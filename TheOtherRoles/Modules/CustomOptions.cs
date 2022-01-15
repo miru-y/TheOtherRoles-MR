@@ -24,10 +24,11 @@ namespace TheOtherRoles {
         public OptionBehaviour optionBehaviour;
         public CustomOption parent;
         public bool isHeader;
+        public bool isRole;
 
         // Option creation
 
-        public CustomOption(int id, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader) {
+        public CustomOption(int id, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader, bool isRole) {
             this.id = id;
             this.name = parent == null ? name : "- " + name;
             this.selections = selections;
@@ -35,6 +36,7 @@ namespace TheOtherRoles {
             this.defaultSelection = index >= 0 ? index : 0;
             this.parent = parent;
             this.isHeader = isHeader;
+            this.isRole = isRole;
             selection = 0;
             if (id != 0) {
                 entry = TheOtherRolesPlugin.Instance.Config.Bind($"Preset{preset}", id.ToString(), defaultSelection);
@@ -43,19 +45,19 @@ namespace TheOtherRoles {
             options.Add(this);
         }
 
-        public static CustomOption Create(int id, string name, string[] selections, CustomOption parent = null, bool isHeader = false) {
-            return new CustomOption(id, name, selections, "", parent, isHeader);
+        public static CustomOption Create(int id, string name, string[] selections, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
+            return new CustomOption(id, name, selections, "", parent, isHeader, isRole);
         }
 
-        public static CustomOption Create(int id, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false) {
+        public static CustomOption Create(int id, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
             List<float> selections = new List<float>();
             for (float s = min; s <= max; s += step)
                 selections.Add(s);
-            return new CustomOption(id, name, selections.Cast<object>().ToArray(), defaultValue, parent, isHeader);
+            return new CustomOption(id, name, selections.Cast<object>().ToArray(), defaultValue, parent, isHeader, isRole);
         }
 
-        public static CustomOption Create(int id, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false) {
-            return new CustomOption(id, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader);
+        public static CustomOption Create(int id, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
+            return new CustomOption(id, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader, isRole);
         }
 
         // Static behaviour
@@ -321,13 +323,17 @@ namespace TheOtherRoles {
     [HarmonyPatch] 
     class GameOptionsDataPatch
     {
+        private const int PageRoles = 5;
+
         private static IEnumerable<MethodBase> TargetMethods() {
             return typeof(GameOptionsData).GetMethods().Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(int));
         }
 
-        private static void Postfix(ref string __result)
+        private static List<StringBuilder> CreateCustomOptionTextList()
         {
-            StringBuilder sb = new StringBuilder(__result);
+            List<StringBuilder> sbList = new List<StringBuilder>();
+
+            StringBuilder sb = new StringBuilder();
             foreach (CustomOption option in CustomOption.options) {
                 if (option.parent == null) {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
@@ -353,64 +359,50 @@ namespace TheOtherRoles {
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax)) {
                         continue;
-                    } else {
+                    } else if (!option.isRole) {
                         sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }
-                    
                 }
             }
-            CustomOption parent = null;
-            foreach (CustomOption option in CustomOption.options)
-                if (option.parent != null) {
-                    if (option.parent != parent) {
-                        sb.AppendLine();
-                        parent = option.parent;
-                    }
+            sbList.Add(sb);
+            sb = null;
+
+            int roleCount = 0;
+            foreach (CustomOption option in CustomOption.options) {
+                if (option.isRole && option.selection > 0) {
+                    if (sb == null)
+                        sb = new StringBuilder();
                     sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
+                    foreach (CustomOption childOption in CustomOption.options) {
+                        CustomOption parent = childOption.parent;
+                        while (parent != null && parent != option)
+                            parent = parent.parent;
+                        if (parent != null)
+                            sb.AppendLine($"\t{childOption.name}: {childOption.selections[childOption.selection].ToString()}");
+                    }
+                    if (++roleCount == PageRoles) {
+                        sbList.Add(sb);
+                        sb = null;
+                        roleCount = 0;
+                    }
                 }
-
-            var hudString = sb.ToString();
-
-            int defaultSettingsLines = 23;
-            int roleSettingsLines = defaultSettingsLines + 40;
-            int detailedSettingsP1 = roleSettingsLines + 40;
-            int detailedSettingsP2 = detailedSettingsP1 + 42;
-            int detailedSettingsP3 = detailedSettingsP2 + 42;
-            int end1 = hudString.TakeWhile(c => (defaultSettingsLines -= (c == '\n' ? 1 : 0)) > 0).Count();
-            int end2 = hudString.TakeWhile(c => (roleSettingsLines -= (c == '\n' ? 1 : 0)) > 0).Count();
-            int end3 = hudString.TakeWhile(c => (detailedSettingsP1 -= (c == '\n' ? 1 : 0)) > 0).Count();
-            int end4 = hudString.TakeWhile(c => (detailedSettingsP2 -= (c == '\n' ? 1 : 0)) > 0).Count();
-            int end5 = hudString.TakeWhile(c => (detailedSettingsP3 -= (c == '\n' ? 1 : 0)) > 0).Count();
-            int counter = TheOtherRolesPlugin.optionsPage;
-            if (counter == 0) {
-                hudString = hudString.Substring(0, end1) + "\n";   
-            } else if (counter == 1) {
-                hudString = hudString.Substring(end1 + 1, end2 - end1);
-                // Temporary fix, should add a new CustomOption for spaces
-                int gap = 2;
-                int index = hudString.TakeWhile(c => (gap -= (c == '\n' ? 1 : 0)) > 0).Count();
-                hudString = hudString.Insert(index, "\n");
-                gap = 6;
-                index = hudString.TakeWhile(c => (gap -= (c == '\n' ? 1 : 0)) > 0).Count();
-                hudString = hudString.Insert(index, "\n");
-                gap = 20;
-                index = hudString.TakeWhile(c => (gap -= (c == '\n' ? 1 : 0)) > 0).Count();
-                hudString = hudString.Insert(index + 1, "\n");
-                gap = 26;
-                index = hudString.TakeWhile(c => (gap -= (c == '\n' ? 1 : 0)) > 0).Count();
-                hudString = hudString.Insert(index + 1, "\n");
-            } else if (counter == 2) {
-                hudString = hudString.Substring(end2 + 1, end3 - end2);
-            } else if (counter == 3) {
-                hudString = hudString.Substring(end3 + 1, end4 - end3);
-            } else if (counter == 4) {
-                hudString = hudString.Substring(end4 + 1, end5 - end4);
-            } else if (counter == 5) {
-                hudString = hudString.Substring(end5 + 1);
             }
 
-            hudString += $"\n Press tab for more... ({counter+1}/6)";
-            __result = hudString;
+            if (sb != null)
+                sbList.Add(sb);
+
+            return sbList;
+        }
+
+        private static void Postfix(ref string __result)
+        {
+            List<StringBuilder> sbList = new List<StringBuilder>();
+            sbList.Add(new StringBuilder(__result));
+            sbList.AddRange(CreateCustomOptionTextList());
+            TheOtherRolesPlugin.optionsPageMax = sbList.Count;
+            TheOtherRolesPlugin.optionsPage = Mathf.Clamp(TheOtherRolesPlugin.optionsPage, 0, TheOtherRolesPlugin.optionsPageMax - 1);
+            string title = $"[Press tab for more... ({TheOtherRolesPlugin.optionsPage + 1}/{TheOtherRolesPlugin.optionsPageMax})]\n";
+            __result = title + sbList[TheOtherRolesPlugin.optionsPage];
         }
     }
 
@@ -420,7 +412,7 @@ namespace TheOtherRoles {
         public static void Postfix(KeyboardJoystick __instance)
         {
             if(Input.GetKeyDown(KeyCode.Tab)) {
-                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % 6;
+                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % TheOtherRolesPlugin.optionsPageMax;
             }
         }
     }

@@ -31,6 +31,7 @@ namespace TheOtherRoles
         public static TheOtherRolesPlugin Instance;
 
         public static int optionsPage = 1;
+        public static int optionsPageMax = optionsPage + 1;
 
         public static ConfigEntry<bool> DebugMode { get; private set; }
         public static ConfigEntry<bool> StreamerMode { get; set; }
