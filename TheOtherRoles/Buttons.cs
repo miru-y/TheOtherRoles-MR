@@ -464,7 +464,7 @@ namespace TheOtherRoles
                () => {
                    if (PlayerControl.GameOptions.MapId != 1) {
                        if (Hacker.vitals == null) {
-                           var e = UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
+                           var e = Helpers.GetVitals();
                            if (e == null || Camera.main == null) return;
                            Hacker.vitals = UnityEngine.Object.Instantiate(e.MinigamePrefab, Camera.main.transform, false);
                        }

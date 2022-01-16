@@ -74,6 +74,7 @@ namespace TheOtherRoles
         UncheckedCmdReportDeadBody,
         ConsumeAdminTime,
         UncheckedExilePlayer,
+        ConsumeVitalTime,
 
         // Role functionality
 
@@ -326,6 +327,10 @@ namespace TheOtherRoles
 
         public static void consumeAdminTime(float delta) {
             MapOptions.AdminTimer -= delta;
+        }
+
+        public static void consumeVitalTime(float delta) {
+            VitalsTimer -= delta;
         }
 
         public static void uncheckedExilePlayer(byte targetId) {
@@ -863,6 +868,9 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.ConsumeAdminTime:
                     float delta = reader.ReadSingle();
                     RPCProcedure.consumeAdminTime(delta);
+                    break;
+                case (byte)CustomRPC.ConsumeVitalTime:
+                    RPCProcedure.consumeVitalTime(reader.ReadSingle());
                     break;
 
                 // Role functionality

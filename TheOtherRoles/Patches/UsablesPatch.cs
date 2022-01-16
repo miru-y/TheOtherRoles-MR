@@ -272,6 +272,32 @@ namespace TheOtherRoles.Patches {
         class VitalsMinigameUpdatePatch {
 
             static void Postfix(VitalsMinigame __instance) {
+                // Consume time to see vital if the player is alive
+                if (!PlayerControl.LocalPlayer.Data.IsDead) {
+
+                    // Show the grey map if players ran out of admin time.
+                    if (MapOptions.VitalsTimer <= 0) {
+                        __instance.SabText.gameObject.SetActive(true);
+                        __instance.SabText.text = "Vitals destroyed.";
+                        for (int k = 0; k < __instance.vitals.Length; k++) {
+                            VitalsPanel vitalsPanel = __instance.vitals[k];
+                            vitalsPanel.gameObject.SetActive(false);
+                        }
+                        return;
+                    }
+
+                    // Consume the time via RPC
+                    float delta = Time.unscaledDeltaTime;
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                        PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.ConsumeVitalTime,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    writer.Write(delta);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.consumeVitalTime(delta);
+                }
+
                 // Hacker show time since death
                 
                 if (Hacker.hacker != null && Hacker.hacker == PlayerControl.LocalPlayer && Hacker.hackerTimer > 0) {
@@ -298,6 +324,27 @@ namespace TheOtherRoles.Patches {
         }
     }
 
+    [HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
+    class SystemConsoleCanUsePatch {
+        public static bool Prefix(SystemConsole __instance,
+            ref float __result,
+            [HarmonyArgument(0)] GameData.PlayerInfo pc,
+            [HarmonyArgument(1)] out bool canUse,
+            [HarmonyArgument(2)] out bool couldUse) {
+            canUse = couldUse = false;
+            __result = float.MaxValue;
+
+            if (PlayerControl.LocalPlayer.Data.IsDead)
+                return true;
+
+            // Vital
+            if (CustomOptionHolder.enabledVitalsTimer.getBool() && __instance.gameObject.name.Contains("panel_vitals"))
+                return MapOptions.VitalsTimer > 0;
+
+            return true;
+        }
+    }
+    
     [HarmonyPatch]
     class AdminPanelPatch {
         static Dictionary<SystemTypes, List<Color>> players = new Dictionary<SystemTypes, List<Color>>();

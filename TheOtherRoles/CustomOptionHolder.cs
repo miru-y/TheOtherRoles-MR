@@ -27,6 +27,9 @@ namespace TheOtherRoles {
         public static CustomOption enabledAdminTimer;
         public static CustomOption hideTaskOverlayOnSabMap;
 
+        public static CustomOption vitalsTimer;
+        public static CustomOption enabledVitalsTimer;
+
         public static CustomOption mafiaSpawnRate;
         public static CustomOption janitorCooldown;
 
@@ -268,6 +271,10 @@ namespace TheOtherRoles {
             adminTimer = CustomOption.Create(999, "Admin Map Available Duration", 10f, 0f, 120f, 1f);
             enabledAdminTimer = CustomOption.Create(998, "Enable Admin Map Available Duration", true);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, "Hide Fake Tasks On Sabotage Map", false);
+
+            vitalsTimer = CustomOption.Create(900000000, "Vitals Available Duration", 0f, 0f, 120f, 1f);
+            enabledVitalsTimer = CustomOption.Create(900000001, "Enable Vitals Available Duration", false);
+
 
             mafiaSpawnRate = CustomOption.Create(10, cs(Janitor.color, "Mafia"), rates, null, true, true);
             janitorCooldown = CustomOption.Create(11, "Janitor Cooldown", 30f, 10f, 60f, 2.5f, mafiaSpawnRate);

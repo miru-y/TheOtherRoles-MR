@@ -68,6 +68,10 @@ namespace TheOtherRoles {
             return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
         }
 
+        public static SystemConsole GetVitals() {
+            return UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
+        }
+
         public static PlayerControl playerById(byte id)
         {
             foreach (PlayerControl player in PlayerControl.AllPlayerControls)
