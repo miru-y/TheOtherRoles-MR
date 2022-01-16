@@ -75,6 +75,7 @@ namespace TheOtherRoles
         ConsumeAdminTime,
         UncheckedExilePlayer,
         ConsumeVitalTime,
+        ConsumeSecurityCameraTime,
 
         // Role functionality
 
@@ -331,6 +332,10 @@ namespace TheOtherRoles
 
         public static void consumeVitalTime(float delta) {
             VitalsTimer -= delta;
+        }
+
+        public static void consumeSecurityCameraTime(float delta) {
+            SecurityCameraTimer -= delta;
         }
 
         public static void uncheckedExilePlayer(byte targetId) {
@@ -871,6 +876,9 @@ namespace TheOtherRoles
                     break;
                 case (byte)CustomRPC.ConsumeVitalTime:
                     RPCProcedure.consumeVitalTime(reader.ReadSingle());
+                    break;
+                case (byte)CustomRPC.ConsumeSecurityCameraTime:
+                    RPCProcedure.consumeSecurityCameraTime(reader.ReadSingle());
                     break;
 
                 // Role functionality

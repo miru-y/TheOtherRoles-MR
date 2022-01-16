@@ -68,8 +68,12 @@ namespace TheOtherRoles {
             return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
         }
 
-        public static SystemConsole GetVitals() {
+        public static SystemConsole getVitals() {
             return UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
+        }
+
+        public static SystemConsole getCamera() {
+            return UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("task_cams") || x.gameObject.name.Contains("SurvConsole") || x.gameObject.name.Contains("Surv_Panel"));
         }
 
         public static PlayerControl playerById(byte id)

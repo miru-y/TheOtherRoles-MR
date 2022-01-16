@@ -24,8 +24,10 @@ namespace TheOtherRoles{
         public static Dictionary<byte, PoolablePlayer> playerIcons = new Dictionary<byte, PoolablePlayer>();
         public static float AdminTimer = 0f;
         public static float VitalsTimer = 0f;
+        public static float SecurityCameraTimer = 0f;
         public static TMPro.TextMeshPro AdminTimerText = null;
         public static TMPro.TextMeshPro VitalsTimerText = null;
+        public static TMPro.TextMeshPro SecurityCameraTimerText = null;
 
 public static void clearAndReloadMapOptions() {
             meetingsCount = 0;
@@ -35,6 +37,7 @@ public static void clearAndReloadMapOptions() {
 
             AdminTimer = CustomOptionHolder.adminTimer.getFloat();
             VitalsTimer = CustomOptionHolder.vitalsTimer.getFloat();
+            SecurityCameraTimer = CustomOptionHolder.securityCameraTimer.getFloat();
 
             UpdateTimer();
 
@@ -99,13 +102,42 @@ public static void clearAndReloadMapOptions() {
             VitalsTimerText = null;
         }
 
+
+        public static void UpdateSecurityCameraTimerText() {
+            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool())
+                return;
+            if (HudManager.Instance == null)
+                return;
+            SecurityCameraTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
+            SecurityCameraTimerText.color = Color.red;
+            SecurityCameraTimerText.transform.localPosition = new Vector3(1.5f, -4.0f, 0);
+            if (SecurityCameraTimer > 0)
+                SecurityCameraTimerText.text = $"Camera: {SecurityCameraTimer.ToString("#0.0")} sec remaining";
+            else
+                SecurityCameraTimerText.text = "Camera: ran out of time";
+            SecurityCameraTimerText.gameObject.SetActive(true);
+        }
+
+        private static void ClearSecurityCameraTimerText() {
+            if (SecurityCameraTimerText == null)
+                return;
+            UnityEngine.Object.Destroy(SecurityCameraTimerText);
+            SecurityCameraTimerText = null;
+        }
+
+
         private static void UpdateTimer() {
             ClearAdminTimerText();
             UpdateAdminTimerText();
 
-            if (Helpers.GetVitals() != null) {
+            if (Helpers.getVitals() != null) {
                 ClearVitalsTimerText();
                 UpdateVitalsTimerText();
+            }
+
+            if (Helpers.getCamera() != null) {
+                ClearSecurityCameraTimerText();
+                UpdateSecurityCameraTimerText();
             }
         }
     }

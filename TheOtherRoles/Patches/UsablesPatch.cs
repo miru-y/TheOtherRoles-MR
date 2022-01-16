@@ -275,10 +275,9 @@ namespace TheOtherRoles.Patches {
                 // Consume time to see vital if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead) {
 
-                    // Show the grey map if players ran out of admin time.
                     if (MapOptions.VitalsTimer <= 0) {
                         __instance.SabText.gameObject.SetActive(true);
-                        __instance.SabText.text = "Vitals destroyed.";
+                        __instance.SabText.text = "[VITALS DESTROYED]";
                         for (int k = 0; k < __instance.vitals.Length; k++) {
                             VitalsPanel vitalsPanel = __instance.vitals[k];
                             vitalsPanel.gameObject.SetActive(false);
@@ -337,9 +336,12 @@ namespace TheOtherRoles.Patches {
             if (PlayerControl.LocalPlayer.Data.IsDead)
                 return true;
 
-            // Vital
+            // Vitals
             if (CustomOptionHolder.enabledVitalsTimer.getBool() && __instance.gameObject.name.Contains("panel_vitals"))
                 return MapOptions.VitalsTimer > 0;
+            // Camera
+            if (CustomOptionHolder.enabledSecurityCameraTimer.getBool() && (__instance.gameObject.name.Contains("task_cams") || __instance.gameObject.name.Contains("SurvConsole") || __instance.gameObject.name.Contains("Surv_Panel")))
+                return MapOptions.SecurityCameraTimer > 0;
 
             return true;
         }
@@ -548,6 +550,30 @@ namespace TheOtherRoles.Patches {
         class SurveillanceMinigameUpdatePatch {
 
             public static bool Prefix(SurveillanceMinigame __instance) {
+                // Consume time to see security camera if the player is alive
+                if (!PlayerControl.LocalPlayer.Data.IsDead) {
+                    if (MapOptions.SecurityCameraTimer <= 0) {
+                        for (int i = 0; i < __instance.SabText.Length; i++) {
+                            __instance.SabText[i].text = "[SECURITY CAMERA DESTROYED]";
+                            __instance.SabText[i].gameObject.SetActive(true);
+                        }
+                        for (int i = 0; i < __instance.ViewPorts.Length; i++)
+                            __instance.ViewPorts[i].sharedMaterial = __instance.StaticMaterial;
+                        return false;
+                    }
+
+                    // Consume the time via RPC
+                    float delta = Time.unscaledDeltaTime;
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                        PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.ConsumeSecurityCameraTime,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    writer.Write(delta);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.consumeSecurityCameraTime(delta);
+                }
+
                 // Update normal and securityGuard cameras
                 timer += Time.deltaTime;
                 int numberOfPages = Mathf.CeilToInt(ShipStatus.Instance.AllCameras.Length / 4f);
@@ -581,6 +607,50 @@ namespace TheOtherRoles.Patches {
                         __instance.SabText[j].gameObject.SetActive(true);
                     }
                 }
+                return false;
+            }
+        }
+    }
+
+    [HarmonyPatch]
+    class PlanetSurveillanceMinigamePatch {
+
+        [HarmonyPatch(typeof(PlanetSurveillanceMinigame), nameof(PlanetSurveillanceMinigame.NextCamera))]
+        class NextCamera {
+            public static bool Prefix(PlanetSurveillanceMinigame __instance, [HarmonyArgument(0)] int direction) {
+                if (!PlayerControl.LocalPlayer.Data.IsDead) {
+                    if (MapOptions.SecurityCameraTimer <= 0)
+                        return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(PlanetSurveillanceMinigame), nameof(PlanetSurveillanceMinigame.Update))]
+        class Update {
+
+            public static bool Prefix(PlanetSurveillanceMinigame __instance) {
+
+                // Consume time to see security camera if the player is alive
+                if (!PlayerControl.LocalPlayer.Data.IsDead) {
+                    if (MapOptions.SecurityCameraTimer <= 0) {
+                        __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
+                        __instance.SabText.gameObject.SetActive(true);
+                        __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
+                        return false;
+                    }
+                    // Consume the time via RPC
+                    float delta = Time.unscaledDeltaTime;
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                        PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.ConsumeSecurityCameraTime,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    writer.Write(delta);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.consumeSecurityCameraTime(delta);
+                }
+
                 return false;
             }
         }
