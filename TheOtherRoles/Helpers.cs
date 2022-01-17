@@ -18,6 +18,15 @@ namespace TheOtherRoles {
         SuppressKill,
         BlankKill
     }
+
+    public enum MapId {
+        Skeld = 0,
+        MiraHQ = 1,
+        Polus = 2,
+        //Dleks = 3, // deactivated
+        Airship = 4,
+    }
+
     public static class Helpers {
 
         public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit) {
@@ -68,12 +77,23 @@ namespace TheOtherRoles {
             return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
         }
 
-        public static SystemConsole getVitals() {
-            return UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("panel_vitals"));
+        public static bool existVitals() {
+            switch ((MapId)PlayerControl.GameOptions.MapId) {
+                case MapId.Polus:
+                case MapId.Airship:
+                    return true;
+            }
+            return false;
         }
 
-        public static SystemConsole getCamera() {
-            return UnityEngine.Object.FindObjectsOfType<SystemConsole>().FirstOrDefault(x => x.gameObject.name.Contains("task_cams") || x.gameObject.name.Contains("SurvConsole") || x.gameObject.name.Contains("Surv_Panel"));
+        public static bool existSecurityCamera() {
+            switch ((MapId)PlayerControl.GameOptions.MapId) {
+                case MapId.Skeld:
+                case MapId.Polus:
+                case MapId.Airship:
+                    return true;
+            }
+            return false;
         }
 
         public static PlayerControl playerById(byte id)
