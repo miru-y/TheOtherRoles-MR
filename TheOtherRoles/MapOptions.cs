@@ -29,6 +29,9 @@ namespace TheOtherRoles{
         public static TMPro.TextMeshPro VitalsTimerText = null;
         public static TMPro.TextMeshPro SecurityCameraTimerText = null;
 
+        const float TimerUIBaseX = -3.5f;
+        const float TimerUIMoveX = 2.5f;
+
 public static void clearAndReloadMapOptions() {
             meetingsCount = 0;
             camerasToAdd = new List<SurvCamera>();
@@ -57,19 +60,21 @@ public static void clearAndReloadMapOptions() {
             UpdateTimer();
         }
 
-        public static void UpdateAdminTimerText()
+        public static int UpdateAdminTimerText(int viewIndex)
         {
             if (!CustomOptionHolder.enabledAdminTimer.getBool())
-                return;
+                return viewIndex;
             if (HudManager.Instance == null)
-                return;
+                return viewIndex;
             AdminTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
-            AdminTimerText.transform.localPosition = new Vector3(-3.5f, -4.0f, 0);
+            AdminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (AdminTimer > 0)
                 AdminTimerText.text = $"Admin: {AdminTimer.ToString("#0.0")} sec remaining";
             else
                 AdminTimerText.text = "Admin: ran out of time";
             AdminTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
         }
 
         private static void ClearAdminTimerText()
@@ -80,19 +85,21 @@ public static void clearAndReloadMapOptions() {
             AdminTimerText = null;
         }
 
-        public static void UpdateVitalsTimerText() {
+        public static int UpdateVitalsTimerText(int viewIndex) {
             if (!CustomOptionHolder.enabledVitalsTimer.getBool())
-                return;
+                return viewIndex;
             if (HudManager.Instance == null)
-                return;
+                return viewIndex;
             VitalsTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
             VitalsTimerText.color = Color.green;
-            VitalsTimerText.transform.localPosition = new Vector3(-1.0f, -4.0f, 0);
+            VitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (VitalsTimer > 0)
                 VitalsTimerText.text = $"Vitals: {VitalsTimer.ToString("#0.0")} sec remaining";
             else
                 VitalsTimerText.text = "Vitals: ran out of time";
             VitalsTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
         }
 
         private static void ClearVitalsTimerText() {
@@ -103,19 +110,21 @@ public static void clearAndReloadMapOptions() {
         }
 
 
-        public static void UpdateSecurityCameraTimerText() {
+        public static int UpdateSecurityCameraTimerText(int viewIndex) {
             if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool())
-                return;
+                return viewIndex;
             if (HudManager.Instance == null)
-                return;
+                return viewIndex;
             SecurityCameraTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
             SecurityCameraTimerText.color = Color.red;
-            SecurityCameraTimerText.transform.localPosition = new Vector3(1.5f, -4.0f, 0);
+            SecurityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (SecurityCameraTimer > 0)
                 SecurityCameraTimerText.text = $"Camera: {SecurityCameraTimer.ToString("#0.0")} sec remaining";
             else
                 SecurityCameraTimerText.text = "Camera: ran out of time";
             SecurityCameraTimerText.gameObject.SetActive(true);
+
+            return viewIndex + 1;
         }
 
         private static void ClearSecurityCameraTimerText() {
@@ -127,17 +136,19 @@ public static void clearAndReloadMapOptions() {
 
 
         private static void UpdateTimer() {
-            ClearAdminTimerText();
-            UpdateAdminTimerText();
 
-            if (Helpers.getVitals() != null) {
+            int viewIndex = 0;
+            ClearAdminTimerText();
+            viewIndex = UpdateAdminTimerText(viewIndex);
+
+            if (Helpers.existVitals()) {
                 ClearVitalsTimerText();
-                UpdateVitalsTimerText();
+                viewIndex = UpdateVitalsTimerText(viewIndex);
             }
 
-            if (Helpers.getCamera() != null) {
+            if (Helpers.existSecurityCamera()) {
                 ClearSecurityCameraTimerText();
-                UpdateSecurityCameraTimerText();
+                viewIndex = UpdateSecurityCameraTimerText(viewIndex);
             }
         }
     }
