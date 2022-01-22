@@ -61,6 +61,7 @@ namespace TheOtherRoles
             Lawyer.clearAndReload();
             Pursuer.clearAndReload();
             Witch.clearAndReload();
+            Yasuna.clearAndReload();
         }
 
         public static class Jester {
@@ -1371,6 +1372,39 @@ namespace TheOtherRoles
             spellCastingDuration = CustomOptionHolder.witchSpellCastingDuration.getFloat();
             triggerBothCooldowns = CustomOptionHolder.witchTriggerBothCooldowns.getBool();
             witchVoteSavesTargets = CustomOptionHolder.witchVoteSavesTargets.getBool();
+        }
+    }
+
+    public static class Yasuna {
+        public static PlayerControl yasuna;
+        public static Color color = new Color32(90, 255, 25, byte.MaxValue);
+        public static byte specialVoteTargetPlayerId = byte.MaxValue;
+        private static int _remainingSpecialVotes = 1;
+        private static Sprite targetSprite;
+
+        public static void clearAndReload() {
+            yasuna = null;
+            _remainingSpecialVotes = Mathf.RoundToInt(CustomOptionHolder.yasunaNumberOfSpecialVotes.getFloat());
+            specialVoteTargetPlayerId = byte.MaxValue;
+        }
+
+        public static Sprite getTargetSprite() {
+            if (targetSprite) return targetSprite;
+            targetSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.YasunaTargetIcon.png", 150f);
+            return targetSprite;
+        }
+
+        public static int remainingSpecialVotes(bool isVote = false) {
+            if (yasuna == null)
+                return 0;
+
+            if (isVote)
+                _remainingSpecialVotes = Mathf.Max(0, _remainingSpecialVotes - 1);
+            return _remainingSpecialVotes;
+        }
+
+        public static bool isYasuna(byte playerId) {
+            return yasuna != null && yasuna.PlayerId == playerId;
         }
     }
 }

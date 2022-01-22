@@ -96,6 +96,16 @@ namespace TheOtherRoles {
             return false;
         }
 
+        public static int GetClientId(PlayerControl control)
+        {
+            for (int i = 0; i < AmongUsClient.Instance.allClients.Count; i++) {
+                InnerNet.ClientData data = AmongUsClient.Instance.allClients[i];
+                if (data.Character == control)
+                    return data.Id;
+            }
+            return -1;
+        }
+
         public static PlayerControl playerById(byte id)
         {
             foreach (PlayerControl player in PlayerControl.AllPlayerControls)

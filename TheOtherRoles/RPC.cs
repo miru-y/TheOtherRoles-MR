@@ -56,6 +56,7 @@ namespace TheOtherRoles
         Lawyer,
         Pursuer,
         Witch,
+        Yasuna,
         Crewmate,
         Impostor
     }
@@ -112,6 +113,8 @@ namespace TheOtherRoles
         LawyerSetTarget,
         LawyerPromotesToPursuer,
         SetBlanked,
+        YasunaSpecialVote,
+        YasunaSpecialVote_DoCastVote,
     }
 
     public static class RPCProcedure {
@@ -282,6 +285,9 @@ namespace TheOtherRoles
                         break;
                     case RoleId.Witch:
                         Witch.witch = player;
+                        break;
+                    case RoleId.Yasuna:
+                        Yasuna.yasuna = player;
                         break;
                     }
                 }
@@ -487,7 +493,9 @@ namespace TheOtherRoles
                 Bait.bait = oldShifter;
                 if (Bait.bait.Data.IsDead) Bait.reported = true;
             }
-                
+            if (Yasuna.yasuna != null && Yasuna.yasuna == player)
+                Yasuna.yasuna = oldShifter;
+
             if (Medium.medium != null && Medium.medium == player)
                 Medium.medium = oldShifter;
             if (Madmate.madmate != null && Madmate.madmate == player)
@@ -609,6 +617,7 @@ namespace TheOtherRoles
             if (player == Bait.bait) Bait.clearAndReload();
             if (player == Medium.medium) Medium.clearAndReload();
             if (player == Madmate.madmate) Madmate.clearAndReload();
+            if (player == Yasuna.yasuna) Yasuna.clearAndReload();
 
             // Impostor roles
             if (player == Morphling.morphling) Morphling.clearAndReload();
@@ -805,6 +814,23 @@ namespace TheOtherRoles
             Pursuer.blankedList.RemoveAll(x => x.PlayerId == playerId);
             if (value > 0) Pursuer.blankedList.Add(target);            
         }
+
+        public static void yasunaSpecialVote(byte playerid, byte targetid) {
+            if (!MeetingHud.Instance) return;
+            if (!Yasuna.isYasuna(playerid)) return;
+            PlayerControl target = Helpers.playerById(targetid);
+            if (target == null) return;
+            Yasuna.specialVoteTargetPlayerId = targetid;
+            Yasuna.remainingSpecialVotes(true);
+        }
+
+        public static void yasunaSpecialVote_DoCastVote() {
+            if (!MeetingHud.Instance) return;
+            if (!Yasuna.isYasuna(PlayerControl.LocalPlayer.PlayerId)) return;
+            PlayerControl target = Helpers.playerById(Yasuna.specialVoteTargetPlayerId);
+            if (target == null) return;
+            MeetingHud.Instance.CmdCastVote(PlayerControl.LocalPlayer.PlayerId, target.PlayerId);
+        }
     }   
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
@@ -991,6 +1017,19 @@ namespace TheOtherRoles
                     break;
                 case (byte)CustomRPC.SetFutureSpelled:
                     RPCProcedure.setFutureSpelled(reader.ReadByte());
+                    break;
+                case (byte)CustomRPC.YasunaSpecialVote:
+                    byte id = reader.ReadByte();
+                    byte targetId = reader.ReadByte();
+                    RPCProcedure.yasunaSpecialVote(id, targetId);
+                    if (AmongUsClient.Instance.AmHost && Yasuna.isYasuna(id)) {
+                        int clientId = Helpers.GetClientId(Yasuna.yasuna);
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.YasunaSpecialVote_DoCastVote, Hazel.SendOption.Reliable, clientId);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    }
+                    break;
+                case (byte)CustomRPC.YasunaSpecialVote_DoCastVote:
+                    RPCProcedure.yasunaSpecialVote_DoCastVote();
                     break;
             }
         }

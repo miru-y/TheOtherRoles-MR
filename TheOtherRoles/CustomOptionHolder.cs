@@ -238,6 +238,9 @@ namespace TheOtherRoles {
         public static CustomOption pursuerCooldown;
         public static CustomOption pursuerBlanksNumber;
 
+        public static CustomOption yasunaSpawnRate;
+        public static CustomOption yasunaNumberOfSpecialVotes;
+
         public static CustomOption maxNumberOfMeetings;
         public static CustomOption blockSkippingInEmergencyMeetings;
         public static CustomOption noVoteIsSelfVote;
@@ -386,6 +389,9 @@ namespace TheOtherRoles {
             lawyerKnowsRole = CustomOption.Create(355, "Lawyer Knows Target Role", false, lawyerSpawnRate);
             pursuerCooldown = CustomOption.Create(356, "Pursuer Blank Cooldown", 30f, 5f, 60f, 2.5f, lawyerSpawnRate);
             pursuerBlanksNumber = CustomOption.Create(357, "Pursuer Number Of Blanks", 5f, 0f, 20f, 1f, lawyerSpawnRate);
+
+            yasunaSpawnRate = CustomOption.Create(910000000, cs(Yasuna.color, "Yasuna"), rates, null, true, true);
+            yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
 
             shifterSpawnRate = CustomOption.Create(70, cs(Shifter.color, "Shifter"), rates, null, true, true);
             shifterShiftsModifiers = CustomOption.Create(71, "Shifter Shifts Modifiers", false, shifterSpawnRate);

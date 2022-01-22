@@ -172,6 +172,10 @@ namespace TheOtherRoles.Patches {
             CustomButton.MeetingEndedUpdate();
             MapOptions.MeetingEndedUpdate();
 
+            // Reset Yasuna settings.
+            if (Yasuna.yasuna != null)
+                Yasuna.specialVoteTargetPlayerId = byte.MaxValue;
+
             // Mini set adapted cooldown
             if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini && Mini.mini.Data.Role.IsImpostor) {
                 var multiplier = Mini.isGrownUp() ? 0.66f : 2f;
@@ -264,6 +268,13 @@ namespace TheOtherRoles.Patches {
                     // Hide number of remaining impostors on Jester win
                     if (id == StringNames.ImpostorsRemainP || id == StringNames.ImpostorsRemainS) {
                         if (Jester.jester != null && player.PlayerId == Jester.jester.PlayerId) __result = "";
+                    }
+
+                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue) {
+                        int index = __result.IndexOf("Ç™í«ï˙Ç≥ÇÍÇΩ");
+                        if (index != -1) {
+                            __result = player.Data.PlayerName + "Ç≥ÇÒÅIÇ‚ÇËÇ‹ÇµÇΩÇÀÇ•Å`ÅI";
+                        }
                     }
                 }
             } catch {
