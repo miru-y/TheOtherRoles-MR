@@ -62,6 +62,7 @@ namespace TheOtherRoles
             Pursuer.clearAndReload();
             Witch.clearAndReload();
             Yasuna.clearAndReload();
+            TaskMaster.clearAndReload();
         }
 
         public static class Jester {
@@ -1405,6 +1406,27 @@ namespace TheOtherRoles
 
         public static bool isYasuna(byte playerId) {
             return yasuna != null && yasuna.PlayerId == playerId;
+        }
+    }
+
+    public static class TaskMaster {
+        public static PlayerControl taskMaster;
+        public static Color color = new Color32(225, 86, 75, byte.MaxValue);
+        public static bool isTaskComplete = false;
+        public static byte clearExTasks = 0;
+        public static byte allExTasks = 0;
+        public static byte oldTaskMasterPlayerId = byte.MaxValue;
+
+        public static void clearAndReload() {
+            taskMaster = null;
+            isTaskComplete = false;
+            clearExTasks = 0;
+            allExTasks = 0;
+            oldTaskMasterPlayerId = byte.MaxValue;
+        }
+
+        public static bool isTaskMaster(byte playerId) {
+            return taskMaster != null && taskMaster.PlayerId == playerId;
         }
     }
 }

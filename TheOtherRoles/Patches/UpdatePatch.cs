@@ -143,6 +143,8 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Pursuer.pursuer, Pursuer.color);
             } else if (Yasuna.yasuna != null && Yasuna.yasuna == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Yasuna.yasuna, Yasuna.color);
+            } else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == PlayerControl.LocalPlayer) {
+                setPlayerNameColor(TaskMaster.taskMaster, TaskMaster.color);
             }
 
             // No else if here, as a Lover of team Jackal needs the colors

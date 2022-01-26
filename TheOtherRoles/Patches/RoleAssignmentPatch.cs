@@ -102,6 +102,8 @@ namespace TheOtherRoles.Patches {
             crewSettings.Add((byte)RoleId.Bait, CustomOptionHolder.baitSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Medium, CustomOptionHolder.mediumSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Yasuna, CustomOptionHolder.yasunaSpawnRate.getSelection());
+            if (Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraCommonTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraLongTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraShortTasks.getFloat()) > 0)
+                crewSettings.Add((byte)RoleId.TaskMaster, CustomOptionHolder.taskMasterSpawnRate.getSelection());
             if (impostors.Count > 1) {
                 // Only add Spy if more than 1 impostor as the spy role is otherwise useless
                 crewSettings.Add((byte)RoleId.Spy, CustomOptionHolder.spySpawnRate.getSelection());
@@ -316,6 +318,7 @@ namespace TheOtherRoles.Patches {
         private static byte setRoleToRandomPlayer(byte roleId, List<PlayerControl> playerList, byte flag = 0, bool removePlayer = true) {
             var index = rnd.Next(0, playerList.Count);
             byte playerId = playerList[index].PlayerId;
+
             if (removePlayer) playerList.RemoveAt(index);
 
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetRole, Hazel.SendOption.Reliable, -1);

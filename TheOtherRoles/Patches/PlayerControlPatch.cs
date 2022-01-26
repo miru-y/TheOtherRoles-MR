@@ -404,22 +404,30 @@ namespace TheOtherRoles.Patches {
                         playerName.transform.localPosition = new Vector3(0.3384f, (0.0311f + 0.0683f), -0.1f);    
                     }
 
+                    bool isTaskMasterExTask = TaskMaster.isTaskMaster(p.PlayerId) && TaskMaster.isTaskComplete;
                     var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(p.Data, true);
+                    var (exTasksCompleted, exTasksTotal) = TasksHandler.taskInfo(p.Data, true, true);
                     string roleNames = RoleInfo.GetRolesString(p, true);
                     string taskInfo = tasksTotal > 0 ? $"<color=#FAD934FF>({tasksCompleted}/{tasksTotal})</color>" : "";
-
+                    string exTaskInfo = exTasksTotal > 0 ? $"<color=#E1564BFF>Ex ({exTasksCompleted}/{exTasksTotal})</color>" : "";
                     string playerInfoText = "";
                     string meetingInfoText = "";
                     if (p == PlayerControl.LocalPlayer) {
                         playerInfoText = $"{roleNames}";
                         if (DestroyableSingleton<TaskPanelBehaviour>.InstanceExists) {
                             TMPro.TextMeshPro tabText = DestroyableSingleton<TaskPanelBehaviour>.Instance.tab.transform.FindChild("TabText_TMP").GetComponent<TMPro.TextMeshPro>();
-                            tabText.SetText($"Tasks {taskInfo}");
+                            tabText.SetText(string.Format("{0} {1}", isTaskMasterExTask ? "Ex Tasks" : "Tasks", isTaskMasterExTask ? exTaskInfo : taskInfo));
                         }
-                        meetingInfoText = $"{roleNames} {taskInfo}".Trim();
+                        if (!isTaskMasterExTask)
+                            meetingInfoText = $"{roleNames} {taskInfo}".Trim();
+                        else
+                            meetingInfoText = $"{roleNames} {taskInfo} {exTaskInfo}".Trim();
                     }
                     else if (MapOptions.ghostsSeeRoles && MapOptions.ghostsSeeTasks) {
-                        playerInfoText = $"{roleNames} {taskInfo}".Trim();
+                        if (!isTaskMasterExTask)
+                            playerInfoText = $"{roleNames} {taskInfo}".Trim();
+                        else
+                            playerInfoText = $"{roleNames} {taskInfo} {exTaskInfo}".Trim();
                         meetingInfoText = playerInfoText;
                     }
                     else if (MapOptions.ghostsSeeTasks) {
@@ -1026,6 +1034,15 @@ namespace TheOtherRoles.Patches {
         public static void Postfix(PlayerControl source, bool canMove) {
             if (colorId.HasValue) source.RawSetColor(colorId.Value);
             colorId = null;
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Die))]
+    public static class PlayerControlDiePatch
+    {
+        public static void Postfix(PlayerControl __instance, [HarmonyArgument(0)] DeathReason reason) {
+            if (TaskMaster.isTaskMaster(__instance.PlayerId) && __instance.PlayerId == PlayerControl.LocalPlayer.PlayerId && TaskMaster.isTaskComplete)
+                __instance.clearAllTasks();
         }
     }
 

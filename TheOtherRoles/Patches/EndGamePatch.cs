@@ -19,7 +19,8 @@ namespace TheOtherRoles.Patches {
         JesterWin = 13,
         ArsonistWin = 14,
         VultureWin = 15,
-        LawyerSoloWin = 16
+        LawyerSoloWin = 16,
+        TaskMasterWin = 100,
     }
 
     enum WinCondition {
@@ -34,7 +35,8 @@ namespace TheOtherRoles.Patches {
         LawyerSoloWin,
         AdditionalLawyerBonusWin,
         AdditionalLawyerStolenWin,
-        AdditionalAlivePursuerWin
+        AdditionalAlivePursuerWin,
+        TaskMasterTeamWin,
     }
 
     static class AdditionalTempData {
@@ -54,6 +56,8 @@ namespace TheOtherRoles.Patches {
             public List<RoleInfo> Roles {get;set;}
             public int TasksCompleted  {get;set;}
             public int TasksTotal  {get;set;}
+            public int ExTasksCompleted { get; set; }
+            public int ExTasksTotal { get; set; }
         }
     }
 
@@ -63,16 +67,36 @@ namespace TheOtherRoles.Patches {
         private static GameOverReason gameOverReason;
         public static void Prefix(AmongUsClient __instance, [HarmonyArgument(0)]ref EndGameResult endGameResult) {
             gameOverReason = endGameResult.GameOverReason;
-            if ((int)endGameResult.GameOverReason >= 10) endGameResult.GameOverReason = GameOverReason.ImpostorByKill;
+
+            if ((int)endGameResult.GameOverReason >= 10 && (int)endGameResult.GameOverReason < 100) {
+                endGameResult.GameOverReason = GameOverReason.ImpostorByKill;
+            } else if ((int)endGameResult.GameOverReason >= 100) {
+                switch ((CustomGameOverReason)endGameResult.GameOverReason) {
+                    case CustomGameOverReason.TaskMasterWin:
+                        endGameResult.GameOverReason = GameOverReason.HumansByTask;
+                        break;
+                }
+            }
         }
 
         public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)]ref EndGameResult endGameResult) {
             AdditionalTempData.clear();
-
+            int allTasks = PlayerControl.GameOptions.NumCommonTasks + PlayerControl.GameOptions.NumLongTasks + PlayerControl.GameOptions.NumShortTasks;
             foreach(var playerControl in PlayerControl.AllPlayerControls) {
                 var roles = RoleInfo.getRoleInfoForPlayer(playerControl);
-                var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(playerControl.Data, true);
-                AdditionalTempData.playerRoles.Add(new AdditionalTempData.PlayerRoleInfo() { PlayerName = playerControl.Data.PlayerName, Roles = roles, TasksTotal = tasksTotal, TasksCompleted = tasksCompleted });
+                var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(playerControl.Data, true, true);
+                bool isTaskMaster = TaskMaster.isTaskMaster(playerControl.PlayerId);
+                bool isTaskMasterExTasks = isTaskMaster && TaskMaster.isTaskComplete;
+
+                AdditionalTempData.playerRoles.Add(new AdditionalTempData.PlayerRoleInfo()
+                { 
+                    PlayerName = playerControl.Data.PlayerName,
+                    Roles = roles,
+                    TasksTotal = isTaskMasterExTasks ? allTasks : tasksTotal,
+                    TasksCompleted = isTaskMasterExTasks ? allTasks : tasksCompleted,
+                    ExTasksTotal = isTaskMasterExTasks ? TaskMaster.allExTasks : isTaskMaster ? TaskMasterTaskHelper.GetTaskMasterTasks() : 0,
+                    ExTasksCompleted = isTaskMasterExTasks ? TaskMaster.clearExTasks : 0,
+                });
             }
 
             // Remove Jester, Arsonist, Vulture, Jackal, former Jackals and Sidekick from winners (if they win, they'll be readded)
@@ -101,6 +125,7 @@ namespace TheOtherRoles.Patches {
             bool teamJackalWin = gameOverReason == (GameOverReason)CustomGameOverReason.TeamJackalWin && ((Jackal.jackal != null && !Jackal.jackal.Data.IsDead) || (Sidekick.sidekick != null && !Sidekick.sidekick.Data.IsDead));
             bool vultureWin = Vulture.vulture != null && gameOverReason == (GameOverReason)CustomGameOverReason.VultureWin;
             bool lawyerSoloWin = Lawyer.lawyer != null && gameOverReason == (GameOverReason)CustomGameOverReason.LawyerSoloWin;
+            bool taskMasterTeamWin = TaskMaster.taskMaster != null && gameOverReason == (GameOverReason)CustomGameOverReason.TaskMasterWin;
 
             // Mini lose
             if (miniLose) {
@@ -187,7 +212,21 @@ namespace TheOtherRoles.Patches {
                 TempData.winners.Add(wpd);
                 AdditionalTempData.winCondition = WinCondition.LawyerSoloWin;
             }
-            else {
+            // TaskMaster team win
+            else if (taskMasterTeamWin) {
+                AdditionalTempData.winCondition = WinCondition.TaskMasterTeamWin;
+                bool addCrewmateLovers = !Lovers.existingWithKiller();
+                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+                foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
+                    if (p == null) continue;
+                    if (addCrewmateLovers && (p == Lovers.lover1 || p == Lovers.lover2))
+                        TempData.winners.Add(new WinningPlayerData(p.Data));
+                    else if (p == Pursuer.pursuer && !Pursuer.pursuer.Data.IsDead)
+                        TempData.winners.Add(new WinningPlayerData(p.Data));
+                    else if (p != Jester.jester && p != Jackal.jackal && p != Sidekick.sidekick && p != Arsonist.arsonist && p != Vulture.vulture && !Jackal.formerJackals.Contains(p) && !p.Data.Role.IsImpostor)
+                        TempData.winners.Add(new WinningPlayerData(p.Data));
+                }
+            } else {
                 // Madmate wins if team impostors wins
                 foreach (WinningPlayerData winner in TempData.winners) {
                     if (winner.IsImpostor) {
@@ -318,6 +357,10 @@ namespace TheOtherRoles.Patches {
                 textRenderer.text = "Mini died";
                 textRenderer.color = Mini.color;
             }
+            else if (AdditionalTempData.winCondition == WinCondition.TaskMasterTeamWin) {
+                textRenderer.text = "Task Master And Crewmates Win";
+                textRenderer.color = TaskMaster.color;
+            }
 
             foreach (WinCondition cond in AdditionalTempData.additionalWinConditions) {
                 if (cond == WinCondition.AdditionalLawyerStolenWin) {
@@ -340,7 +383,8 @@ namespace TheOtherRoles.Patches {
                 foreach(var data in AdditionalTempData.playerRoles) {
                     var roles = string.Join(" ", data.Roles.Select(x => Helpers.cs(x.color, x.name)));
                     var taskInfo = data.TasksTotal > 0 ? $" - <color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
-                    roleSummaryText.AppendLine($"{data.PlayerName} - {roles}{taskInfo}");
+                    var taskInfo2 = data.ExTasksTotal > 0 ? $" Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
+                    roleSummaryText.AppendLine($"{data.PlayerName} - {roles}{taskInfo}{taskInfo2}");
                 }
                 TMPro.TMP_Text roleSummaryTextMesh = roleSummary.GetComponent<TMPro.TMP_Text>();
                 roleSummaryTextMesh.alignment = TMPro.TextAlignmentOptions.TopLeft;

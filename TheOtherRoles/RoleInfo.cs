@@ -70,7 +70,8 @@ namespace TheOtherRoles
         public static RoleInfo lover = new RoleInfo("Lover", Lovers.color, $"You are in love", $"You are in love", RoleId.Lover);
         public static RoleInfo witch = new RoleInfo("Witch", Witch.color, "Cast a spell upon your foes", "Cast a spell upon your foes", RoleId.Witch);
         public static RoleInfo yasuna = new RoleInfo("Yasuna", Yasuna.color, "Exile suspicious crewmates.", "Exile suspicious crewmates.", RoleId.Yasuna);
-
+        public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
+        
         public static List<RoleInfo> allRoleInfos = new List<RoleInfo>() {
             impostor,
             godfather,
@@ -118,6 +119,7 @@ namespace TheOtherRoles
             medium,
             madmate,
             yasuna,
+            taskMaster,
         };
 
         public static List<RoleInfo> getRoleInfoForPlayer(PlayerControl p) {
@@ -167,6 +169,7 @@ namespace TheOtherRoles
             if (p == Lawyer.lawyer) infos.Add(lawyer);
             if (p == Pursuer.pursuer) infos.Add(pursuer);
             if (p == Yasuna.yasuna) infos.Add(yasuna);
+            if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
 
             // Default roles
             if (infos.Count == 0 && p.Data.Role.IsImpostor) infos.Add(impostor); // Just Impostor

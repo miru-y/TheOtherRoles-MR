@@ -57,6 +57,7 @@ namespace TheOtherRoles
         Pursuer,
         Witch,
         Yasuna,
+        TaskMaster,
         Crewmate,
         Impostor
     }
@@ -115,6 +116,8 @@ namespace TheOtherRoles
         SetBlanked,
         YasunaSpecialVote,
         YasunaSpecialVote_DoCastVote,
+        TaskMasterSetExTasks,
+        TaskMasterUpdateExTasks,
     }
 
     public static class RPCProcedure {
@@ -288,6 +291,9 @@ namespace TheOtherRoles
                         break;
                     case RoleId.Yasuna:
                         Yasuna.yasuna = player;
+                        break;
+                    case RoleId.TaskMaster:
+                        TaskMaster.taskMaster = player;
                         break;
                     }
                 }
@@ -495,6 +501,8 @@ namespace TheOtherRoles
             }
             if (Yasuna.yasuna != null && Yasuna.yasuna == player)
                 Yasuna.yasuna = oldShifter;
+            if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == player)
+                TaskMaster.taskMaster = oldShifter;
 
             if (Medium.medium != null && Medium.medium == player)
                 Medium.medium = oldShifter;
@@ -618,6 +626,7 @@ namespace TheOtherRoles
             if (player == Medium.medium) Medium.clearAndReload();
             if (player == Madmate.madmate) Madmate.clearAndReload();
             if (player == Yasuna.yasuna) Yasuna.clearAndReload();
+            if (player == TaskMaster.taskMaster) TaskMaster.clearAndReload();
 
             // Impostor roles
             if (player == Morphling.morphling) Morphling.clearAndReload();
@@ -831,7 +840,47 @@ namespace TheOtherRoles
             if (target == null) return;
             MeetingHud.Instance.CmdCastVote(PlayerControl.LocalPlayer.PlayerId, target.PlayerId);
         }
-    }   
+
+        public static void taskMasterSetExTasks(byte playerId, byte oldTaskMasterPlayerId, byte[] taskTypeIds) {
+            PlayerControl oldTaskMasterPlayer = Helpers.playerById(oldTaskMasterPlayerId);
+            if (oldTaskMasterPlayer != null) {
+                oldTaskMasterPlayer.clearAllTasks();
+                TaskMaster.oldTaskMasterPlayerId = oldTaskMasterPlayerId;
+            }
+
+            if (!TaskMaster.isTaskMaster(playerId)) 
+                return;
+            GameData.PlayerInfo player = GameData.Instance.GetPlayerById(playerId);
+            if (player == null)
+                return;
+
+            if (taskTypeIds != null && taskTypeIds.Length > 0) {
+                player.Object.clearAllTasks();
+                player.Tasks = new Il2CppSystem.Collections.Generic.List<GameData.TaskInfo>(taskTypeIds.Length);
+                for (int i = 0; i < taskTypeIds.Length; i++) {
+                    player.Tasks.Add(new GameData.TaskInfo(taskTypeIds[i], (uint)i));
+                    player.Tasks[i].Id = (uint)i;
+                }
+                for (int i = 0; i < player.Tasks.Count; i++) {
+                    GameData.TaskInfo taskInfo = player.Tasks[i];
+                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), player.Object.transform);
+                    normalPlayerTask.Id = taskInfo.Id;
+                    normalPlayerTask.Owner = player.Object;
+                    normalPlayerTask.Initialize();
+                    player.Object.myTasks.Add(normalPlayerTask);
+                }
+                TaskMaster.isTaskComplete = true;
+            } else {
+                TaskMaster.isTaskComplete = false;
+            }
+        }
+
+        public static void taskMasterUpdateExTasks(byte clearExTasks, byte allExTasks) {
+            if (TaskMaster.taskMaster == null) return;
+            TaskMaster.clearExTasks = clearExTasks;
+            TaskMaster.allExTasks = allExTasks;
+        }
+    }
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     class RPCHandlerPatch
@@ -1030,6 +1079,17 @@ namespace TheOtherRoles
                     break;
                 case (byte)CustomRPC.YasunaSpecialVote_DoCastVote:
                     RPCProcedure.yasunaSpecialVote_DoCastVote();
+                    break;
+                case (byte)CustomRPC.TaskMasterSetExTasks:
+                    playerId = reader.ReadByte();
+                    byte oldTaskMasterPlayerId = reader.ReadByte();
+                    byte[] taskTypeIds = reader.BytesRemaining > 0 ? reader.ReadBytes(reader.BytesRemaining) : null;
+                    RPCProcedure.taskMasterSetExTasks(playerId, oldTaskMasterPlayerId, taskTypeIds);
+                    break;
+                case (byte)CustomRPC.TaskMasterUpdateExTasks:
+                    byte clearExTasks = reader.ReadByte();
+                    byte allExTasks = reader.ReadByte();
+                    RPCProcedure.taskMasterUpdateExTasks(clearExTasks, allExTasks);
                     break;
             }
         }

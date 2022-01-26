@@ -241,6 +241,11 @@ namespace TheOtherRoles {
         public static CustomOption yasunaSpawnRate;
         public static CustomOption yasunaNumberOfSpecialVotes;
 
+        public static CustomOption taskMasterSpawnRate;
+        public static CustomOption taskMasterExtraCommonTasks;
+        public static CustomOption taskMasterExtraShortTasks;
+        public static CustomOption taskMasterExtraLongTasks;
+
         public static CustomOption maxNumberOfMeetings;
         public static CustomOption blockSkippingInEmergencyMeetings;
         public static CustomOption noVoteIsSelfVote;
@@ -392,6 +397,11 @@ namespace TheOtherRoles {
 
             yasunaSpawnRate = CustomOption.Create(910000000, cs(Yasuna.color, "Yasuna"), rates, null, true, true);
             yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
+
+            taskMasterSpawnRate = CustomOption.Create(910000100, cs(TaskMaster.color, "TaskMaster"), rates, null, true, true);
+            taskMasterExtraCommonTasks = CustomOption.Create(910000101, "TaskMaster Extra Common Tasks", 2f, 0f, 4f, 1f, taskMasterSpawnRate);
+            taskMasterExtraShortTasks = CustomOption.Create(910000102, "TaskMaster Extra Short Tasks", 2f, 0f, 23f, 1f, taskMasterSpawnRate);
+            taskMasterExtraLongTasks = CustomOption.Create(910000103, "TaskMaster Extra Long Tasks", 2f, 0f, 15f, 1f, taskMasterSpawnRate);
 
             shifterSpawnRate = CustomOption.Create(70, cs(Shifter.color, "Shifter"), rates, null, true, true);
             shifterShiftsModifiers = CustomOption.Create(71, "Shifter Shifts Modifiers", false, shifterSpawnRate);
