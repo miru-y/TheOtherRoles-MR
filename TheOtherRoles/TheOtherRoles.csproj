@@ -2,13 +2,14 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <Version>1.2.1</Version>
-        <Description>TheOtherRoles</Description>
+        <Description>TheOtherRoles MR Edition</Description>
         <Authors>Eisbison</Authors>
     </PropertyGroup>
 
     <PropertyGroup>
         <DefineConstants>$(DefineConstants);STEAM</DefineConstants>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyName>TheOtherRolesMR</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
