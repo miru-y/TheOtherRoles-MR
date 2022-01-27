@@ -44,7 +44,7 @@ namespace TheOtherRoles.Modules {
             
             var text = button.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
             __instance.StartCoroutine(Effects.Lerp(0.1f, new System.Action<float>((p) => {
-                text.SetText("Update\nThe Other Roles");
+                text.SetText("Update\nThe Other Roles MR");
             })));
 
             TwitchManager man = DestroyableSingleton<TwitchManager>.Instance;
@@ -63,7 +63,7 @@ namespace TheOtherRoles.Modules {
     public static class Announcement {
         public static bool Prefix(AnnouncementPopUp __instance) {       
             var text = __instance.AnnounceTextMeshPro;
-            text.text = ModUpdater.announcement;
+            text.text = (SupportedLangs)SaveManager.LastLanguage == SupportedLangs.Japanese ? ModUpdater.announcementJp : ModUpdater.announcement;
             return false;
         }
     }
@@ -74,6 +74,7 @@ namespace TheOtherRoles.Modules {
         public static string updateURI = null;
         private static Task updateTask = null;
         public static string announcement = "";
+        public static string announcementJp = "";
         public static GenericPopup InfoPopup;
 
         public static void LaunchUpdater() {
@@ -117,7 +118,8 @@ namespace TheOtherRoles.Modules {
             try {
                 HttpClient http = new HttpClient();
                 http.DefaultRequestHeaders.Add("User-Agent", "TheOtherRoles Updater");
-                var response = await http.GetAsync(new System.Uri("https://api.github.com/repos/Eisbison/TheOtherRoles/releases/latest"), HttpCompletionOption.ResponseContentRead);
+                var response = await http.GetAsync(new System.Uri("https://api.github.com/repos/miru-y/TheOtherRoles-MR/releases/latest"), HttpCompletionOption.ResponseContentRead);
+                //var response = await http.GetAsync(new System.Uri("https://api.github.com/repos/Eisbison/TheOtherRoles/releases/latest"), HttpCompletionOption.ResponseContentRead);
                 // var response = await http.GetAsync(new System.Uri("https://api.github.com/repos/EoF-1141/TheOtherRoles/releases/latest"), HttpCompletionOption.ResponseContentRead);
                 if (response.StatusCode != HttpStatusCode.OK || response.Content == null) {
                     System.Console.WriteLine("Server returned no data: " + response.StatusCode.ToString());
@@ -130,19 +132,41 @@ namespace TheOtherRoles.Modules {
                 if (tagname == null) {
                     return false; // Something went wrong
                 }
-
+ 
                 string changeLog = data["body"]?.ToString();
-                if (changeLog != null) announcement = changeLog;
+                if (changeLog == null) changeLog = "";
+
+                int announcementJpTagStartIndex = changeLog.IndexOf("### JP");
+                int announcementJpTagEndIndex = announcementJpTagStartIndex != -1 ? announcementJpTagStartIndex + "### JP".Length + 2 : -1;
+                int announcementTagStartIndex = changeLog.IndexOf("### EN");
+                int announcementTagEndIndex = announcementTagStartIndex != -1 ? announcementTagStartIndex + "### EN".Length + 2 : -1;
+                if (announcementJpTagStartIndex == -1 && announcementTagStartIndex == -1) {
+                    announcement = announcementJp = changeLog;
+                } else if (announcementJpTagStartIndex != -1 && announcementTagStartIndex == -1) {
+                    announcement = announcementJp = changeLog.Substring(announcementTagEndIndex);
+                } else if (announcementJpTagStartIndex == -1 && announcementTagStartIndex != -1) {
+                    announcement = announcementJp = changeLog.Substring(announcementJpTagEndIndex);
+                } else {
+                    if (announcementJpTagStartIndex < announcementTagEndIndex) {
+                        announcementJp = changeLog.Substring(announcementJpTagEndIndex, announcementTagStartIndex - announcementJpTagEndIndex);
+                        announcement = changeLog.Substring(announcementTagEndIndex);
+                    } else {
+                        announcement = changeLog.Substring(announcementTagEndIndex, announcementJpTagStartIndex - announcementTagEndIndex);
+                        announcementJp = changeLog.Substring(announcementJpTagEndIndex);
+                    }
+                }
+
                 // check version
-                System.Version ver = System.Version.Parse(tagname.Replace("v", ""));
+                System.Version ver = System.Version.Parse(tagname.Replace("MR_v", ""));
                 int diff = TheOtherRolesPlugin.Version.CompareTo(ver);
                 if (diff < 0) { // Update required
                     hasUpdate = true;
-                    announcement = $@"<size=150%>A new <color=#FC0303>THE OTHER ROLES</color>
+                    string title = $@"<size=150%>A new <color=#FC0303>THE OTHER ROLES MR</color>
 update to v{ver} is available</size>
 
-{announcement}";
-
+";
+                    announcement = title + announcement;
+                    announcementJp = title + announcementJp;
                     JToken assets = data["assets"];
                     if (!assets.HasValues)
                         return false;
@@ -158,9 +182,11 @@ update to v{ver} is available</size>
                         }
                     }
                 }  else {
-                    announcement = $@"<size=150%><color=#FC0303>THE OTHER ROLES</color> Version {ver}:</size>
+                    string title = $@"<size=150%><color=#FC0303>THE OTHER ROLES MR</color> Version {ver}:</size>
 
-{announcement}";
+";
+                    announcement = title + announcement;
+                    announcementJp = title + announcementJp;
                 }
             } catch (System.Exception ex) {
                 TheOtherRolesPlugin.Instance.Log.LogError(ex.ToString());
@@ -172,7 +198,7 @@ update to v{ver} is available</size>
         public static async Task<bool> downloadUpdate() {
             try {
                 HttpClient http = new HttpClient();
-                http.DefaultRequestHeaders.Add("User-Agent", "TheOtherRoles Updater");
+                http.DefaultRequestHeaders.Add("User-Agent", "TheOtherRoles MR Updater");
                 var response = await http.GetAsync(new System.Uri(updateURI), HttpCompletionOption.ResponseContentRead);
                 if (response.StatusCode != HttpStatusCode.OK || response.Content == null) {
                     System.Console.WriteLine("Server returned no data: " + response.StatusCode.ToString());
@@ -191,7 +217,7 @@ update to v{ver} is available</size>
                         responseStream.CopyTo(fileStream); 
                     }
                 }
-                showPopup("The Other Roles\nupdated successfully\nPlease restart the game.");
+                showPopup("The Other Roles MR\nupdated successfully\nPlease restart the game.");
                 return true;
             } catch (System.Exception ex) {
                 TheOtherRolesPlugin.Instance.Log.LogError(ex.ToString());
