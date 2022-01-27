@@ -16,6 +16,7 @@ namespace TheOtherRoles{
         public static bool ghostsSeeVotes = true;
         public static bool showRoleSummary = true;
         public static bool allowParallelMedBayScans = false;
+        public static bool showLighterDarker = true;
 
         // Updating values
         public static int meetingsCount = 0;
@@ -53,6 +54,7 @@ public static void clearAndReloadMapOptions() {
             ghostsSeeTasks = TheOtherRolesPlugin.GhostsSeeTasks.Value;
             ghostsSeeVotes = TheOtherRolesPlugin.GhostsSeeVotes.Value;
             showRoleSummary = TheOtherRolesPlugin.ShowRoleSummary.Value;
+            showLighterDarker = TheOtherRolesPlugin.ShowLighterDarker.Value;
         }
 
         public static void MeetingEndedUpdate()
@@ -152,4 +154,4 @@ public static void clearAndReloadMapOptions() {
             }
         }
     }
-} 
+}
