@@ -265,6 +265,9 @@ namespace TheOtherRoles.Patches {
 
             // Reset Settings
             RPCProcedure.resetVariables();
+
+            if (TheOtherRolesPlugin.DebugMode.Value)
+                DebugManager.bots.Clear();
         }
     }
 
