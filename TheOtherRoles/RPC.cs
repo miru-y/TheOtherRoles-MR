@@ -57,6 +57,7 @@ namespace TheOtherRoles
         Lawyer,
         Pursuer,
         Witch,
+        EvilYasuna,
         Yasuna,
         TaskMaster,
         Crewmate,
@@ -297,6 +298,7 @@ namespace TheOtherRoles
                         Witch.witch = player;
                         break;
                     case RoleId.Yasuna:
+                    case RoleId.EvilYasuna:
                         Yasuna.yasuna = player;
                         break;
                     case RoleId.TaskMaster:

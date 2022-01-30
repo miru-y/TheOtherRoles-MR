@@ -103,7 +103,6 @@ namespace TheOtherRoles.Patches {
             crewSettings.Add((byte)RoleId.Snitch, CustomOptionHolder.snitchSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Bait, CustomOptionHolder.baitSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Medium, CustomOptionHolder.mediumSpawnRate.getSelection());
-            crewSettings.Add((byte)RoleId.Yasuna, CustomOptionHolder.yasunaSpawnRate.getSelection());
             if (Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraCommonTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraLongTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraShortTasks.getFloat()) > 0)
                 crewSettings.Add((byte)RoleId.TaskMaster, CustomOptionHolder.taskMasterSpawnRate.getSelection());
             if (impostors.Count > 1) {
@@ -188,6 +187,10 @@ namespace TheOtherRoles.Patches {
                 CustomOptionHolder.deputySpawnRate.getSelection() == 0) 
                     data.crewSettings.Add((byte)RoleId.Sheriff, CustomOptionHolder.sheriffSpawnRate.getSelection());
 
+            // Assign Yasuna (chance to be impostor based on setting)
+            bool isEvilYasuna = (rnd.Next(1, 101) <= CustomOptionHolder.yasunaIsImpYasunaRate.getSelection() * 10);
+            if (isEvilYasuna) data.impSettings.Add((byte)RoleId.EvilYasuna, CustomOptionHolder.yasunaSpawnRate.getSelection());
+            else data.crewSettings.Add((byte)RoleId.Yasuna, CustomOptionHolder.yasunaSpawnRate.getSelection());
 
             crewValues = data.crewSettings.Values.ToList().Sum();
             impValues = data.impSettings.Values.ToList().Sum();

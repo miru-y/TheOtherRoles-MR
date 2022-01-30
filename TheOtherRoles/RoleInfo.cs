@@ -71,6 +71,7 @@ namespace TheOtherRoles
         public static RoleInfo lover = new RoleInfo("Lover", Lovers.color, $"You are in love", $"You are in love", RoleId.Lover);
         public static RoleInfo witch = new RoleInfo("Witch", Witch.color, "Cast a spell upon your foes", "Cast a spell upon your foes", RoleId.Witch);
         public static RoleInfo yasuna = new RoleInfo("Yasuna", Yasuna.color, "Exile suspicious crewmates.", "Exile suspicious crewmates.", RoleId.Yasuna);
+        public static RoleInfo evilYasuna = new RoleInfo("Evil Yasuna", Palette.ImpostorRed, "Exile smart crewmates.", "Exile smart crewmates.", RoleId.EvilYasuna);
         public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
         
         public static List<RoleInfo> allRoleInfos = new List<RoleInfo>() {
@@ -121,6 +122,7 @@ namespace TheOtherRoles
             medium,
             madmate,
             yasuna,
+            evilYasuna,
             taskMaster,
         };
 
@@ -171,7 +173,7 @@ namespace TheOtherRoles
             if (p == Madmate.madmate) infos.Add(madmate);
             if (p == Lawyer.lawyer) infos.Add(lawyer);
             if (p == Pursuer.pursuer) infos.Add(pursuer);
-            if (p == Yasuna.yasuna) infos.Add(yasuna);
+            if (p == Yasuna.yasuna) infos.Add(p.Data.Role.IsImpostor ? evilYasuna : yasuna);
             if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
 
             // Default roles

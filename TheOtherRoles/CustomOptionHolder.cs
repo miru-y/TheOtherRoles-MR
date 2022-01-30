@@ -255,6 +255,7 @@ namespace TheOtherRoles {
         public static CustomOption pursuerBlanksNumber;
 
         public static CustomOption yasunaSpawnRate;
+        public static CustomOption yasunaIsImpYasunaRate;
         public static CustomOption yasunaNumberOfSpecialVotes;
 
         public static CustomOption taskMasterSpawnRate;
@@ -421,6 +422,7 @@ namespace TheOtherRoles {
             pursuerBlanksNumber = CustomOption.Create(357, "Pursuer Number Of Blanks", 5f, 1f, 20f, 1f, lawyerSpawnRate);
 
             yasunaSpawnRate = CustomOption.Create(910000000, cs(Yasuna.color, "Yasuna"), rates, null, true, true);
+            yasunaIsImpYasunaRate = CustomOption.Create(910000002, "Chance That The Yasuna Is An Impostor", rates, yasunaSpawnRate);
             yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
 
             taskMasterSpawnRate = CustomOption.Create(910000100, cs(TaskMaster.color, "TaskMaster"), rates, null, true, true);

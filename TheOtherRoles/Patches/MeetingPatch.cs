@@ -469,18 +469,18 @@ namespace TheOtherRoles.Patches {
                     targetBox.name = "SpecialVoteButton";
                     targetBox.transform.localPosition = new Vector3(-0.95f, 0.03f, -2.5f);
                     SpriteRenderer renderer = targetBox.GetComponent<SpriteRenderer>();
-                    renderer.sprite = Yasuna.getTargetSprite();
+                    renderer.sprite = Yasuna.getTargetSprite(PlayerControl.LocalPlayer.Data.Role.IsImpostor);
                     PassiveButton button = targetBox.GetComponent<PassiveButton>();
                     button.OnClick.RemoveAllListeners();
                     int copiedIndex = i;
                     button.OnClick.AddListener((UnityEngine.Events.UnityAction)(() => yasunaOnClick(copiedIndex, __instance)));
 
-                    TMPro.TextMeshPro targetBoxRemain = UnityEngine.Object.Instantiate(__instance.playerStates[0].NameText, targetBox.transform);
-                    targetBoxRemain.text = Yasuna.remainingSpecialVotes().ToString();
-                    targetBoxRemain.color = Yasuna.color;
-                    targetBoxRemain.alignment = TMPro.TextAlignmentOptions.Center;
-                    targetBoxRemain.transform.localPosition = new Vector3(0.2f, -0.3f, targetBoxRemain.transform.localPosition.z);
-                    targetBoxRemain.transform.localScale *= 1.7f;
+                    TMPro.TextMeshPro targetBoxRemainText = UnityEngine.Object.Instantiate(__instance.playerStates[0].NameText, targetBox.transform);
+                    targetBoxRemainText.text = Yasuna.remainingSpecialVotes().ToString();
+                    targetBoxRemainText.color = PlayerControl.LocalPlayer.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color;
+                    targetBoxRemainText.alignment = TMPro.TextAlignmentOptions.Center;
+                    targetBoxRemainText.transform.localPosition = new Vector3(0.2f, -0.3f, targetBoxRemainText.transform.localPosition.z);
+                    targetBoxRemainText.transform.localScale *= 1.7f;
                 }
             }
         }

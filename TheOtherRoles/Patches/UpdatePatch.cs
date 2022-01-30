@@ -152,7 +152,7 @@ namespace TheOtherRoles.Patches {
             } else if (Pursuer.pursuer != null && Pursuer.pursuer == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Pursuer.pursuer, Pursuer.color);
             } else if (Yasuna.yasuna != null && Yasuna.yasuna == PlayerControl.LocalPlayer) {
-                setPlayerNameColor(Yasuna.yasuna, Yasuna.color);
+                setPlayerNameColor(Yasuna.yasuna, PlayerControl.LocalPlayer.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color);
             } else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(TaskMaster.taskMaster, TaskMaster.color);
             }

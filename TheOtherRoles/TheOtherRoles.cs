@@ -1497,9 +1497,9 @@ namespace TheOtherRoles
             specialVoteTargetPlayerId = byte.MaxValue;
         }
 
-        public static Sprite getTargetSprite() {
+        public static Sprite getTargetSprite(bool isImpostor) {
             if (targetSprite) return targetSprite;
-            targetSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.YasunaTargetIcon.png", 150f);
+            targetSprite = Helpers.loadSpriteFromResources(isImpostor ? "TheOtherRoles.Resources.EvilYasunaTargetIcon.png" : "TheOtherRoles.Resources.YasunaTargetIcon.png", 150f);
             return targetSprite;
         }
 
