@@ -58,7 +58,7 @@ namespace TheOtherRoles.Patches {
                 taskTypesList.Add(playerTasks[i].TaskType);
                 ++count;
                 list.Add((byte)playerTasks[i].Index);
-                if (list.Count >= numTasks)
+                if (count >= numTasks)
                     break;
             }
             return count; 
