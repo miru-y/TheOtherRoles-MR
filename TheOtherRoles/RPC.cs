@@ -60,6 +60,7 @@ namespace TheOtherRoles
         EvilYasuna,
         Yasuna,
         TaskMaster,
+        DoorHacker,
         Crewmate,
         Impostor
     }
@@ -123,6 +124,7 @@ namespace TheOtherRoles
         YasunaSpecialVote_DoCastVote,
         TaskMasterSetExTasks,
         TaskMasterUpdateExTasks,
+        DoorHackerDone,
     }
 
     public static class RPCProcedure {
@@ -303,6 +305,9 @@ namespace TheOtherRoles
                         break;
                     case RoleId.TaskMaster:
                         TaskMaster.taskMaster = player;
+                        break;
+                    case RoleId.DoorHacker:
+                        DoorHacker.doorHacker = player;
                         break;
                     }
                 }
@@ -674,6 +679,7 @@ namespace TheOtherRoles
             if (player == Cleaner.cleaner) Cleaner.clearAndReload();
             if (player == Warlock.warlock) Warlock.clearAndReload();
             if (player == Witch.witch) Witch.clearAndReload();
+            if (player == DoorHacker.doorHacker) DoorHacker.clearAndReload();
 
             // Other roles
             if (player == Jester.jester) Jester.clearAndReload();
@@ -922,6 +928,12 @@ namespace TheOtherRoles
             TaskMaster.clearExTasks = clearExTasks;
             TaskMaster.allExTasks = allExTasks;
         }
+
+        public static void doorHackerDone(byte playerId) {
+            PlayerControl player = Helpers.playerById(playerId);
+            if (DoorHacker.doorHacker == null || DoorHacker.doorHacker != player) return;
+            DoorHacker.DisableDoors(playerId);
+        }
     }
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
@@ -1142,6 +1154,10 @@ namespace TheOtherRoles
                     byte clearExTasks = reader.ReadByte();
                     byte allExTasks = reader.ReadByte();
                     RPCProcedure.taskMasterUpdateExTasks(clearExTasks, allExTasks);
+                    break;
+                case (byte)CustomRPC.DoorHackerDone:
+                    playerId = reader.ReadByte();
+                    RPCProcedure.doorHackerDone(playerId);
                     break;
             }
         }

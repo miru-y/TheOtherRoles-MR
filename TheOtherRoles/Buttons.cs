@@ -46,6 +46,7 @@ namespace TheOtherRoles
         public static CustomButton mediumButton;
         public static CustomButton pursuerButton;
         public static CustomButton witchSpellButton;
+        public static CustomButton doorHackerButton;
 
         public static Dictionary<byte, List<CustomButton>> deputyHandcuffedButtons = null;
 
@@ -55,6 +56,7 @@ namespace TheOtherRoles
         public static TMPro.TMP_Text pursuerButtonBlanksText;
         public static TMPro.TMP_Text hackerAdminTableChargesText;
         public static TMPro.TMP_Text hackerVitalsChargesText;
+        public static TMPro.TMP_Text doorHackerButtonUsesText;
 
         public static void setCustomButtonCooldowns() {
             engineerRepairButton.MaxTimer = 0f;
@@ -88,7 +90,8 @@ namespace TheOtherRoles
             mediumButton.MaxTimer = Medium.cooldown;
             pursuerButton.MaxTimer = Pursuer.cooldown;
             trackerTrackCorpsesButton.MaxTimer = Tracker.corpsesTrackingCooldown;
-            witchSpellButton.MaxTimer = Witch.cooldown; 
+            witchSpellButton.MaxTimer = Witch.cooldown;
+            doorHackerButton.MaxTimer = DoorHacker.cooldown;
 
             timeMasterShieldButton.EffectDuration = TimeMaster.shieldDuration;
             hackerButton.EffectDuration = Hacker.duration;
@@ -103,6 +106,7 @@ namespace TheOtherRoles
             mediumButton.EffectDuration = Medium.duration;
             trackerTrackCorpsesButton.EffectDuration = Tracker.corpsesTrackingDuration;
             witchSpellButton.EffectDuration = Witch.spellCastingDuration;
+            doorHackerButton.EffectDuration = DoorHacker.duration;
             securityGuardCamButton.EffectDuration = SecurityGuard.duration;
             // Already set the timer to the max, as the button is enabled during the game and not available at the start
             lightsOutButton.Timer = lightsOutButton.MaxTimer;
@@ -1351,6 +1355,42 @@ namespace TheOtherRoles
                     Witch.spellCastingTarget = null;
                 }
             );
+
+            // DoorHacker button
+            doorHackerButton = new CustomButton(
+                () => {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.DoorHackerDone, Hazel.SendOption.Reliable, -1);
+                    writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.doorHackerDone(PlayerControl.LocalPlayer.PlayerId);
+                },
+                () => { return DoorHacker.remainingUses != 0 && DoorHacker.doorHacker != null && DoorHacker.doorHacker == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+                () => {
+                    if (doorHackerButtonUsesText != null && DoorHacker.remainingUses != -1) doorHackerButtonUsesText.text = $"{DoorHacker.remainingUses}";
+
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () => {
+                    doorHackerButton.Timer = doorHackerButton.MaxTimer;
+                    doorHackerButton.isEffectActive = false;
+                    doorHackerButton.actionButton.cooldownTimerText.color = Palette.EnabledColor;
+
+                    doorHackerButton.showButtonText = true;
+                },
+                DoorHacker.getButtonSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                KeyCode.F,
+                true,
+                DoorHacker.duration,
+                () => { doorHackerButton.Timer = doorHackerButton.MaxTimer; }
+            );
+            doorHackerButtonUsesText = GameObject.Instantiate(doorHackerButton.actionButton.cooldownTimerText, doorHackerButton.actionButton.cooldownTimerText.transform.parent);
+            doorHackerButtonUsesText.text = "";
+            doorHackerButtonUsesText.enableWordWrapping = false;
+            doorHackerButtonUsesText.transform.localScale = Vector3.one * 0.5f;
+            doorHackerButtonUsesText.transform.localPosition += new Vector3(0.5f, 0.3f, 0);
+
 
             // Set the default (or settings from the previous game) timers/durations when spawning the buttons
             setCustomButtonCooldowns();

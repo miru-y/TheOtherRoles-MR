@@ -73,7 +73,8 @@ namespace TheOtherRoles
         public static RoleInfo yasuna = new RoleInfo("Yasuna", Yasuna.color, "Exile suspicious crewmates.", "Exile suspicious crewmates.", RoleId.Yasuna);
         public static RoleInfo evilYasuna = new RoleInfo("Evil Yasuna", Palette.ImpostorRed, "Exile smart crewmates.", "Exile smart crewmates.", RoleId.EvilYasuna);
         public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
-        
+        public static RoleInfo doorHacker = new RoleInfo("DoorHacker", DoorHacker.color, "Slip through the door and cover your tracks.", "Slip through the door and cover your tracks.", RoleId.DoorHacker);
+
         public static List<RoleInfo> allRoleInfos = new List<RoleInfo>() {
             impostor,
             godfather,
@@ -124,6 +125,7 @@ namespace TheOtherRoles
             yasuna,
             evilYasuna,
             taskMaster,
+            doorHacker,
         };
 
         public static List<RoleInfo> getRoleInfoForPlayer(PlayerControl p) {
@@ -175,6 +177,7 @@ namespace TheOtherRoles
             if (p == Pursuer.pursuer) infos.Add(pursuer);
             if (p == Yasuna.yasuna) infos.Add(p.Data.Role.IsImpostor ? evilYasuna : yasuna);
             if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
+            if (p == DoorHacker.doorHacker) infos.Add(doorHacker);
 
             // Default roles
             if (infos.Count == 0 && p.Data.Role.IsImpostor) infos.Add(impostor); // Just Impostor

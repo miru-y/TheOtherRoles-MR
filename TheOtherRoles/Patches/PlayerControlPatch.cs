@@ -767,6 +767,16 @@ namespace TheOtherRoles.Patches {
             setPlayerOutline(Witch.currentTarget, Witch.color);
         }
 
+        static void doorHackerUpdate() {
+            if (DoorHacker.doorHacker == null) return;
+            float oldDoorHackerTimer = DoorHacker.doorHackerTimer;
+            if (oldDoorHackerTimer <= 0f) return;
+
+            DoorHacker.doorHackerTimer = Mathf.Max(0f, DoorHacker.doorHackerTimer - Time.fixedDeltaTime);
+            if (DoorHacker.doorHackerTimer <= 0f) {
+                DoorHacker.ResetDoors(true);
+            }
+        }
 
         public static void Postfix(PlayerControl __instance) {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
@@ -848,6 +858,8 @@ namespace TheOtherRoles.Patches {
                 // Witch
                 witchSetTarget();
                 hackerUpdate();
+                // DoorHacker
+                doorHackerUpdate();
             } 
         }
     }

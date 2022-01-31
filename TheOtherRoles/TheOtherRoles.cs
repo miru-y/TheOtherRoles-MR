@@ -11,6 +11,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 using TheOtherRoles.Objects;
+using UnhollowerBaseLib;
 
 namespace TheOtherRoles
 {
@@ -64,6 +65,7 @@ namespace TheOtherRoles
             Witch.clearAndReload();
             Yasuna.clearAndReload();
             TaskMaster.clearAndReload();
+            DoorHacker.clearAndReload();
         }
 
         public static class Jester {
@@ -1535,6 +1537,67 @@ namespace TheOtherRoles
 
         public static bool isTaskMaster(byte playerId) {
             return taskMaster != null && taskMaster.PlayerId == playerId;
+        }
+    }
+
+    public static class DoorHacker {
+        public static PlayerControl doorHacker;
+        public static Color color = Palette.ImpostorRed;
+
+        public static float cooldown = 30f;
+        public static float duration = 3f;
+        public static float doorHackerTimer = 0f;
+        public static int remainingUses = -1;
+
+        private static Il2CppArrayBase<PlainDoor> doors = null;
+        private static List<bool> enableDoors = null;
+
+        private static Sprite buttonSprite;
+        public static Sprite getButtonSprite() {
+            if (buttonSprite) return buttonSprite;
+            buttonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.DoorHackerButton.png", 115f);
+            return buttonSprite;
+        }
+
+        public static void DisableDoors(int playerId) {
+            if (doorHacker == null || doorHacker.PlayerId != playerId) return;
+            if (remainingUses == 0) return;
+
+            if (playerId == PlayerControl.LocalPlayer.PlayerId) {
+                doors = GameObject.FindObjectsOfType<PlainDoor>();
+                if (doors != null && doors.Count > 0) {
+                    doorHackerTimer = duration;
+                    enableDoors = new List<bool>();
+                    for (int i = 0; i < doors.Count; ++i) {
+                        enableDoors.Add(doors[i].myCollider.enabled);
+                        doors[i].myCollider.enabled = false;
+                    }
+                }
+            } else {
+                doorHacker.Collider.isTrigger = true;
+            }
+        }
+
+        public static void ResetDoors(bool consumeRemain = false) {
+            if (doorHacker == null) return;
+            if (consumeRemain && remainingUses != -1)
+                --remainingUses;
+            doorHackerTimer = 0f;
+            doorHacker.Collider.isTrigger = false;
+            if (doors == null) return;
+            for (int i = 0; i < doors.Count; ++i)
+                doors[i].myCollider.enabled = enableDoors[i];
+            enableDoors.Clear();
+            doors = null;
+        }
+
+        public static void clearAndReload() {
+            cooldown = CustomOptionHolder.doorHackerCooldown.getFloat();
+            duration = CustomOptionHolder.doorHackerDuration.getFloat();
+            int num = Mathf.RoundToInt(CustomOptionHolder.doorHackerNumberOfUses.getFloat());
+            remainingUses = num == 0 ? -1 : num;
+
+            ResetDoors();
         }
     }
 }

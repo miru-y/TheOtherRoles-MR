@@ -263,6 +263,11 @@ namespace TheOtherRoles {
         public static CustomOption taskMasterExtraShortTasks;
         public static CustomOption taskMasterExtraLongTasks;
 
+        public static CustomOption doorHackerSpawnRate;
+        public static CustomOption doorHackerNumberOfUses;
+        public static CustomOption doorHackerCooldown;
+        public static CustomOption doorHackerDuration;
+
         public static CustomOption maxNumberOfMeetings;
         public static CustomOption blockSkippingInEmergencyMeetings;
         public static CustomOption noVoteIsSelfVote;
@@ -306,10 +311,10 @@ namespace TheOtherRoles {
             enabledAdminTimer = CustomOption.Create(998, "Enable Admin Map Available Duration", true);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, "Hide Fake Tasks On Sabotage Map", false);
 
-            vitalsTimer = CustomOption.Create(900000000, cs(Color.green, "Vitals Available Duration"), 15f, 0f, 120f, 1f);
+            vitalsTimer = CustomOption.Create(900000000, cs(Color.green, "Vitals Available Duration"), 10f, 0f, 120f, 1f);
             enabledVitalsTimer = CustomOption.Create(900000001, cs(Color.green, "Enable Vitals Available Duration"), false);
 
-            securityCameraTimer = CustomOption.Create(900000002, cs(Color.red, "Security Camera Available Duration"), 15f, 0f, 120f, 1f);
+            securityCameraTimer = CustomOption.Create(900000002, cs(Color.red, "Security Camera Available Duration"), 10f, 0f, 120f, 1f);
             enabledSecurityCameraTimer = CustomOption.Create(900000003, cs(Color.red, "Enable Security Camera Available Duration"), false);
 
             mafiaSpawnRate = CustomOption.Create(10, cs(Janitor.color, "Mafia"), rates, null, true, true);
@@ -366,6 +371,11 @@ namespace TheOtherRoles {
             witchSpellCastingDuration = CustomOption.Create(374, "Spell Casting Duration", 1f, 0f, 10f, 1f, witchSpawnRate);
             witchTriggerBothCooldowns = CustomOption.Create(375, "Trigger Both Cooldowns", true, witchSpawnRate);
             witchVoteSavesTargets = CustomOption.Create(376, "Voting The Witch Saves All The Targets", true, witchSpawnRate);
+
+            doorHackerSpawnRate = CustomOption.Create(910000200, cs(DoorHacker.color, "DoorHacker"), rates, null, true, true);
+            doorHackerNumberOfUses = CustomOption.Create(910000203, "Door Hacker Number Of Uses", 0f, 0f, 15, 1f, doorHackerSpawnRate);
+            doorHackerCooldown = CustomOption.Create(910000201, "Door Hacker Cooldown", 30f, 0f, 60f, 2.5f, doorHackerSpawnRate);
+            doorHackerDuration = CustomOption.Create(910000202, "Door Hacker Duration", 5f, 1f, 30f, 0.5f, doorHackerSpawnRate);
 
             miniSpawnRate = CustomOption.Create(180, cs(Mini.color, "Mini"), rates, null, true, true);
             miniGrowingUpDuration = CustomOption.Create(181, "Mini Growing Up Duration", 400f, 100f, 1500f, 100f, miniSpawnRate);
