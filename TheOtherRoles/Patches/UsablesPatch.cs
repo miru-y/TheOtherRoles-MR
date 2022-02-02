@@ -293,27 +293,28 @@ namespace TheOtherRoles.Patches {
             static void Postfix(VitalsMinigame __instance) {
                 // Consume time to see vital if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead) {
-
-                    if (MapOptions.VitalsTimer <= 0) {
-                        __instance.SabText.gameObject.SetActive(true);
-                        __instance.SabText.text = "[VITALS DESTROYED]";
-                        for (int k = 0; k < __instance.vitals.Length; k++) {
-                            VitalsPanel vitalsPanel = __instance.vitals[k];
-                            vitalsPanel.gameObject.SetActive(false);
+                    if (CustomOptionHolder.enabledVitalsTimer.getBool()) {
+                        if (MapOptions.VitalsTimer <= 0) {
+                            __instance.SabText.gameObject.SetActive(true);
+                            __instance.SabText.text = "[VITALS DESTROYED]";
+                            for (int k = 0; k < __instance.vitals.Length; k++) {
+                                VitalsPanel vitalsPanel = __instance.vitals[k];
+                                vitalsPanel.gameObject.SetActive(false);
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    // Consume the time via RPC
-                    float delta = Time.unscaledDeltaTime;
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                        PlayerControl.LocalPlayer.NetId,
-                        (byte)CustomRPC.ConsumeVitalTime,
-                        Hazel.SendOption.Reliable,
-                        -1);
-                    writer.Write(delta);
-                    AmongUsClient.Instance.FinishRpcImmediately(writer);
-                    RPCProcedure.consumeVitalTime(delta);
+                        // Consume the time via RPC
+                        float delta = Time.unscaledDeltaTime;
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                            PlayerControl.LocalPlayer.NetId,
+                            (byte)CustomRPC.ConsumeVitalTime,
+                            Hazel.SendOption.Reliable,
+                            -1);
+                        writer.Write(delta);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                        RPCProcedure.consumeVitalTime(delta);
+                    }
                 }
 
                 // Hacker show time since death
@@ -571,26 +572,28 @@ namespace TheOtherRoles.Patches {
             public static bool Prefix(SurveillanceMinigame __instance) {
                 // Consume time to see security camera if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead) {
-                    if (MapOptions.SecurityCameraTimer <= 0) {
-                        for (int i = 0; i < __instance.SabText.Length; i++) {
-                            __instance.SabText[i].text = "[SECURITY CAMERA DESTROYED]";
-                            __instance.SabText[i].gameObject.SetActive(true);
+                    if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
+                        if (MapOptions.SecurityCameraTimer <= 0) {
+                            for (int i = 0; i < __instance.SabText.Length; i++) {
+                                __instance.SabText[i].text = "[SECURITY CAMERA DESTROYED]";
+                                __instance.SabText[i].gameObject.SetActive(true);
+                            }
+                            for (int i = 0; i < __instance.ViewPorts.Length; i++)
+                                __instance.ViewPorts[i].sharedMaterial = __instance.StaticMaterial;
+                            return false;
                         }
-                        for (int i = 0; i < __instance.ViewPorts.Length; i++)
-                            __instance.ViewPorts[i].sharedMaterial = __instance.StaticMaterial;
-                        return false;
-                    }
 
-                    // Consume the time via RPC
-                    float delta = Time.unscaledDeltaTime;
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                        PlayerControl.LocalPlayer.NetId,
-                        (byte)CustomRPC.ConsumeSecurityCameraTime,
-                        Hazel.SendOption.Reliable,
-                        -1);
-                    writer.Write(delta);
-                    AmongUsClient.Instance.FinishRpcImmediately(writer);
-                    RPCProcedure.consumeSecurityCameraTime(delta);
+                        // Consume the time via RPC
+                        float delta = Time.unscaledDeltaTime;
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                            PlayerControl.LocalPlayer.NetId,
+                            (byte)CustomRPC.ConsumeSecurityCameraTime,
+                            Hazel.SendOption.Reliable,
+                            -1);
+                        writer.Write(delta);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                        RPCProcedure.consumeSecurityCameraTime(delta);
+                    }
                 }
 
                 // Update normal and securityGuard cameras
