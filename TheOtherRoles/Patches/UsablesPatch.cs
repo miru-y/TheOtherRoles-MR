@@ -655,22 +655,24 @@ namespace TheOtherRoles.Patches {
 
                 // Consume time to see security camera if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead) {
-                    if (MapOptions.SecurityCameraTimer <= 0) {
-                        __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
-                        __instance.SabText.gameObject.SetActive(true);
-                        __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
-                        return false;
+                    if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
+                        if (MapOptions.SecurityCameraTimer <= 0) {
+                            __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
+                            __instance.SabText.gameObject.SetActive(true);
+                            __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
+                            return false;
+                        }
+                        // Consume the time via RPC
+                        float delta = Time.unscaledDeltaTime;
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                            PlayerControl.LocalPlayer.NetId,
+                            (byte)CustomRPC.ConsumeSecurityCameraTime,
+                            Hazel.SendOption.Reliable,
+                            -1);
+                        writer.Write(delta);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                        RPCProcedure.consumeSecurityCameraTime(delta);
                     }
-                    // Consume the time via RPC
-                    float delta = Time.unscaledDeltaTime;
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                        PlayerControl.LocalPlayer.NetId,
-                        (byte)CustomRPC.ConsumeSecurityCameraTime,
-                        Hazel.SendOption.Reliable,
-                        -1);
-                    writer.Write(delta);
-                    AmongUsClient.Instance.FinishRpcImmediately(writer);
-                    RPCProcedure.consumeSecurityCameraTime(delta);
                 }
 
                 return false;
