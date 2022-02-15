@@ -151,6 +151,8 @@ namespace TheOtherRoles.Patches {
                     continue;
                 if (player.Data.IsDead)
                     continue;
+                if (player.PlayerId == exiledPlayerId)
+                    continue;
                 if (currentPlayerIndex == targetPlayerIndex)
                     return player;
                 currentPlayerIndex++;

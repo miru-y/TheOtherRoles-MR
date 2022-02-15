@@ -25,6 +25,7 @@ namespace TheOtherRoles {
 
         public static CustomOption adminTimer;
         public static CustomOption enabledAdminTimer;
+        public static CustomOption heliSabotageSystemTimeLimit;
         public static CustomOption hideTaskOverlayOnSabMap;
 
         public static CustomOption vitalsTimer;
@@ -309,6 +310,7 @@ namespace TheOtherRoles {
 
             adminTimer = CustomOption.Create(999, "Admin Map Available Duration", 10f, 0f, 120f, 1f);
             enabledAdminTimer = CustomOption.Create(998, "Enable Admin Map Available Duration", true);
+            heliSabotageSystemTimeLimit = CustomOption.Create(996, "Time Limit of Avert Crash Time", 90f, 1f, 120f, 5f);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, "Hide Fake Tasks On Sabotage Map", false);
 
             vitalsTimer = CustomOption.Create(900000000, cs(Color.green, "Vitals Available Duration"), 10f, 0f, 120f, 1f);
