@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.UI.Button;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]
@@ -45,6 +46,7 @@ Design by <color=#FCCE03FF>Bavari</color>
         private static class PingTrackerPatch
         {
             private static GameObject modStamp;
+            public static GameObject customPreset;
             static void Prefix(PingTracker __instance) {
                 if (modStamp == null) {
                     modStamp = new GameObject("ModStamp");
@@ -54,8 +56,34 @@ Design by <color=#FCCE03FF>Bavari</color>
                     modStamp.transform.parent = __instance.transform.parent;
                     modStamp.transform.localScale *= 0.6f;
                 }
+                if (customPreset == null) {
+                    var buttonBehaviour = UnityEngine.Object.Instantiate(HudManager.Instance.GameMenu.CensorChatButton);
+                    buttonBehaviour.Text.text = "";
+                    buttonBehaviour.Background.sprite = TheOtherRolesPlugin.GetCustomPreset();
+                    buttonBehaviour.Background.color = new Color(1, 1, 1, 1);
+                    customPreset = buttonBehaviour.gameObject;
+                    customPreset.name = "CustomPreset";
+                    customPreset.transform.parent = __instance.transform.parent;
+                    customPreset.transform.localScale = new Vector3(0.2f, 1.2f, 1.2f) * 1.2f;
+                    customPreset.SetActive(true);
+                    var button = buttonBehaviour.GetComponent<PassiveButton>();
+                    button.ClickSound = null;
+                    button.OnMouseOver = new UnityEngine.Events.UnityEvent();
+                    button.OnMouseOut = new UnityEngine.Events.UnityEvent();
+                    button.OnClick = new ButtonClickedEvent();
+                    button.OnClick.AddListener((Action)(() => {
+                        ClientOptionsPatch.isOpenPreset = true;
+                        HudManager.Instance.GameMenu.Open();
+                    }));
+                }
                 float offset = (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) ? 0.75f : 0f;
                 modStamp.transform.position = HudManager.Instance.MapButton.transform.position + Vector3.down * offset;
+                if (customPreset) {
+                    customPreset.transform.position = modStamp.transform.position + Vector3.down * 0.75f;
+                    if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && customPreset.gameObject.activeSelf)
+                        customPreset.gameObject.SetActive(false);
+                }
+
             }
 
             static void Postfix(PingTracker __instance){

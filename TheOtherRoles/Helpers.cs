@@ -395,5 +395,47 @@ namespace TheOtherRoles {
             
             return team;
         }
+
+        public class DestroyInfo
+        {
+            public DestroyInfo(string searchName, bool isFindChild = true) {
+                this.searchName = searchName;
+                this.isDestroyChild = isFindChild;
+            }
+
+            public string searchName = "";
+            public bool isDestroyChild = true;
+        }
+
+        public static bool destroyGameObjects(GameObject root, DestroyInfo[] excludeInfos = null, GameObject obj = null) {
+            if (obj == null)
+                obj = root;
+
+            DestroyInfo findInfo = null;
+            if (excludeInfos != null)
+                findInfo = Array.Find(excludeInfos, (info) => info.searchName == obj.name);
+            if (obj != root && findInfo == null) {
+                UnityEngine.Object.DestroyImmediate(obj);
+                return true;
+            }
+
+            if (findInfo == null || findInfo.isDestroyChild) {
+                for (int i = 0; i < obj.transform.GetChildCount(); ++i) {
+                    if (destroyGameObjects(root, excludeInfos, obj.transform.GetChild(i).gameObject))
+                        --i;
+                }
+            }
+            return false;
+        }
+
+        public static void logTransform(string name, Transform t, int index = 0) {
+            string space = "";
+            for (int i = 0; i < index; ++i)
+                space += "  ";
+            TheOtherRolesPlugin.Logger.LogMessage(string.Format("[{0}]{1}{2}[{3}]", name, space, t.name,
+                t.gameObject.activeSelf ? "o" : "x"));
+            for (int i = 0; i < t.GetChildCount(); ++i)
+                logTransform(name, t.GetChild(i), index + 1);
+        }
     }
 }

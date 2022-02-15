@@ -22,7 +22,7 @@ namespace TheOtherRoles
     {
         public const string Id = "me.eisbison.theotherroles";
 
-        public const string VersionString = "1.3.1";
+        public const string VersionString = "1.4.0";
 
 
         public static System.Version Version = System.Version.Parse(VersionString);
@@ -48,6 +48,7 @@ namespace TheOtherRoles
         public static ConfigEntry<string> ShowPopUpVersion { get; set; }
 
         public static Sprite ModStamp;
+        public static Sprite CustomPreset;
 
         public static IRegionInfo[] defaultRegions;
         public static void UpdateRegions() {
@@ -72,7 +73,6 @@ namespace TheOtherRoles
             ShowPopUpVersion = Config.Bind("Custom", "Show PopUp", "0");
             StreamerModeReplacementText = Config.Bind("Custom", "Streamer Mode Replacement Text", "\n\nThe Other Roles");
             StreamerModeReplacementColor = Config.Bind("Custom", "Streamer Mode Replacement Text Hex Color", "#87AAF5FF");
-            
 
             Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
             Port = Config.Bind("Custom", "Custom Server Port", (ushort)22023);
@@ -93,6 +93,10 @@ namespace TheOtherRoles
         public static Sprite GetModStamp() {
             if (ModStamp) return ModStamp;
             return ModStamp = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.ModStamp.png", 150f);
+        }
+        public static Sprite GetCustomPreset() {
+            if (CustomPreset) return CustomPreset;
+            return CustomPreset = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.CustomPreset.png", 150f);
         }
     }
 

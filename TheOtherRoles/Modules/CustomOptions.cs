@@ -104,19 +104,19 @@ namespace TheOtherRoles {
 
         // Option changes
 
-        public void updateSelection(int newSelection) {
+        public void updateSelection(int newSelection, bool isShareOption = true) {
             selection = Mathf.Clamp((newSelection + selections.Length) % selections.Length, 0, selections.Length - 1);
             if (optionBehaviour != null && optionBehaviour is StringOption stringOption) {
                 stringOption.oldValue = stringOption.Value = selection;
                 stringOption.ValueText.text = selections[selection].ToString();
+            }
+            if (AmongUsClient.Instance?.AmHost == true && PlayerControl.LocalPlayer) {
+                if (id == 0) switchPreset(selection); // Switch presets
+                else if (entry != null) entry.Value = selection; // Save selection to config
 
-                if (AmongUsClient.Instance?.AmHost == true && PlayerControl.LocalPlayer) {
-                    if (id == 0) switchPreset(selection); // Switch presets
-                    else if (entry != null) entry.Value = selection; // Save selection to config
-
+                if (isShareOption)
                     ShareOptionSelections();// Share all selections
-                }
-           }
+            }
         }
     }
 
