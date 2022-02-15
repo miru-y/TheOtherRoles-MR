@@ -24,7 +24,6 @@ namespace TheOtherRoles
 
         public const string VersionString = "1.4.0";
 
-
         public static System.Version Version = System.Version.Parse(VersionString);
         internal static BepInEx.Logging.ManualLogSource Logger;
 
