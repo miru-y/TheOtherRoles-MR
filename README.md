@@ -783,7 +783,7 @@ Depending on the options you can choose whether voting the Witch out will save a
 -----------------------
 
 
-## DoorHacker (MR Edition only)
+## Door Hacker (MR Edition only)
 ### **Team: Impostors**
 This is an Imposter roles that allows you to temporarily slip through doors.\
 During the game, press the "DoorHack" button in the lower right corner to enter the "Door Hack" state, which allows you to slip through doors for a certain period of time.\
