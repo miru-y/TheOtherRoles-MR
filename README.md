@@ -1,9 +1,9 @@
 # The Other Roles: MR Edition
 This mod is The Other Roles extension mod which implements new roles and systems based on [The Other Roles](https://github.com/Eisbison/TheOtherRoles)/[The Other Roles+](https://github.com/tomarai/TheOtherRoles).
 - **New Roles**
-  - [Yasuna](#yasuna)/[Evil Yasuna](#yasuna) by [miru-y](https://github.com/miru-y)
-  - [Task Master](#task-master) by [miru-y](https://github.com/miru-y)
-  - [Door Hacker](#door-hacker) by [miru-y](https://github.com/miru-y)
+  - [Yasuna](#yasuna-mr-edition-only)/[Evil Yasuna](#yasuna-mr-edition-only) by [miru-y](https://github.com/miru-y)
+  - [Task Master](#task-master-mr-edition-only) by [miru-y](https://github.com/miru-y)
+  - [Door Hacker](#door-hacker-mr-edition-only) by [miru-y](https://github.com/miru-y)
 - **New Systems**
   - **System:** Added an option to set the "Vital" available time.
   - **System:** Added an option to set the "Security camera" available time.
@@ -49,14 +49,14 @@ Even more roles are coming soon :)
 | [Vampire](#vampire) | [Deputy](#deputy) |  |
 | [Warlock](#warlock) | [Shifter](#shifter) |  |  |
 | [Witch](#witch) | [Snitch](#snitch) |  |  |
-| [Evil Yasuna (MR Edition only)](#yasuna) | [Spy](#spy) |  |  |
-| [Door Hacker (MR Edition only)](#door-hacker) | [Swapper](#swapper) |  |  |
+| [Evil Yasuna (MR Edition only)](#yasuna-mr-edition-only) | [Spy](#spy) |  |  |
+| [Door Hacker (MR Edition only)](#door-hacker-mr-edition-only) | [Swapper](#swapper) |  |  |
 |  | [Time Master](#time-master) |  |  |
 |  |  [Tracker](#tracker) |  |  |
 |  |  [Bait](#bait) |  |
 |  |  [Medium](#medium) |  |
-| | [Yasuna (MR Edition only)](#yasuna) | |
-| | [Task Master (MR Edition only)](#task-master) | |
+| | [Yasuna (MR Edition only)](#yasuna-mr-edition-only) | |
+| | [Task Master (MR Edition only)](#task-master-mr-edition-only) | |
 
 The [Role Assignment](#role-assignment) sections explains how the roles are being distributed among the players.
 
@@ -783,7 +783,7 @@ Depending on the options you can choose whether voting the Witch out will save a
 -----------------------
 
 
-## DoorHacker
+## DoorHacker (MR Edition only)
 ### **Team: Impostors**
 This is an Imposter roles that allows you to temporarily slip through doors.\
 During the game, press the "DoorHack" button in the lower right corner to enter the "Door Hack" state, which allows you to slip through doors for a certain period of time.\
