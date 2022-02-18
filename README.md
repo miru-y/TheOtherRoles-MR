@@ -1,11 +1,31 @@
-![eisbison banner](./Images/TOR_logo.png)
-<p align="center"><a href="https://github.com/Eisbison/TheOtherRoles/releases/"><img src="https://badgen.net/github/release/eisbison/theotherroles"></a></p>
+# The Other Roles: MR Edition
+This mod is The Other Roles extension mod which implements new roles and systems based on [The Other Roles](https://github.com/Eisbison/TheOtherRoles)/[The Other Roles+](https://github.com/tomarai/TheOtherRoles).
+- **New Roles**
+  - [Yasuna](#yasuna)/[Evil Yasuna](#yasuna) by [miru-y](https://github.com/miru-y)
+  - [Task Master](#task-master) by [miru-y](https://github.com/miru-y)
+  - [Door Hacker](#door-hacker) by [miru-y](https://github.com/miru-y)
+- **New Systems**
+  - **System:** Added an option to set the "Vital" available time.
+  - **System:** Added an option to set the "Security camera" available time.
+  - **System:** Added "Custom Preset System".
+  - **Lobby UI:** Improve "The Other Roles Settings" display on the left.
 
-<p align="center">
-This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.</p>
+This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.
 
-[![Discord](./Images/TOR_server.png)](https://discord.gg/77RkMJHWsM)
-![eisbison infographic](./Images/TOR_roles.jpg)
+
+# Releases
+| Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
+|----------|-------------|-----------------|-----------------|
+| [v1.4.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.1) | 2021.12.15s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[v3.4.3.2+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.3.2%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.1/TheOtherRolesMR.zip)
+| [v1.4.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.0) | 2021.12.15s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[v3.4.3.2+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.3.2%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.0/TheOtherRolesMR.zip)
+| [v1.3.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.3.1) | 2021.12.15s | [TheOtherRoles v3.4.2](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.2)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.3.1/TheOtherRolesMR.zip)
+| [v1.3.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.3.0) | 2021.12.15s | [TheOtherRoles v3.4.2](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.2)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.3.0/TheOtherRolesMR.zip)
+| [v1.2.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.2.2) | 2021.12.15s | [TheOtherRoles v3.4.2](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.2)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.2.2/TheOtherRolesMR.zip)
+| [v1.2.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.2.1) | 2021.12.15s | [TheOtherRoles v3.4.1](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.1)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.2.1/TheOtherRolesMR.zip)
+| [v1.2.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.2.0) | 2021.12.15s | [TheOtherRoles v3.4.0](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.0)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.2.0/TheOtherRolesMR.zip)
+| [v1.1.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.1.0) | 2021.12.15s | [TheOtherRoles v3.3.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.3.3)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.1.0/TheOtherRolesMR.zip)
+| [v1.0.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.0.1) | 2021.12.15s | [TheOtherRoles v3.3.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.3.3)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.0.1/TheOtherRolesMR.zip)
+| [v1.0.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.0.0) | 2021.12.15s | [TheOtherRoles v3.3.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.3.3)/[v3.3.3.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.3.3.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.0.0/TheOtherRolesMR.zip)
 
 
 # The Other Roles
@@ -29,71 +49,16 @@ Even more roles are coming soon :)
 | [Vampire](#vampire) | [Deputy](#deputy) |  |
 | [Warlock](#warlock) | [Shifter](#shifter) |  |  |
 | [Witch](#witch) | [Snitch](#snitch) |  |  |
-|  | [Spy](#spy) |  |  |
-|  | [Swapper](#swapper) |  |  |
+| [Evil Yasuna (MR Edition only)](#yasuna) | [Spy](#spy) |  |  |
+| [Door Hacker (MR Edition only)](#door-hacker) | [Swapper](#swapper) |  |  |
 |  | [Time Master](#time-master) |  |  |
 |  |  [Tracker](#tracker) |  |  |
 |  |  [Bait](#bait) |  |
 |  |  [Medium](#medium) |  |
+| | [Yasuna (MR Edition only)](#yasuna) | |
+| | [Task Master (MR Edition only)](#task-master) | |
 
 The [Role Assignment](#role-assignment) sections explains how the roles are being distributed among the players.
-
-# Releases
-| Among Us - Version| Mod Version | Link |
-|----------|-------------|-----------------|
-| 2021.12.15s| v3.4.3| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.4.3/TheOtherRoles.zip)
-| 2021.12.15s| v3.4.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.4.2/TheOtherRoles.zip)
-| 2021.12.15s| v3.4.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.4.1/TheOtherRoles.zip)
-| 2021.12.15s| v3.4.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.4.0/TheOtherRoles.zip)
-| 2021.12.15s| v3.3.3| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.3.3/TheOtherRoles.zip)
-| 2021.12.15s| v3.3.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.3.2/TheOtherRoles.zip)
-| 2021.12.14s| v3.3.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.3.1/TheOtherRoles.zip)
-| 2021.12.14s| v3.3.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.3.0/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.2.4| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.2.4/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.2.3| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.2.3/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.2.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.2.2/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.2.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.2.1/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.2.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.2.0/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.1.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.1.2/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.1.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.1.1/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.1.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.1.0/TheOtherRoles.zip)
-| 2021.11.9.5s| v3.0.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v3.0.0/TheOtherRoles.zip)
-| 2021.6.30s| v2.9.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.9.2/TheOtherRoles.zip)
-| 2021.6.30s| v2.9.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.9.1/TheOtherRoles.zip)
-| 2021.6.30s| v2.9.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.9.0/TheOtherRoles.zip)
-| 2021.6.30s| v2.8.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.8.1/TheOtherRoles.zip)
-| 2021.6.30s| v2.8.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.8.0/TheOtherRoles.zip)
-| 2021.6.30s| v2.7.3| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.7.3/TheOtherRoles.zip)
-| 2021.6.15s| v2.7.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.7.1/TheOtherRoles.zip)
-| 2021.6.15s| v2.7.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.7.0/TheOtherRoles.zip)
-| 2021.5.25.2s| v2.6.7| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.7/TheOtherRoles.zip)
-| 2021.5.10s| v2.6.6| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.6/TheOtherRoles.zip)
-| 2021.5.10s| v2.6.5| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.5/TheOtherRoles.zip)
-| 2021.5.10s| v2.6.4| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.4/TheOtherRoles.zip)
-| 2021.5.10s| v2.6.3| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.3/TheOtherRoles.zip)
-| 2021.5.10s| v2.6.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.2/TheOtherRoles.zip)
-| 2021.4.14s| v2.6.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.1/TheOtherRoles.zip)
-| 2021.4.14s| v2.6.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.6.0/TheOtherRoles.zip)
-| 2021.4.14s| v2.5.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.5.1/TheOtherRoles.zip)
-| 2021.4.14s| v2.5.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.5.0/TheOtherRoles.zip)
-| 2021.4.14s| v2.4.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.4.0/TheOtherRoles.zip)
-| 2021.4.14s| v2.3.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.3.0/TheOtherRoles.zip)
-| 2021.4.14s| v2.2.2| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.2.2/TheOtherRoles.zip)
-| 2021.4.12s| v2.2.1| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.2.1/TheOtherRoles.zip)
-| 2021.4.12s| v2.2.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.2.0/TheOtherRoles.zip)
-| 2021.3.31.3s| v2.1.0| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.1.0/TheOtherRoles.zip)
-| 2021.3.31.3s| v2.0.1 beta| [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.0.1/TheOtherRoles.zip)
-| 2021.3.31.3s | v2.0.0 beta | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v2.0.0/TheOtherRoles.zip)
-| 2021.3.5s | v1.8.2 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.8.2/TheOtherRoles.zip)
-| 2021.3.5s | v1.8.1 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.8.1/TheOtherRoles.zip)
-| 2021.3.5s | v1.8 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.8/TheOtherRoles.zip)
-| 2021.3.5s | v1.7 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.7/TheOtherRoles.zip)
-| 2021.3.5s | v1.6 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.6/TheOtherRoles.zip)
-| 2021.3.5s | v1.5 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.5/TheOtherRoles.zip)
-| 2021.3.5s | v1.4 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.4/TheOtherRoles.zip)
-| 2021.3.5s | v1.3 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.3/TheOtherRoles.zip)
-| 2020.12.19s | v1.1 | [Download](https://github.com/Eisbison/TheOtherRoles/releases/download/v1.1/TheOtherRoles.zip)
-| 2020.12.19s | v1.0 | [Download](https://github.com/Eisbison/TheOtherRoles/files/6097191/TheOtherRoles.zip)
 
 # Changelog
 <details>
@@ -485,17 +450,8 @@ The [Role Assignment](#role-assignment) sections explains how the roles are bein
 </details>
 
 # Installation
-## Windows Auto Installation/Updating Using The AmongUsModUpdater
-This tool was made by [Narua](https://github.com/Narua2010) and [Jolle](https://github.com/joelweih). It automatically installs/updates the TheOtherRoles mod to the newest version, runs the game and
-syncs your game options automatically.
-
-1. Simply get the newest [release](https://github.com/Narua2010/AmongUsModUpdater/releases/latest) of the [AmongUsModUpdater](https://github.com/Narua2010/AmongUsModUpdater)
-2. Unzip the folder and run the **setup.exe**
-
-If you have problems with the AmongUsModUpdater, make sure to [contact us](https://discord.gg/csa3pHYdPU).
-
 ## Windows Manual Installation
-1. Download and unzip the newest [release](https://github.com/Eisbison/TheOtherRoles/releases/latest)
+1. Download and unzip the newest [release](https://github.com/miru-y/TheOtherRoles-MR/releases/latest)
 2. Find the folder of your game, for Steam players you can right click in Steam, on the game, a menu will appear proposing you to go to the folders.
 3. Make a copy of your game, it's not obligatory but advised, put it where you want.
 4. Drag or extract the files from the zip into your game, at the `.exe` level.
@@ -507,55 +463,9 @@ Not working? You might want to install the dependency [vc_redist](https://aka.ms
 
 **Linux Manual**
 1. Install Among Us via Steam
-2. Download newest [release](https://github.com/Eisbison/TheOtherRoles/releases/latest) and extract it to ~/.steam/steam/steamapps/common/Among Us
+2. Download newest [release](https://github.com/miru-y/TheOtherRoles-MR/releases/latest) and extract it to ~/.steam/steam/steamapps/common/Among Us
 3. Enable `winhttp.dll` via the proton winecfg (https://docs.bepinex.dev/articles/advanced/steam_interop.html#open-winecfg-for-the-target-game)
 4. Launch the game via Steam
-
-# Custom Servers and 10+ Players
-We always recommend you to play on custom servers rather than on the official ones. If you want to play with more than 10 players in one lobby, you're required to use a custom server. Credits for the original implementation that allowed 10+ player lobbies go to the creators of the [CrowdedMod](https://github.com/CrowdedMods/CrowdedMod).
-
-**Setup the Clients:**
-1. Open the region menu where you can choose between the different regions
-2. Select the region *Custom*
-3. Enter the ip/domain and the port of your custom server in the corresponding text fields
-
-**Setup the Server:**
-1. Get the [Impostor](https://github.com/Impostor/Impostor) release for the Among Us version **2021.3.31 - 2021.4.2**
-2. Follow the steps (using the server release you just downloaded) on the official [Impostor-Documentation](https://github.com/Impostor/Impostor/wiki/Running-the-server)
-3. Make sure to set the following values to false in the `config.json` file:
-```
-    ...
-    "AntiCheat": {
-      "Enabled": false,
-      "BanIpFromGame": false
-    }
-```
-4. Make sure to forward the right ports on the hosting machine
-5. Run the server and setup the client
-
-**Setting up Server as Docker Container:** \
-If you want to run the server as a docker container you'll need to use the image
-```
-aeonlucid/impostor:nightly
-```
-(Currently only the "nightly" tag is starting a server supporting 2021.3.31 or later)
-
-In addition to running it, the environment variables to disable the AntiCheat feature need to be set.
-```
-IMPOSTOR_AntiCheat__Enabled=false
-IMPOSTOR_AntiCheat__BanIpFromGame=false
-```
-
-Example to docker run command:
-```
-docker run -p 22023:22023/udp --env IMPOSTOR_AntiCheat__Enabled=false --env IMPOSTOR_AntiCheat__BanIpFromGame=false aeonlucid/impostor:nightly
-```
-
-Or use to run it in the background
-```
-docker run -d -p 22023:22023/udp --env IMPOSTOR_AntiCheat__Enabled=false --env IMPOSTOR_AntiCheat__BanIpFromGame=false aeonlucid/impostor:nightly
-```
-
 
 # Credits & Resources
 [OxygenFilter](https://github.com/NuclearPowered/Reactor.OxygenFilter) - For all the version v2.3.0 to v2.6.1, we were using the OxygenFilter for automatic deobfuscation\
@@ -870,6 +780,21 @@ Depending on the options you can choose whether voting the Witch out will save a
 | Witch Spell Casting Duration | The time that you need to stay next to the target in order to cast a spell on it
 | Trigger Both Cooldowns | If set to true, casting a spell will also trigger cooldown of the kill button and vice versa (but the two cooldowns may vary)
 | Voting The Witch Saves All The Targets | If set to true, all the cursed targets will survive at the end of the meeting
+-----------------------
+
+
+## DoorHacker
+### **Team: Impostors**
+This is an Imposter roles that allows you to temporarily slip through doors.\
+During the game, press the "DoorHack" button in the lower right corner to enter the "Door Hack" state, which allows you to slip through doors for a certain period of time.\
+***The crewmate team can't see the view behind the closed door, so enjoy the variety of kills!**
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+|Door Hacker Number Of Uses|Number of times the door hack function can be used. ***0 means unlimited use**|
+|Door Hacker Cooldown|Cool time after using the door hack function.|
+|Door Hacker Duration|Effect duration of door hack function.|
 -----------------------
 
 
@@ -1407,6 +1332,38 @@ What is your killers role? (mini exluded)
 | Medium Each Soul Can Only Be Questioned Once | If set to true, souls can only be questioned once and then disappear
 -----------------------
 
+## Yasuna (MR Edition only)
+### **Team: Crewmates or Impostors**
+The Yasuna can be a Crewmate or an Impostor (depending on the settings).\
+Yasuna can forcibly exile certain players at your own discretion.\
+During the meeting phase, a green target icon (+ the number of times it can be used) will appear on all players except you.\
+When you click on the target icon of the player you want to exile, it will be treated as a vote, and the result of the vote will force everyone to vote for the player you want to exile.\
+***This is a very powerful role and should be used appropriately.**
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+|Yasuna Number Of Special Votes|Number of times compulsory voting can be used.|
+|Chance That The Yasuna Is An Impostor|Probability of becoming Evil Yasuna (Imposter).|
+-----------------------
+
+## Task Master (MR Edition only)
+### **Team: Crewmates**
+This is a crew position where extra tasks appear after all tasks are completed.\
+If you complete all extra tasks without exile or dying in the process, crewmate team wins.\
+***This is a very powerful role and should be used appropriately.**
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+|TaskMaster Extra Common Tasks|Number of common tasks added to the task master.|
+|TaskMaster Extra Short Tasks|Number of short tasks added to the task master.|
+|TaskMaster Extra Long Tasks|Number of long tasks added to the task master.|
+
+***The role will not be assigned unless one of the options is set to 1 or higher.**
+
+-----------------------
+
 ## Vulture
 ### **Team: Neutral**
 
@@ -1463,9 +1420,3 @@ The Pursuer has tasks (which can already be done while being a Lawyer), that cou
 # Source code
 It's bad I know, this is a side project and my second week of modding. So there are no best practices around here.
 You can use parts of the code but don't copy paste the whole thing. Make sure you give credits to the other developers, because some parts of the code are based on theirs.
-
-# Bugs, suggestions and requests
-If you found any bugs, have an idea for a new role or any other request, join our [Discord server](https://discord.gg/77RkMJHWsM).
-
-# Copyedit
-Thanks for fixing our typos [jacktose](https://github.com/jacktose) ✌️
