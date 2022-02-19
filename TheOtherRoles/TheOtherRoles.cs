@@ -1520,6 +1520,7 @@ namespace TheOtherRoles
     }
 
     public static class TaskMaster {
+        public static bool triggerTaskMasterWin = false;
         public static PlayerControl taskMaster;
         public static Color color = new Color32(225, 86, 75, byte.MaxValue);
         public static bool isTaskComplete = false;
@@ -1528,6 +1529,7 @@ namespace TheOtherRoles
         public static byte oldTaskMasterPlayerId = byte.MaxValue;
 
         public static void clearAndReload() {
+            triggerTaskMasterWin = false;
             taskMaster = null;
             isTaskComplete = false;
             clearExTasks = 0;

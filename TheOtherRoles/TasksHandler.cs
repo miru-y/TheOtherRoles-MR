@@ -93,10 +93,9 @@ namespace TheOtherRoles {
                             AmongUsClient.Instance.FinishRpcImmediately(writer);
                             RPCProcedure.taskMasterSetExTasks(pc.PlayerId, byte.MaxValue, taskTypeIds);
                             action();
-                        } else {
+                        } else if (!TaskMaster.triggerTaskMasterWin) {
                             action();
-                            ShipStatus.Instance.enabled = false;
-                            ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.TaskMasterWin, false);
+                            TaskMaster.triggerTaskMasterWin = true;
                         }
                     } else {
                         action();

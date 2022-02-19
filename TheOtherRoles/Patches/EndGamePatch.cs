@@ -416,6 +416,7 @@ namespace TheOtherRoles.Patches {
             if (DestroyableSingleton<TutorialManager>.InstanceExists) // InstanceExists | Don't check Custom Criteria when in Tutorial
                 return true;
             var statistics = new PlayerStatistics(__instance);
+            if (CheckAndEndGameForTaskMasterWin(__instance)) return false;
             if (CheckAndEndGameForMiniLose(__instance)) return false;
             if (CheckAndEndGameForJesterWin(__instance)) return false;
             if (CheckAndEndGameForLawyerMeetingWin(__instance)) return false;
@@ -427,6 +428,15 @@ namespace TheOtherRoles.Patches {
             if (CheckAndEndGameForJackalWin(__instance, statistics)) return false;
             if (CheckAndEndGameForImpostorWin(__instance, statistics)) return false;
             if (CheckAndEndGameForCrewmateWin(__instance, statistics)) return false;
+            return false;
+        }
+
+        private static bool CheckAndEndGameForTaskMasterWin(ShipStatus __instance) {
+            if (TaskMaster.triggerTaskMasterWin) {
+                __instance.enabled = false;
+                UncheckedEndGame((GameOverReason)CustomGameOverReason.TaskMasterWin, false);
+                return true;
+            }
             return false;
         }
 
