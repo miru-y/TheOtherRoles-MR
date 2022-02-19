@@ -228,11 +228,13 @@ namespace TheOtherRoles.Patches {
                 }
             } else {
                 // Madmate wins if team impostors wins
-                foreach (WinningPlayerData winner in TempData.winners) {
-                    if (winner.IsImpostor) {
-                        WinningPlayerData wpd = new WinningPlayerData(Madmate.madmate.Data);
-                        TempData.winners.Add(wpd);
-                        break;
+                if (Madmate.madmate != null) {
+                    foreach (WinningPlayerData winner in TempData.winners) {
+                        if (winner.IsImpostor) {
+                            WinningPlayerData wpd = new WinningPlayerData(Madmate.madmate.Data);
+                            TempData.winners.Add(wpd);
+                            break;
+                        }
                     }
                 }
             }
