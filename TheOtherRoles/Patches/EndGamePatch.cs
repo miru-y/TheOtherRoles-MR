@@ -266,8 +266,11 @@ namespace TheOtherRoles.Patches {
             // Reset Settings
             RPCProcedure.resetVariables();
 
-            if (TheOtherRolesPlugin.DebugMode.Value)
+            if (TheOtherRolesPlugin.DebugMode.Value) {
+                for (int i = 0; i < DebugManager.bots.Count; ++i)
+                    PlayerControl.AllPlayerControls.Remove(DebugManager.bots[i]);
                 DebugManager.bots.Clear();
+            }
         }
     }
 
