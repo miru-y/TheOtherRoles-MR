@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using InnerNet;
 
 namespace TheOtherRoles
 {
@@ -80,6 +81,7 @@ namespace TheOtherRoles
         ConsumeAdminTime,
         UncheckedExilePlayer,
         DynamicMapOption,
+        UncheckedEndGame,
         ConsumeVitalTime,
         ConsumeSecurityCameraTime,
 
@@ -371,6 +373,25 @@ namespace TheOtherRoles
 
         public static void dynamicMapOption(byte mapId) {
             PlayerControl.GameOptions.MapId = mapId;
+        }
+
+        public static void uncheckedEndGame(byte reason) {
+            AmongUsClient.Instance.GameState = InnerNet.InnerNetClient.GameStates.Ended;
+            Il2CppSystem.Collections.Generic.List<ClientData> allClients = AmongUsClient.Instance.allClients;
+            lock (allClients) {
+                AmongUsClient.Instance.allClients.Clear();
+            }
+            var dispatcher = AmongUsClient.Instance.Dispatcher;
+            lock (dispatcher) {
+                AmongUsClient.Instance.Dispatcher.Add(new Action(() => {
+                    ShipStatus.Instance.enabled = false;
+                    ShipStatus.Instance.BeginCalled = false;
+                    AmongUsClient.Instance.OnGameEnd(new EndGameResult((GameOverReason)reason, false));
+                    if (AmongUsClient.Instance.AmHost) {
+                        ShipStatus.RpcEndGame((GameOverReason)reason, false);
+                    }
+                    }));
+            }
         }
 
         // Role functionality
@@ -1007,6 +1028,10 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.ConsumeAdminTime:
                     float delta = reader.ReadSingle();
                     RPCProcedure.consumeAdminTime(delta);
+                    break;
+                case (byte)CustomRPC.UncheckedEndGame:
+                    byte reason = reader.ReadByte();
+                    RPCProcedure.uncheckedEndGame(reason);
                     break;
                 case (byte)CustomRPC.ConsumeVitalTime:
                     RPCProcedure.consumeVitalTime(reader.ReadSingle());
