@@ -73,6 +73,7 @@ namespace TheOtherRoles.Patches
             }
 
             public void OnLoad() {
+                BasicOptions.Load(section, orphanedEntries);
                 foreach (CustomOption option in CustomOption.options) {
                     if (option.id == 0) continue;
 
@@ -84,6 +85,7 @@ namespace TheOtherRoles.Patches
                 }
                 TheOtherRolesPlugin.Instance.Config.Save();
                 CustomOption.ShareOptionSelections();
+                PlayerControl.LocalPlayer.RpcSyncSettings(SaveManager.hostOptionsData);
             }
 
             public void OnRename(string newPresetName) {
@@ -529,6 +531,7 @@ namespace TheOtherRoles.Patches
                 orphanedEntries.Add(configDefinition, option.selection.ToString());
             }
             presetInfo.SetRegistTime(registTime);
+            BasicOptions.Save(presetInfo.section, orphanedEntries);
             TheOtherRolesPlugin.Instance.Config.Save();
             UpdatePresetInfo();
         }
