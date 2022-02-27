@@ -111,6 +111,7 @@ namespace TheOtherRoles.Patches
             }
 
             public void OnRemove(bool isSave = true) {
+                BasicOptions.Remove(section, orphanedEntries);
                 var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
                 if (!TheOtherRolesPlugin.Instance.Config.Remove(configDefinition))
                     orphanedEntries.Remove(configDefinition);
@@ -524,11 +525,18 @@ namespace TheOtherRoles.Patches
             presetInfoList.Add(presetInfo);
             presetInfoPageNow = presetInfoPageMax = ((presetInfoList.Count - 1) / PresetInfoOnePageViewMax) + 1;
             var configDefinition = new BepInEx.Configuration.ConfigDefinition(presetInfo.section, "0");
-            orphanedEntries.Add(configDefinition, registTime.ToString());
+            if (!orphanedEntries.ContainsKey(configDefinition))
+                orphanedEntries.Add(configDefinition, registTime.ToString());
+            else
+                orphanedEntries[configDefinition] = registTime.ToString();
+
             foreach (var option in CustomOption.options) {
                 if (option.id == 0) continue;
                 configDefinition = new BepInEx.Configuration.ConfigDefinition(presetInfo.section, option.id.ToString());
-                orphanedEntries.Add(configDefinition, option.selection.ToString());
+                if (!orphanedEntries.ContainsKey(configDefinition))
+                    orphanedEntries.Add(configDefinition, option.selection.ToString());
+                else
+                    orphanedEntries[configDefinition] = option.selection.ToString();
             }
             presetInfo.SetRegistTime(registTime);
             BasicOptions.Save(presetInfo.section, orphanedEntries);

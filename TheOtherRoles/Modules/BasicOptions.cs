@@ -70,7 +70,7 @@ namespace TheOtherRoles
                 TheOtherRolesPlugin.Instance.Config.Save();
         }
 
-        public static void Load(string section, Dictionary<ConfigDefinition, string> orphanedEntries, bool isSave = false) {
+        public static void Load(string section, Dictionary<ConfigDefinition, string> orphanedEntries) {
             // Generic options
             if (mapId.Load(section, orphanedEntries, out byte byteValue))
                 SaveManager.hostOptionsData.MapId = byteValue;
@@ -145,6 +145,57 @@ namespace TheOtherRoles
                 SaveManager.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Shapeshifter, intValue, intValue2);
         }
 
+        public static void Remove(string section, Dictionary<ConfigDefinition, string> orphanedEntries, bool isSave = false) {
+            // Generic options
+            mapId.Remove(section, orphanedEntries);
+            playerSpeedMod.Remove(section, orphanedEntries);
+            crewLightMod.Remove(section, orphanedEntries);
+            impostorLightMod.Remove(section, orphanedEntries);
+            killCooldown.Remove(section, orphanedEntries);
+            numCommonTasks.Remove(section, orphanedEntries);
+            numLongTasks.Remove(section, orphanedEntries);
+            numShortTasks.Remove(section, orphanedEntries);
+            numEmergencyMeetings.Remove(section, orphanedEntries);
+            emergencyCooldown.Remove(section, orphanedEntries);
+            numImpostors.Remove(section, orphanedEntries);
+            ghostsDoTasks.Remove(section, orphanedEntries);
+            killDistance.Remove(section, orphanedEntries);
+            discussionTime.Remove(section, orphanedEntries);
+            votingTime.Remove(section, orphanedEntries);
+            confirmImpostor.Remove(section, orphanedEntries);
+            visualTasks.Remove(section, orphanedEntries);
+            anonymousVotes.Remove(section, orphanedEntries);
+            taskBarMode.Remove(section, orphanedEntries);
+            isDefaults.Remove(section, orphanedEntries);
+
+
+            // Role options
+            shapeshifterLeaveSkin.Remove(section, orphanedEntries);
+            shapeshifterCooldown.Remove(section, orphanedEntries);
+            shapeshifterDuration.Remove(section, orphanedEntries);
+            scientistCooldown.Remove(section, orphanedEntries);
+            scientistBatteryCharge.Remove(section, orphanedEntries);
+            guardianAngelCooldown.Remove(section, orphanedEntries);
+            impostorsCanSeeProtect.Remove(section, orphanedEntries);
+            protectionDurationSeconds.Remove(section, orphanedEntries);
+            engineerCooldown.Remove(section, orphanedEntries);
+            engineerInVentMaxTime.Remove(section, orphanedEntries);
+
+
+            scientistMaxCount.Remove(section, orphanedEntries);
+            scientistChance.Remove(section, orphanedEntries);
+            engineerMaxCount.Remove(section, orphanedEntries);
+            engineerChance.Remove(section, orphanedEntries);
+            guardianAngelMaxCount.Remove(section, orphanedEntries);
+            guardianAngelChance.Remove(section, orphanedEntries);
+            shapeshifterMaxCount.Remove(section, orphanedEntries);
+            shapeshifterChance.Remove(section, orphanedEntries);
+
+
+            if (isSave)
+                TheOtherRolesPlugin.Instance.Config.Save();
+        }
+
 
         class Option<T>
         {
@@ -158,7 +209,10 @@ namespace TheOtherRoles
 
             public void Save(string section, Dictionary<ConfigDefinition, string> orphanedEntries, T value) {
                 var configDefinition = new ConfigDefinition(section, id.ToString());
-                orphanedEntries.Add(configDefinition, value.ToString());
+                if (!orphanedEntries.ContainsKey(configDefinition))
+                    orphanedEntries.Add(configDefinition, value.ToString());
+                else
+                    orphanedEntries[configDefinition] = value.ToString();
             }
 
             public bool Load(string section, Dictionary<ConfigDefinition, string> orphanedEntries, out int outValue) {
@@ -189,6 +243,15 @@ namespace TheOtherRoles
                 outValue = TaskBarMode.Normal;
                 var configDefinition = new ConfigDefinition(section, id.ToString());
                 return orphanedEntries.TryGetValue(configDefinition, out string value) && TaskBarMode.TryParse(value, out outValue);
+            }
+
+            public bool Remove(string section, Dictionary<ConfigDefinition, string> orphanedEntries) {
+                var configDefinition = new ConfigDefinition(section, id.ToString());
+                if (orphanedEntries.ContainsKey(configDefinition)) {
+                    orphanedEntries.Remove(configDefinition);
+                    return true;
+                }
+                return false;
             }
         }
 
