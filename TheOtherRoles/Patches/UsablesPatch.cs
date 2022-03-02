@@ -640,7 +640,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(PlanetSurveillanceMinigame), nameof(PlanetSurveillanceMinigame.NextCamera))]
         class NextCamera {
             public static bool Prefix(PlanetSurveillanceMinigame __instance, [HarmonyArgument(0)] int direction) {
-                if (!PlayerControl.LocalPlayer.Data.IsDead) {
+                if (!PlayerControl.LocalPlayer.Data.IsDead && CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
                     if (MapOptions.SecurityCameraTimer <= 0)
                         return false;
                 }
@@ -652,11 +652,17 @@ namespace TheOtherRoles.Patches {
         class Update {
 
             public static bool Prefix(PlanetSurveillanceMinigame __instance) {
+                Func<PlayerTask, bool> p = (t) => { return t.TaskType == TaskTypes.FixComms; };
+                bool commsActive = PlayerControl.LocalPlayer.myTasks.Find(p) != null;
+                if (commsActive) {
+                    __instance.SabText.gameObject.SetActive(true);
+                    __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
+                }
 
                 // Consume time to see security camera if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead) {
                     if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
-                        if (MapOptions.SecurityCameraTimer <= 0) {
+                        if (!commsActive && MapOptions.SecurityCameraTimer <= 0) {
                             __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
                             __instance.SabText.gameObject.SetActive(true);
                             __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
