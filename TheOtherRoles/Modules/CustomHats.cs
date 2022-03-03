@@ -366,6 +366,7 @@ namespace TheOtherRoles.Modules {
     public class CustomHatLoader {
         public static bool running = false;
         private static readonly string[] Repos = new string[] {
+            "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
             "https://raw.githubusercontent.com/Eisbison/TheOtherHats/master",
             "https://raw.githubusercontent.com/yukinogatari/TheOtherHats-GM/master",
         };
