@@ -135,7 +135,9 @@ namespace TheOtherRoles {
         public static void refreshRoleDescription(PlayerControl player) {
             if (player == null) return;
 
-            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(player); 
+            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(player);
+            if (infos.Count > 0 && infos[0].roleId == RoleId.TaskMaster && !player.Data.IsDead && TaskMaster.becomeATaskMasterWhenCompleteAllTasks && !TaskMaster.isTaskComplete)
+                infos[0] = RoleInfo.crewmate;
 
             var toRemove = new List<PlayerTask>();
             foreach (PlayerTask t in player.myTasks) {

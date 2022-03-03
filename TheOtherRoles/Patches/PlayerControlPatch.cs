@@ -440,7 +440,7 @@ namespace TheOtherRoles.Patches {
                     bool isTaskMasterExTask = TaskMaster.isTaskMaster(p.PlayerId) && TaskMaster.isTaskComplete;
                     var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(p.Data, true);
                     var (exTasksCompleted, exTasksTotal) = TasksHandler.taskInfo(p.Data, true, true);
-                    string roleNames = RoleInfo.GetRolesString(p, true);
+                    string roleNames = RoleInfo.GetRolesString(p, true, PlayerControl.LocalPlayer.Data.IsDead);
                     string taskInfo = tasksTotal > 0 ? $"<color=#FAD934FF>({tasksCompleted}/{tasksTotal})</color>" : "";
                     string exTaskInfo = exTasksTotal > 0 ? $"<color=#E1564BFF>Ex ({exTasksCompleted}/{exTasksTotal})</color>" : "";
                     string playerInfoText = "";

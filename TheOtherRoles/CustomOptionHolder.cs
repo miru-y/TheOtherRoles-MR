@@ -260,6 +260,7 @@ namespace TheOtherRoles {
         public static CustomOption yasunaNumberOfSpecialVotes;
 
         public static CustomOption taskMasterSpawnRate;
+        public static CustomOption taskMasterBecomeATaskMasterWhenCompleteAllTasks;
         public static CustomOption taskMasterExtraCommonTasks;
         public static CustomOption taskMasterExtraShortTasks;
         public static CustomOption taskMasterExtraLongTasks;
@@ -438,6 +439,8 @@ namespace TheOtherRoles {
             yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
 
             taskMasterSpawnRate = CustomOption.Create(910000100, cs(TaskMaster.color, "TaskMaster"), rates, null, true, true);
+
+            taskMasterBecomeATaskMasterWhenCompleteAllTasks = CustomOption.Create(910000104, "Become A Task Master When Complete All Tasks", false, taskMasterSpawnRate);
             taskMasterExtraCommonTasks = CustomOption.Create(910000101, "TaskMaster Extra Common Tasks", 2f, 0f, 4f, 1f, taskMasterSpawnRate);
             taskMasterExtraShortTasks = CustomOption.Create(910000102, "TaskMaster Extra Short Tasks", 2f, 0f, 23f, 1f, taskMasterSpawnRate);
             taskMasterExtraLongTasks = CustomOption.Create(910000103, "TaskMaster Extra Long Tasks", 2f, 0f, 15f, 1f, taskMasterSpawnRate);

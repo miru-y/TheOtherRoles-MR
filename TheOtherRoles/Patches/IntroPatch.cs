@@ -115,6 +115,9 @@ namespace TheOtherRoles.Patches {
                 List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
                 RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
 
+                if (roleInfo.roleId == RoleId.TaskMaster && TaskMaster.becomeATaskMasterWhenCompleteAllTasks)
+                    roleInfo = RoleInfo.crewmate;
+
                 if (roleInfo != null) {
                     __instance.RoleText.text = roleInfo.name;
                     __instance.RoleText.color = roleInfo.color;
