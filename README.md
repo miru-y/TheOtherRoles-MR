@@ -9,6 +9,8 @@ This mod is The Other Roles extension mod which implements new roles and systems
   - **System:** Added an option to set the "Security camera" available time.
   - **System:** Added "Custom Preset System".
   - **Lobby UI:** Improve "The Other Roles Settings" display on the left.
+-  **New The Other Hats Skin**
+   - Added [The Other Hats-MR](https://github.com/miru-y/TheOtherHats-MR/).
 
 This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.
 
@@ -16,6 +18,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v1.5.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.5.0) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.5.0/TheOtherRolesMR.zip)
 | [v1.4.4](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.4) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.4/TheOtherRolesMR.zip)
 | [v1.4.3](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.3) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.3/TheOtherRolesMR.zip)
 | [v1.4.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.2) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.2/TheOtherRolesMR.zip)
@@ -1359,6 +1362,7 @@ If you complete all extra tasks without exile or dying in the process, crewmate 
 ### Game Options
 | Name | Description |
 |----------|:-------------:|
+|Become A Task Master When Complete All Tasks|If set to "On", it will be "Crewmate" until all tasks are completed. When all tasks are completed, it becomes "Task Master".|
 |TaskMaster Extra Common Tasks|Number of common tasks added to the task master.|
 |TaskMaster Extra Short Tasks|Number of short tasks added to the task master.|
 |TaskMaster Extra Long Tasks|Number of long tasks added to the task master.|
