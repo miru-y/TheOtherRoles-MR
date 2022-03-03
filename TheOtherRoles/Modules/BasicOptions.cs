@@ -9,7 +9,7 @@ namespace TheOtherRoles
     {
         public static void Save(string section, Dictionary<ConfigDefinition, string> orphanedEntries, bool isSave = false) {
 
-            var optionData = SaveManager.hostOptionsData;
+            var optionData = AmongUsClient.Instance.AmHost ? SaveManager.hostOptionsData : SaveManager.GameHostOptions;
 
             // Generic options
             mapId.Save(section, orphanedEntries, optionData.MapId);
