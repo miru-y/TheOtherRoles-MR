@@ -1750,8 +1750,10 @@ namespace TheOtherRoles
             stareText = null;
             if (arrow != null && arrow.arrow != null) UnityEngine.Object.Destroy(arrow.arrow);
             for (int i = 0; i < gaugeRenderer.Length; ++i) {
-                UnityEngine.Object.Destroy(gaugeRenderer[i].gameObject);
-                gaugeRenderer[i] = null;
+                if (gaugeRenderer[i] != null) {
+                    UnityEngine.Object.Destroy(gaugeRenderer[i].gameObject);
+                    gaugeRenderer[i] = null;
+                }
             }
             arrow = null;
             gaugeTimer = 0.0f;
