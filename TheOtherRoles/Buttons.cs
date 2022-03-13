@@ -1165,6 +1165,10 @@ namespace TheOtherRoles
                         var murderAttemptResult = Helpers.checkMuderAttempt(Kataomoi.kataomoi, Kataomoi.currentTarget);
                         if (murderAttemptResult == MurderAttemptResult.SuppressKill) return;
 
+                        MessageWriter winWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.KataomoiWin, Hazel.SendOption.Reliable, -1);
+                        AmongUsClient.Instance.FinishRpcImmediately(winWriter);
+                        RPCProcedure.kataomoiWin();
+
                         if (murderAttemptResult == MurderAttemptResult.PerformKill) {
                             byte targetId = Kataomoi.currentTarget.PlayerId;
                             MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
@@ -1175,9 +1179,6 @@ namespace TheOtherRoles
                             RPCProcedure.uncheckedMurderPlayer(Kataomoi.kataomoi.Data.PlayerId, targetId, Byte.MaxValue);
                         }
 
-                        MessageWriter winWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.KataomoiWin, Hazel.SendOption.Reliable, -1);
-                        AmongUsClient.Instance.FinishRpcImmediately(winWriter);
-                        RPCProcedure.kataomoiWin();
                         kataomoiButton.HasEffect = false;
                     } else if (Kataomoi.currentTarget != null) {
                         kataomoiButton.HasEffect = true;
