@@ -704,4 +704,63 @@ namespace TheOtherRoles.Patches {
                 __instance.taskOverlay.Hide();
         }
     }
+
+    [HarmonyPatch]
+    public static class MapBehaviourPatch
+    {
+        public static void ResetIcons() {
+            if (kataomoiMark != null) {
+                GameObject.Destroy(kataomoiMark.gameObject);
+                kataomoiMark = null;
+            }
+        }
+
+        [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.GenericShow))]
+        class GenericShowPatch
+        {
+            static void Postfix(MapBehaviour __instance) {
+                if (Kataomoi.kataomoi == PlayerControl.LocalPlayer) {
+                    if (kataomoiMark == null) {
+                        kataomoiMark = UnityEngine.Object.Instantiate(__instance.HerePoint, __instance.HerePoint.transform.parent);
+                        kataomoiMark.sprite = GetKataomoiMarkSprite();
+                        kataomoiMark.transform.localScale = Vector3.one * 0.5f;
+                        kataomoiMark.enabled = IsShowKataomoiMark();
+                        PlayerControl.SetPlayerMaterialColors(Kataomoi.color, kataomoiMark);
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.FixedUpdate))]
+        class FixedUpdatePatch
+        {
+            static void Postfix(MapBehaviour __instance) {
+
+                if (Kataomoi.kataomoi == PlayerControl.LocalPlayer) {
+                    bool isShowKataomoiMark = IsShowKataomoiMark();
+                    kataomoiMark.enabled = isShowKataomoiMark;
+                    if (isShowKataomoiMark) {
+                        Vector3 vector = Kataomoi.target.transform.position;
+                        vector /= ShipStatus.Instance.MapScale;
+                        vector.x *= Mathf.Sign(ShipStatus.Instance.transform.localScale.x);
+                        vector.z = -1f;
+                        kataomoiMark.transform.localPosition = vector;
+                    }
+                }
+            }
+        }
+
+        static bool IsShowKataomoiMark() {
+            return Kataomoi.kataomoi == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.isDead() && Kataomoi.target != null && !Kataomoi.target.isDead() && Kataomoi.isSearch;
+        }
+
+        static SpriteRenderer kataomoiMark;
+        static Sprite kataomoiMarkSprite;
+
+        static Sprite GetKataomoiMarkSprite() {
+            if (kataomoiMarkSprite) return kataomoiMarkSprite;
+            kataomoiMarkSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.KataomoiMark.png", 115f);
+            return kataomoiMarkSprite;
+        }
+    }
 }

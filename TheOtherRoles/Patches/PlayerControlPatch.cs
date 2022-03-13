@@ -3,14 +3,13 @@ using Hazel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static TheOtherRoles.TheOtherRoles;
-using static TheOtherRoles.GameHistory;
 using TheOtherRoles.Objects;
 using UnityEngine;
+using static TheOtherRoles.GameHistory;
+using static TheOtherRoles.TheOtherRoles;
 
-namespace TheOtherRoles.Patches {
+namespace TheOtherRoles.Patches
+{
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
     public static class PlayerControlFixedUpdatePatch {
         // Helpers
@@ -21,6 +20,12 @@ namespace TheOtherRoles.Patches {
             if (!ShipStatus.Instance) return result;
             if (targetingPlayer == null) targetingPlayer = PlayerControl.LocalPlayer;
             if (targetingPlayer.Data.IsDead) return result;
+
+            // Can't target stalking kataomoi
+            if (Kataomoi.kataomoi != null && Kataomoi.target != null && Kataomoi.isStalking()) {
+                if (untargetablePlayers == null) untargetablePlayers = new List<PlayerControl>();
+                untargetablePlayers.Add(Kataomoi.kataomoi);
+            }
 
             Vector2 truePosition = targetingPlayer.GetTruePosition();
             Il2CppSystem.Collections.Generic.List<GameData.PlayerInfo> allPlayers = GameData.Instance.AllPlayers;
@@ -410,8 +415,10 @@ namespace TheOtherRoles.Patches {
         }
 
         public static void updatePlayerInfo() {
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls) {         
-                if ((Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target) || p == PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.Data.IsDead) {
+            foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
+                bool isKataomoi = PlayerControl.LocalPlayer == Kataomoi.kataomoi;
+                bool isKataomoiTarget = (Kataomoi.kataomoi != null && p == Kataomoi.target && (p.isDead() || p != PlayerControl.LocalPlayer));
+                if ((Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target) || p == PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.Data.IsDead || (isKataomoi && isKataomoiTarget)) {
                     Transform playerInfoTransform = p.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo == null) {
@@ -431,8 +438,17 @@ namespace TheOtherRoles.Patches {
                         meetingInfo.gameObject.name = "Info";
                     }
 
+                    Transform meetingInfoExtraTransform = playerVoteArea != null ? playerVoteArea.NameText.transform.parent.FindChild("InfoEx") : null;
+                    TMPro.TextMeshPro meetingExtraInfo = meetingInfoExtraTransform != null ? meetingInfoExtraTransform.GetComponent<TMPro.TextMeshPro>() : null;
+                    if (meetingExtraInfo == null && playerVoteArea != null) {
+                        meetingExtraInfo = UnityEngine.Object.Instantiate(playerVoteArea.NameText, playerVoteArea.NameText.transform.parent);
+                        meetingExtraInfo.transform.localPosition += Vector3.down * 0.22f;
+                        meetingExtraInfo.fontSize *= 0.60f;
+                        meetingExtraInfo.gameObject.name = "InfoEx";
+                    }
+
                     // Set player name higher to align in middle
-                    if (meetingInfo != null && playerVoteArea != null) {
+                    if (meetingInfo != null && meetingExtraInfo != null && playerVoteArea != null) {
                         var playerName = playerVoteArea.NameText;
                         playerName.transform.localPosition = new Vector3(0.3384f, (0.0311f + 0.0683f), -0.1f);    
                     }
@@ -445,6 +461,11 @@ namespace TheOtherRoles.Patches {
                     string exTaskInfo = exTasksTotal > 0 ? $"<color=#E1564BFF>Ex ({exTasksCompleted}/{exTasksTotal})</color>" : "";
                     string playerInfoText = "";
                     string meetingInfoText = "";
+
+                    string extraInfoText = "";
+                    if (isKataomoiTarget)
+                        extraInfoText = Helpers.cs(Kataomoi.color, "Kataomoi Target");
+
                     if (p == PlayerControl.LocalPlayer) {
                         playerInfoText = $"{roleNames}";
                         if (DestroyableSingleton<TaskPanelBehaviour>.InstanceExists) {
@@ -455,6 +476,12 @@ namespace TheOtherRoles.Patches {
                             meetingInfoText = $"{roleNames} {taskInfo}".Trim();
                         else
                             meetingInfoText = $"{roleNames} {taskInfo} {exTaskInfo}".Trim();
+
+                        if (!string.IsNullOrEmpty(extraInfoText))
+                            playerInfoText += " " + extraInfoText;
+                    }
+                    else if (isKataomoi && isKataomoiTarget && !PlayerControl.LocalPlayer.isDead()) {
+                        playerInfoText = extraInfoText;
                     }
                     else if (MapOptions.ghostsSeeRoles && MapOptions.ghostsSeeTasks) {
                         if (!isTaskMasterExTask)
@@ -462,6 +489,8 @@ namespace TheOtherRoles.Patches {
                         else
                             playerInfoText = $"{roleNames} {taskInfo} {exTaskInfo}".Trim();
                         meetingInfoText = playerInfoText;
+                        if (!string.IsNullOrEmpty(extraInfoText))
+                            playerInfoText += " " + extraInfoText;
                     }
                     else if (MapOptions.ghostsSeeTasks) {
                         playerInfoText = $"{taskInfo}".Trim();
@@ -470,12 +499,15 @@ namespace TheOtherRoles.Patches {
                     else if (MapOptions.ghostsSeeRoles || (Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target)) {
                         playerInfoText = $"{roleNames}";
                         meetingInfoText = playerInfoText;
+                        if (!string.IsNullOrEmpty(extraInfoText))
+                            playerInfoText += " " + extraInfoText;
                     }
 
                     playerInfo.text = playerInfoText;
                     playerInfo.gameObject.SetActive(p.Visible);
                     if (meetingInfo != null) meetingInfo.text = MeetingHud.Instance.state == MeetingHud.VoteStates.Results ? "" : meetingInfoText;
-                }                
+                    if (meetingExtraInfo != null) meetingExtraInfo.text = MeetingHud.Instance.state == MeetingHud.VoteStates.Results ? "" : extraInfoText;
+                }
             }
         }
 
@@ -515,6 +547,15 @@ namespace TheOtherRoles.Patches {
                 untargetables = Arsonist.dousedPlayers;
             Arsonist.currentTarget = setTarget(untargetablePlayers: untargetables);
             if (Arsonist.currentTarget != null) setPlayerOutline(Arsonist.currentTarget, Arsonist.color);
+        }
+
+        public static void kataomoiSetTarget() {
+            if (Kataomoi.kataomoi == null || Kataomoi.kataomoi != PlayerControl.LocalPlayer) return;
+            if (Kataomoi.target == null) return;
+
+            var untargetables = PlayerControl.AllPlayerControls.ToArray().Where(x => x.PlayerId != Kataomoi.target.PlayerId).ToList();
+            Kataomoi.currentTarget = setTarget(untargetablePlayers: untargetables);
+            if (Kataomoi.currentTarget != null) setPlayerOutline(Kataomoi.currentTarget, Kataomoi.color);
         }
 
         static void snitchUpdate() {
@@ -778,6 +819,25 @@ namespace TheOtherRoles.Patches {
             }
         }
 
+        static void kataomoiUpdate() {
+            if (Kataomoi.kataomoi != PlayerControl.LocalPlayer) return;
+
+            // Update Stare Count Text
+            if (Kataomoi.stareText != null) {
+                if (Kataomoi.stareCount > 0)
+                    Kataomoi.stareText.text = $"{Kataomoi.stareCount}";
+                else
+                    Kataomoi.stareText.text = "";
+            }
+
+            // Update Arrow
+            if (Kataomoi.arrow == null) Kataomoi.arrow = new Arrow(Kataomoi.color);
+            Kataomoi.arrow.arrow.SetActive(Kataomoi.isSearch);
+            if (Kataomoi.isSearch) {
+                Kataomoi.arrow.Update(Kataomoi.target.transform.position);
+            }
+        }
+
         public static void Postfix(PlayerControl __instance) {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
 
@@ -839,6 +899,8 @@ namespace TheOtherRoles.Patches {
                 securityGuardUpdate();
                 // Arsonist
                 arsonistSetTarget();
+                // Kataomoi
+                kataomoiSetTarget();
                 // Snitch
                 snitchUpdate();
                 // BountyHunter
@@ -860,7 +922,9 @@ namespace TheOtherRoles.Patches {
                 hackerUpdate();
                 // DoorHacker
                 doorHackerUpdate();
-            } 
+                // Kataomoi
+                kataomoiUpdate();
+            }
         }
     }
 
@@ -964,6 +1028,10 @@ namespace TheOtherRoles.Patches {
                     otherLover.MurderPlayer(otherLover);
                 }
             }
+
+            // Kataomoi suicide trigger on murder
+            if (Kataomoi.kataomoi != null && !Kataomoi.kataomoi.isDead() && Kataomoi.kataomoi != __instance && Kataomoi.target == target)
+                Kataomoi.kataomoi.MurderPlayer(Kataomoi.kataomoi);
 
             // Sidekick promotion trigger on murder
             if (Sidekick.promotesToJackal && Sidekick.sidekick != null && !Sidekick.sidekick.Data.IsDead && target == Jackal.jackal && Jackal.jackal == PlayerControl.LocalPlayer) {
@@ -1125,7 +1193,11 @@ namespace TheOtherRoles.Patches {
                 if (otherLover != null && !otherLover.Data.IsDead && Lovers.bothDie)
                     otherLover.Exiled();
             }
-            
+
+            // Kataomoi suicide trigger on murder
+            if (Kataomoi.kataomoi != null && !Kataomoi.kataomoi.isDead() && Kataomoi.target == __instance)
+                Kataomoi.kataomoi.Exiled();
+
             // Sidekick promotion trigger on exile
             if (Sidekick.promotesToJackal && Sidekick.sidekick != null && !Sidekick.sidekick.Data.IsDead && __instance == Jackal.jackal && Jackal.jackal == PlayerControl.LocalPlayer) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SidekickPromotes, Hazel.SendOption.Reliable, -1);

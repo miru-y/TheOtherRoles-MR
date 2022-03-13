@@ -270,6 +270,16 @@ namespace TheOtherRoles {
         public static CustomOption doorHackerCooldown;
         public static CustomOption doorHackerDuration;
 
+        public static CustomOption kataomoiSpawnRate;
+        public static CustomOption kataomoiStareCooldown;
+        public static CustomOption kataomoiStareDuration;
+        public static CustomOption kataomoiStareCount;
+        public static CustomOption kataomoiStalkingCooldown;
+        public static CustomOption kataomoiStalkingDuration;
+        public static CustomOption kataomoiStalkingFadeTime;
+        public static CustomOption kataomoiSearchCooldown;
+        public static CustomOption kataomoiSearchDuration;
+
         public static CustomOption maxNumberOfMeetings;
         public static CustomOption blockSkippingInEmergencyMeetings;
         public static CustomOption noVoteIsSelfVote;
@@ -406,6 +416,16 @@ namespace TheOtherRoles {
             arsonistSpawnRate = CustomOption.Create(290, cs(Arsonist.color, "Arsonist"), rates, null, true, true);
             arsonistCooldown = CustomOption.Create(291, "Arsonist Cooldown", 12.5f, 2.5f, 60f, 2.5f, arsonistSpawnRate);
             arsonistDuration = CustomOption.Create(292, "Arsonist Douse Duration", 3f, 1f, 10f, 1f, arsonistSpawnRate);
+
+            kataomoiSpawnRate = CustomOption.Create(910000300, cs(Kataomoi.color, "Kataomoi"), rates, null, true, true);
+            kataomoiStareCooldown = CustomOption.Create(910000301, "Kataomoi Stare Cooldown", 20f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
+            kataomoiStareDuration = CustomOption.Create(910000302, "Kataomoi Stare Duration", 3f, 1f, 10f, 1f, kataomoiSpawnRate);
+            kataomoiStareCount = CustomOption.Create(910000303, "Kataomoi Stare Count", 5f, 1f, 100f, 1f, kataomoiSpawnRate);
+            kataomoiStalkingCooldown = CustomOption.Create(910000304, "Kataomoi Stalking Cooldown", 20f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
+            kataomoiStalkingDuration = CustomOption.Create(910000305, "Kataomoi Stalking Duration", 10f, 1f, 30f, 1f, kataomoiSpawnRate);
+            kataomoiStalkingFadeTime = CustomOption.Create(910000306, "Kataomoi Stalking Fade Time", 0.5f, 0.0f, 2.5f, 0.5f, kataomoiSpawnRate);
+            kataomoiSearchCooldown = CustomOption.Create(910000307, "Kataomoi Search Cooldown", 20f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
+            kataomoiSearchDuration = CustomOption.Create(910000308, "Kataomoi Search Duration", 10f, 1f, 30f, 1f, kataomoiSpawnRate);
 
             jackalSpawnRate = CustomOption.Create(220, cs(Jackal.color, "Jackal"), rates, null, true, true);
             jackalKillCooldown = CustomOption.Create(221, "Jackal/Sidekick Kill Cooldown", 30f, 10f, 60f, 2.5f, jackalSpawnRate);

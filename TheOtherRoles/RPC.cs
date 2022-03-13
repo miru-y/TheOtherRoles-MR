@@ -62,6 +62,7 @@ namespace TheOtherRoles
         Yasuna,
         TaskMaster,
         DoorHacker,
+        Kataomoi,
         Crewmate,
         Impostor
     }
@@ -127,6 +128,9 @@ namespace TheOtherRoles
         TaskMasterSetExTasks,
         TaskMasterUpdateExTasks,
         DoorHackerDone,
+        KataomoiSetTarget,
+        KataomoiWin,
+        KataomoiStalking,
     }
 
     public static class RPCProcedure {
@@ -140,6 +144,7 @@ namespace TheOtherRoles
             clearAndReloadRoles();
             clearGameHistory();
             setCustomButtonCooldowns();
+            MapBehaviourPatch.ResetIcons();
         }
 
         public static void ShareOptions(int numberOfOptions, MessageReader reader) {            
@@ -311,6 +316,9 @@ namespace TheOtherRoles
                     case RoleId.DoorHacker:
                         DoorHacker.doorHacker = player;
                         break;
+                    case RoleId.Kataomoi:
+                        Kataomoi.kataomoi = player;
+                        break;
                     }
                 }
         }
@@ -481,7 +489,7 @@ namespace TheOtherRoles
             Shifter.clearAndReload();
 
             // Suicide (exile) when impostor or impostor variants
-            if (player.Data.Role.IsImpostor || player == Jackal.jackal || player == Sidekick.sidekick || Jackal.formerJackals.Contains(player) || player == Jester.jester || player == Arsonist.arsonist || player == Vulture.vulture || player == Lawyer.lawyer) {
+            if (player.Data.Role.IsImpostor || player == Jackal.jackal || player == Sidekick.sidekick || Jackal.formerJackals.Contains(player) || player == Jester.jester || player == Arsonist.arsonist || player == Vulture.vulture || player == Lawyer.lawyer || player == Kataomoi.kataomoi) {
                 oldShifter.Exiled();
                 return;
             }
@@ -706,6 +714,7 @@ namespace TheOtherRoles
             // Other roles
             if (player == Jester.jester) Jester.clearAndReload();
             if (player == Arsonist.arsonist) Arsonist.clearAndReload();
+            if (player == Kataomoi.kataomoi) Kataomoi.clearAndReload();
             if (Guesser.isGuesser(player.PlayerId)) Guesser.clear(player.PlayerId);
             if (!ignoreLovers && (player == Lovers.lover1 || player == Lovers.lover2)) { // The whole Lover couple is being erased
                 Lovers.clearAndReload(); 
@@ -847,19 +856,21 @@ namespace TheOtherRoles
             if (dyingTarget == null ) return;
             dyingTarget.Exiled();
             PlayerControl dyingLoverPartner = Lovers.bothDie ? dyingTarget.getPartner() : null; // Lover check
+            PlayerControl kataomoiPlayer = Kataomoi.kataomoi != null && Kataomoi.target == dyingTarget ? Kataomoi.kataomoi : null; // Kataomoi check
             byte partnerId = dyingLoverPartner != null ? dyingLoverPartner.PlayerId : dyingTargetId;
+            byte partnerId2 = kataomoiPlayer != null ? kataomoiPlayer.PlayerId : dyingTargetId;
 
             Guesser.remainingShots(killerId, true);
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(dyingTarget.KillSfx, false, 0.8f);
             if (MeetingHud.Instance) {
                 foreach (PlayerVoteArea pva in MeetingHud.Instance.playerStates) {
-                    if (pva.TargetPlayerId == dyingTargetId || pva.TargetPlayerId == partnerId) {
+                    if (pva.TargetPlayerId == dyingTargetId || pva.TargetPlayerId == partnerId || pva.TargetPlayerId == partnerId2) {
                         pva.SetDead(pva.DidReport, true);
                         pva.Overlay.gameObject.SetActive(true);
                     }
 
                     //Give players back their vote if target is shot dead
-                    if (pva.VotedFor != dyingTargetId || pva.VotedFor != partnerId) continue;
+                    if (pva.VotedFor != dyingTargetId || pva.VotedFor != partnerId || pva.VotedFor != partnerId2) continue;
                     pva.UnsetVote();
                     var voteAreaPlayer = Helpers.playerById(pva.TargetPlayerId);
                     if (!voteAreaPlayer.AmOwner) continue;
@@ -875,7 +886,9 @@ namespace TheOtherRoles
                     HudManager.Instance.KillOverlay.ShowKillAnimation(guesser.Data, dyingTarget.Data);
                 else if (dyingLoverPartner != null && PlayerControl.LocalPlayer == dyingLoverPartner) 
                     HudManager.Instance.KillOverlay.ShowKillAnimation(dyingLoverPartner.Data, dyingLoverPartner.Data);
-            
+                else if (kataomoiPlayer != null && PlayerControl.LocalPlayer == kataomoiPlayer)
+                    HudManager.Instance.KillOverlay.ShowKillAnimation(kataomoiPlayer.Data, kataomoiPlayer.Data);
+
             PlayerControl guessedTarget = Helpers.playerById(guessedTargetId);
             if (Guesser.showInfoInGhostChat && PlayerControl.LocalPlayer.Data.IsDead && guessedTarget != null) {
                 RoleInfo roleInfo = RoleInfo.allRoleInfos.FirstOrDefault(x => (byte)x.roleId == guessedRoleId);
@@ -955,6 +968,25 @@ namespace TheOtherRoles
             PlayerControl player = Helpers.playerById(playerId);
             if (DoorHacker.doorHacker == null || DoorHacker.doorHacker != player) return;
             DoorHacker.DisableDoors(playerId);
+        }
+
+        public static void kataomoiSetTarget(byte playerId) {
+            Kataomoi.target = Helpers.playerById(playerId);
+        }
+
+        public static void kataomoiWin() {
+            if (Kataomoi.kataomoi == null) return;
+
+            Kataomoi.triggerKataomoiWin = true;
+            if (Kataomoi.target != null)
+                Kataomoi.target.Exiled();
+        }
+
+        public static void kataomoiStalking(byte playerId) {
+            PlayerControl player = Helpers.playerById(playerId);
+            if (Kataomoi.kataomoi == null || Kataomoi.kataomoi != player) return;
+
+            Kataomoi.doStalking();
         }
     }
 
@@ -1184,6 +1216,17 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.DoorHackerDone:
                     playerId = reader.ReadByte();
                     RPCProcedure.doorHackerDone(playerId);
+                    break;
+                case (byte)CustomRPC.KataomoiSetTarget:
+                    playerId = reader.ReadByte();
+                    RPCProcedure.kataomoiSetTarget(playerId);
+                    break;
+                case (byte)CustomRPC.KataomoiWin:
+                    RPCProcedure.kataomoiWin();
+                    break;
+                case (byte)CustomRPC.KataomoiStalking:
+                    playerId = reader.ReadByte();
+                    RPCProcedure.kataomoiStalking(playerId);
                     break;
             }
         }

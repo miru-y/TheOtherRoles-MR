@@ -42,6 +42,9 @@ namespace TheOtherRoles
         public static CustomButton securityGuardButton;
         public static CustomButton securityGuardCamButton;
         public static CustomButton arsonistButton;
+        public static CustomButton kataomoiButton;
+        public static CustomButton kataomoiStalkingButton;
+        public static CustomButton kataomoiSearchButton;
         public static CustomButton vultureEatButton;
         public static CustomButton mediumButton;
         public static CustomButton pursuerButton;
@@ -86,6 +89,9 @@ namespace TheOtherRoles
             securityGuardButton.MaxTimer = SecurityGuard.cooldown;
             securityGuardCamButton.MaxTimer = SecurityGuard.cooldown;
             arsonistButton.MaxTimer = Arsonist.cooldown;
+            kataomoiButton.MaxTimer = Kataomoi.stareCooldown;
+            kataomoiStalkingButton.MaxTimer = Kataomoi.stalkingCooldown;
+            kataomoiSearchButton.MaxTimer = Kataomoi.searchCooldown;
             vultureEatButton.MaxTimer = Vulture.cooldown;
             mediumButton.MaxTimer = Medium.cooldown;
             pursuerButton.MaxTimer = Pursuer.cooldown;
@@ -103,6 +109,9 @@ namespace TheOtherRoles
             morphlingButton.EffectDuration = Morphling.duration;
             lightsOutButton.EffectDuration = Trickster.lightsOutDuration;
             arsonistButton.EffectDuration = Arsonist.duration;
+            kataomoiButton.EffectDuration = Kataomoi.stareDuration;
+            kataomoiStalkingButton.EffectDuration = Kataomoi.stalkingDuration;
+            kataomoiSearchButton.EffectDuration = Kataomoi.searchDuration;
             mediumButton.EffectDuration = Medium.duration;
             trackerTrackCorpsesButton.EffectDuration = Tracker.corpsesTrackingDuration;
             witchSpellButton.EffectDuration = Witch.spellCastingDuration;
@@ -278,7 +287,7 @@ namespace TheOtherRoles
                         if ((Sheriff.currentTarget.Data.Role.IsImpostor && (Sheriff.currentTarget != Mini.mini || Mini.isGrownUp())) ||
                             (Sheriff.spyCanDieToSheriff && Spy.spy == Sheriff.currentTarget) ||
                             (Sheriff.madmateCanDieToSheriff && Madmate.madmate == Sheriff.currentTarget) ||
-                            (Sheriff.canKillNeutrals && (Arsonist.arsonist == Sheriff.currentTarget || Jester.jester == Sheriff.currentTarget || Vulture.vulture == Sheriff.currentTarget || Lawyer.lawyer == Sheriff.currentTarget || Pursuer.pursuer == Sheriff.currentTarget)) ||
+                            (Sheriff.canKillNeutrals && (Arsonist.arsonist == Sheriff.currentTarget || Jester.jester == Sheriff.currentTarget || Vulture.vulture == Sheriff.currentTarget || Lawyer.lawyer == Sheriff.currentTarget || Pursuer.pursuer == Sheriff.currentTarget || Kataomoi.kataomoi == Sheriff.currentTarget)) ||
                             (Jackal.jackal == Sheriff.currentTarget || Sidekick.sidekick == Sheriff.currentTarget)) {
                             targetId = Sheriff.currentTarget.PlayerId;
                         }
@@ -1146,6 +1155,116 @@ namespace TheOtherRoles
                             MapOptions.playerIcons[p.PlayerId].setSemiTransparent(false);
                         }
                     }
+                }
+            );
+
+            // Kataomoi button
+            kataomoiButton = new CustomButton(
+                () => {
+                    if (Kataomoi.canLove()) {
+                        var murderAttemptResult = Helpers.checkMuderAttempt(Kataomoi.kataomoi, Kataomoi.currentTarget);
+                        if (murderAttemptResult == MurderAttemptResult.SuppressKill) return;
+
+                        if (murderAttemptResult == MurderAttemptResult.PerformKill) {
+                            byte targetId = Kataomoi.currentTarget.PlayerId;
+                            MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+                            killWriter.Write(Kataomoi.kataomoi.Data.PlayerId);
+                            killWriter.Write(targetId);
+                            killWriter.Write(byte.MaxValue);
+                            AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                            RPCProcedure.uncheckedMurderPlayer(Kataomoi.kataomoi.Data.PlayerId, targetId, Byte.MaxValue);
+                        }
+
+                        MessageWriter winWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.KataomoiWin, Hazel.SendOption.Reliable, -1);
+                        AmongUsClient.Instance.FinishRpcImmediately(winWriter);
+                        RPCProcedure.kataomoiWin();
+                        kataomoiButton.HasEffect = false;
+                    } else if (Kataomoi.currentTarget != null) {
+                        kataomoiButton.HasEffect = true;
+                    }
+                },
+                () => { return Kataomoi.kataomoi != null && Kataomoi.kataomoi == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+                () => {
+                    if (Kataomoi.canLove()) kataomoiButton.actionButton.graphic.sprite = Kataomoi.getLoveSprite();
+
+                    if (kataomoiButton.isEffectActive && Kataomoi.target != null && Kataomoi.target != Kataomoi.currentTarget) {
+                        kataomoiButton.Timer = 0f;
+                        kataomoiButton.isEffectActive = false;
+                    }
+
+                    return PlayerControl.LocalPlayer.CanMove && Kataomoi.currentTarget != null;
+                },
+                () => {
+                    kataomoiButton.Timer = kataomoiButton.MaxTimer;
+                    kataomoiButton.isEffectActive = false;
+                },
+                Kataomoi.getStareSprite(),
+                new Vector3(-1.8f, -0.06f, 0),
+                __instance,
+                KeyCode.F,
+                true,
+                Kataomoi.stareDuration,
+                () => {
+                    Kataomoi.doStare();
+                    kataomoiButton.Timer = Kataomoi.canLove() ? 0 : kataomoiButton.MaxTimer;
+                }
+            );
+
+            // Kataomoi search button
+            kataomoiSearchButton = new CustomButton(
+                () => {
+                    if (Kataomoi.kataomoi == null) return;
+                    Kataomoi.doSearch();
+                },
+                () => { return Kataomoi.kataomoi != null && Kataomoi.kataomoi == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+                () => {
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () => {
+                    kataomoiSearchButton.Timer = kataomoiSearchButton.MaxTimer;
+                    kataomoiSearchButton.isEffectActive = false;
+                    Kataomoi.resetSearch();
+                },
+                Kataomoi.getSearchSprite(),
+                new Vector3(0, 1, 0),
+                __instance,
+                null,
+                true,
+                Kataomoi.searchDuration,
+                () => {
+                    kataomoiSearchButton.Timer = kataomoiSearchButton.MaxTimer;
+                    Kataomoi.resetSearch();
+                }
+            );
+
+            // Kataomoi stalking button
+            kataomoiStalkingButton = new CustomButton(
+                () => {
+                    if (Kataomoi.kataomoi == null) return;
+
+                    byte playerId = Kataomoi.kataomoi.Data.PlayerId;
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.KataomoiStalking, Hazel.SendOption.Reliable, -1);
+                    writer.Write(playerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+
+                    RPCProcedure.kataomoiStalking(playerId);
+                },
+                () => { return Kataomoi.kataomoi != null && Kataomoi.kataomoi == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+                () => {
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () => {
+                    kataomoiStalkingButton.Timer = kataomoiStalkingButton.MaxTimer;
+                    kataomoiStalkingButton.isEffectActive = false;
+                },
+                Kataomoi.getStalkingSprite(),
+                new Vector3(-0.9f, 1, 0),
+                __instance,
+                null,
+                true,
+                Kataomoi.stalkingDuration,
+                () => {
+                    kataomoiStalkingButton.Timer = kataomoiStalkingButton.MaxTimer;
                 }
             );
 

@@ -187,7 +187,7 @@ namespace TheOtherRoles {
             if (player == Madmate.madmate)
                 return !Madmate.noticeImpostors;
 
-            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Contains(player));
+            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Contains(player) || player == Kataomoi.kataomoi);
         }
 
         public static bool canBeErased(this PlayerControl player) {
@@ -246,7 +246,8 @@ namespace TheOtherRoles {
         }
 
         public static bool hidePlayerName(PlayerControl source, PlayerControl target) {
-            if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
+            if (source != target && Kataomoi.isStalking(target)) return true; // Hide kataomoi nametags
+            else if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
             else if (!MapOptions.hidePlayerNames) return false; // All names are visible
             else if (source == null || target == null) return true;
             else if (source == target) return false; // Player sees his own name
@@ -254,6 +255,7 @@ namespace TheOtherRoles {
             else if ((source == Lovers.lover1 || source == Lovers.lover2) && (target == Lovers.lover1 || target == Lovers.lover2)) return false; // Members of team Lovers see the names of each other
             else if ((source == Jackal.jackal || source == Sidekick.sidekick) && (target == Jackal.jackal || target == Sidekick.sidekick || target == Jackal.fakeSidekick)) return false; // Members of team Jackal see the names of each other
             else if (Deputy.knowsSheriff && (source == Sheriff.sheriff || source == Deputy.deputy) && (target == Sheriff.sheriff || target == Deputy.deputy)) return false; // Sheriff & Deputy see the names of each other
+
             return true;
         }
 
@@ -409,6 +411,14 @@ namespace TheOtherRoles {
             public bool isDestroyChild = true;
         }
 
+        public static bool isDead(this PlayerControl player) {
+            return player?.Data?.IsDead == true || player?.Data?.Disconnected == true;
+        }
+
+        public static bool isAlive(this PlayerControl player) {
+            return !isDead(player);
+        }
+
         public static bool destroyGameObjects(GameObject root, DestroyInfo[] excludeInfos = null, GameObject obj = null) {
             if (obj == null)
                 obj = root;
@@ -418,6 +428,27 @@ namespace TheOtherRoles {
                 findInfo = Array.Find(excludeInfos, (info) => info.searchName == obj.name);
             if (obj != root && findInfo == null) {
                 UnityEngine.Object.DestroyImmediate(obj);
+                return true;
+            }
+
+            if (findInfo == null || findInfo.isDestroyChild) {
+                for (int i = 0; i < obj.transform.GetChildCount(); ++i) {
+                    if (destroyGameObjects(root, excludeInfos, obj.transform.GetChild(i).gameObject))
+                        --i;
+                }
+            }
+            return false;
+        }
+
+        public static bool hideGameObjects(GameObject root, DestroyInfo[] excludeInfos = null, GameObject obj = null) {
+            if (obj == null)
+                obj = root;
+
+            DestroyInfo findInfo = null;
+            if (excludeInfos != null)
+                findInfo = Array.Find(excludeInfos, (info) => info.searchName == obj.name);
+            if (obj != root && findInfo == null) {
+                obj.SetActive(false);
                 return true;
             }
 

@@ -155,6 +155,10 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Yasuna.yasuna, PlayerControl.LocalPlayer.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color);
             } else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(TaskMaster.taskMaster, !TaskMaster.becomeATaskMasterWhenCompleteAllTasks || TaskMaster.isTaskComplete ? TaskMaster.color : RoleInfo.crewmate.color);
+            } else if (Kataomoi.kataomoi != null && Kataomoi.kataomoi == PlayerControl.LocalPlayer) {
+                setPlayerNameColor(Kataomoi.kataomoi, Kataomoi.color);
+                if (Kataomoi.target != null)
+                    setPlayerNameColor(Kataomoi.target, Kataomoi.color);
             }
 
             // No else if here, as a Lover of team Jackal needs the colors

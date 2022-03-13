@@ -34,6 +34,10 @@ namespace TheOtherRoles.Patches {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
                         player.transform.localScale = Vector3.one * 0.4f;
                         player.gameObject.SetActive(false);
+                    } else if (PlayerControl.LocalPlayer == Kataomoi.kataomoi && p == Kataomoi.target) {
+                        player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
+                        player.transform.localScale = Vector3.one * 0.4f;
+                        player.gameObject.SetActive(true);
                     } else {
                         player.gameObject.SetActive(false);
                     }
@@ -50,16 +54,54 @@ namespace TheOtherRoles.Patches {
                     BountyHunter.cooldownText.transform.localPosition = bottomLeft + new Vector3(0f, -1f, -1f);
                     BountyHunter.cooldownText.gameObject.SetActive(true);
                 }
-            } 
-
             }
+
+            if (Kataomoi.kataomoi != null && PlayerControl.LocalPlayer == Kataomoi.kataomoi) {
+                if (HudManager.Instance != null) {
+                    Vector3 bottomLeft = new Vector3(-HudManager.Instance.UseButton.transform.localPosition.x, HudManager.Instance.UseButton.transform.localPosition.y, HudManager.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
+                    Kataomoi.stareText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                    Kataomoi.stareText.alignment = TMPro.TextAlignmentOptions.Center;
+                    Kataomoi.stareText.transform.localPosition = bottomLeft + new Vector3(0f, -1f, -1f);
+                    Kataomoi.stareText.gameObject.SetActive(true);
+
+                    Kataomoi.gaugeRenderer[0] = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.graphic, HudManager.Instance.transform);
+                    var killButton = Kataomoi.gaugeRenderer[0].GetComponent<KillButton>();
+                    killButton.SetCoolDown(0.00000001f, 0.00000001f);
+                    killButton.SetFillUp(0.00000001f, 0.00000001f);
+                    killButton.SetDisabled();
+                    Helpers.hideGameObjects(Kataomoi.gaugeRenderer[0].gameObject);
+                    Kataomoi.gaugeRenderer[0].sprite = Kataomoi.getLoveGaugeSprite(0);
+                    Kataomoi.gaugeRenderer[0].color = new Color32(175, 175, 176, 255);
+                    Kataomoi.gaugeRenderer[0].size = new Vector2(300f, 64f);
+                    Kataomoi.gaugeRenderer[0].gameObject.SetActive(true);
+                    Kataomoi.gaugeRenderer[0].transform.localPosition = new Vector3(-3.354069f, -2.429999f, -8f);
+                    Kataomoi.gaugeRenderer[0].transform.localScale = Vector3.one;
+
+                    Kataomoi.gaugeRenderer[1] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], HudManager.Instance.transform);
+                    Kataomoi.gaugeRenderer[1].sprite = Kataomoi.getLoveGaugeSprite(1);
+                    Kataomoi.gaugeRenderer[1].size = new Vector2(261f, 7f);
+                    Kataomoi.gaugeRenderer[1].color = Kataomoi.color;
+                    Kataomoi.gaugeRenderer[1].transform.localPosition = new Vector3(-3.482069f, -2.626999f, -8.1f);
+                    Kataomoi.gaugeRenderer[1].transform.localScale = Vector3.one;
+
+                    Kataomoi.gaugeRenderer[2] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], HudManager.Instance.transform);
+                    Kataomoi.gaugeRenderer[2].sprite = Kataomoi.getLoveGaugeSprite(2);
+                    Kataomoi.gaugeRenderer[2].color = Kataomoi.gaugeRenderer[0].color;
+                    Kataomoi.gaugeRenderer[2].size = new Vector2(300f, 64f);
+                    Kataomoi.gaugeRenderer[2].transform.localPosition = new Vector3(-3.354069f, -2.429999f, -8.2f);
+                    Kataomoi.gaugeRenderer[2].transform.localScale = Vector3.one;
+
+                    Kataomoi.gaugeTimer = 1.0f;
+                }
+            }
+        }
     }
 
     [HarmonyPatch]
     class IntroPatch {
         public static void setupIntroTeamIcons(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
             // Intro solo teams
-            if (PlayerControl.LocalPlayer == Jester.jester || PlayerControl.LocalPlayer == Jackal.jackal || PlayerControl.LocalPlayer == Arsonist.arsonist || PlayerControl.LocalPlayer == Vulture.vulture || PlayerControl.LocalPlayer == Lawyer.lawyer) {
+            if (PlayerControl.LocalPlayer == Jester.jester || PlayerControl.LocalPlayer == Jackal.jackal || PlayerControl.LocalPlayer == Arsonist.arsonist || PlayerControl.LocalPlayer == Vulture.vulture || PlayerControl.LocalPlayer == Lawyer.lawyer || PlayerControl.LocalPlayer == Kataomoi.kataomoi) {
                 var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
                 soloTeam.Add(PlayerControl.LocalPlayer);
                 yourTeam = soloTeam;
@@ -128,6 +170,9 @@ namespace TheOtherRoles.Patches {
                 if (infos.Any(info => info.roleId == RoleId.Lover)) {
                     PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
                     __instance.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
+                }
+                if (infos.Any(info => info.roleId == RoleId.Kataomoi)) {
+                    __instance.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ Your unrequited love target is {Kataomoi.target?.Data?.PlayerName ?? ""} ♥");
                 }
                 if (Deputy.knowsSheriff && Deputy.deputy != null && Sheriff.sheriff != null) {
                     if (infos.Any(info => info.roleId == RoleId.Sheriff)) 

@@ -1,4 +1,4 @@
-  
+﻿  
 using HarmonyLib;
 using static TheOtherRoles.TheOtherRoles;
 using static TheOtherRoles.GameHistory;
@@ -20,6 +20,7 @@ namespace TheOtherRoles.Patches {
         ArsonistWin = 14,
         VultureWin = 15,
         LawyerSoloWin = 16,
+        KataomoiWin = 80,
         TaskMasterWin = 100,
     }
 
@@ -37,6 +38,7 @@ namespace TheOtherRoles.Patches {
         AdditionalLawyerStolenWin,
         AdditionalAlivePursuerWin,
         TaskMasterTeamWin,
+        KataomoiWin,
     }
 
     static class AdditionalTempData {
@@ -58,6 +60,7 @@ namespace TheOtherRoles.Patches {
             public int TasksTotal  {get;set;}
             public int ExTasksCompleted { get; set; }
             public int ExTasksTotal { get; set; }
+            public string ExtraInfo { get; set; }
         }
     }
 
@@ -88,6 +91,10 @@ namespace TheOtherRoles.Patches {
                 bool isTaskMaster = TaskMaster.isTaskMaster(playerControl.PlayerId);
                 bool isTaskMasterExTasks = isTaskMaster && TaskMaster.isTaskComplete;
 
+                string extraInfo = "";
+                if (Kataomoi.kataomoi != null && Kataomoi.target == playerControl)
+                    extraInfo = Helpers.cs(Kataomoi.color, "♥");
+
                 AdditionalTempData.playerRoles.Add(new AdditionalTempData.PlayerRoleInfo()
                 { 
                     PlayerName = playerControl.Data.PlayerName,
@@ -96,10 +103,11 @@ namespace TheOtherRoles.Patches {
                     TasksCompleted = isTaskMasterExTasks ? allTasks : tasksCompleted,
                     ExTasksTotal = isTaskMasterExTasks ? TaskMaster.allExTasks : isTaskMaster ? TaskMasterTaskHelper.GetTaskMasterTasks() : 0,
                     ExTasksCompleted = isTaskMasterExTasks ? TaskMaster.clearExTasks : 0,
+                    ExtraInfo = extraInfo,
                 });
             }
 
-            // Remove Jester, Arsonist, Vulture, Jackal, former Jackals and Sidekick from winners (if they win, they'll be readded)
+            // Remove Jester, Arsonist, Vulture, Jackal, former Jackals and Sidekick, Kataomoi from winners (if they win, they'll be readded)
             List<PlayerControl> notWinners = new List<PlayerControl>();
             if (Jester.jester != null) notWinners.Add(Jester.jester);
             if (Sidekick.sidekick != null) notWinners.Add(Sidekick.sidekick);
@@ -109,6 +117,7 @@ namespace TheOtherRoles.Patches {
             if (Madmate.madmate != null) notWinners.Add(Madmate.madmate);
             if (Lawyer.lawyer != null) notWinners.Add(Lawyer.lawyer);
             if (Pursuer.pursuer != null) notWinners.Add(Pursuer.pursuer);
+            if (Kataomoi.kataomoi != null) notWinners.Add(Kataomoi.kataomoi);
 
             notWinners.AddRange(Jackal.formerJackals);
 
@@ -126,6 +135,7 @@ namespace TheOtherRoles.Patches {
             bool vultureWin = Vulture.vulture != null && gameOverReason == (GameOverReason)CustomGameOverReason.VultureWin;
             bool lawyerSoloWin = Lawyer.lawyer != null && gameOverReason == (GameOverReason)CustomGameOverReason.LawyerSoloWin;
             bool taskMasterTeamWin = TaskMaster.taskMaster != null && gameOverReason == (GameOverReason)CustomGameOverReason.TaskMasterWin;
+            bool kataomoiWin = Kataomoi.kataomoi != null && gameOverReason == (GameOverReason)CustomGameOverReason.KataomoiWin;
 
             // Mini lose
             if (miniLose) {
@@ -150,6 +160,14 @@ namespace TheOtherRoles.Patches {
                 WinningPlayerData wpd = new WinningPlayerData(Arsonist.arsonist.Data);
                 TempData.winners.Add(wpd);
                 AdditionalTempData.winCondition = WinCondition.ArsonistWin;
+            }
+
+            // Kataomoi win
+            else if (kataomoiWin) {
+                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+                WinningPlayerData wpd = new WinningPlayerData(Kataomoi.kataomoi.Data);
+                TempData.winners.Add(wpd);
+                AdditionalTempData.winCondition = WinCondition.KataomoiWin;
             }
 
             // Vulture win
@@ -226,7 +244,8 @@ namespace TheOtherRoles.Patches {
                     else if (p != Madmate.madmate && p != Jester.jester && p != Jackal.jackal && p != Sidekick.sidekick && p != Arsonist.arsonist && p != Vulture.vulture && !Jackal.formerJackals.Contains(p) && !p.Data.Role.IsImpostor)
                         TempData.winners.Add(new WinningPlayerData(p.Data));
                 }
-            } else {
+            }
+            else {
                 // Madmate wins if team impostors wins
                 if (Madmate.madmate != null) {
                     foreach (WinningPlayerData winner in TempData.winners) {
@@ -339,6 +358,17 @@ namespace TheOtherRoles.Patches {
                 textRenderer.text = "Arsonist Wins";
                 textRenderer.color = Arsonist.color;
             }
+            else if (AdditionalTempData.winCondition == WinCondition.KataomoiWin) {
+                textRenderer.text = "Kataomoi Wins";
+                foreach (var data in AdditionalTempData.playerRoles) {
+                    if (data.ExtraInfo.Contains("♥")) {
+                        textRenderer.text += $"\nI want you to see and touch love more...";
+                        break;
+                    }
+                }
+                textRenderer.color = Kataomoi.color;
+                __instance.BackgroundBar.material.SetColor("_Color", Kataomoi.color);
+            }
             else if (AdditionalTempData.winCondition == WinCondition.VultureWin) {
                 textRenderer.text = "Vulture Wins";
                 textRenderer.color = Vulture.color;
@@ -392,8 +422,10 @@ namespace TheOtherRoles.Patches {
                     var roles = string.Join(" ", data.Roles.Select(x => Helpers.cs(x.color, x.name)));
                     var taskInfo = data.TasksTotal > 0 ? $" - <color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
                     var taskInfo2 = data.ExTasksTotal > 0 ? $" Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
-                    roleSummaryText.AppendLine($"{data.PlayerName} - {roles}{taskInfo}{taskInfo2}");
+                    roleSummaryText.AppendLine($"{data.ExtraInfo}{data.PlayerName} - {roles}{taskInfo}{taskInfo2}");
                 }
+
+
                 TMPro.TMP_Text roleSummaryTextMesh = roleSummary.GetComponent<TMPro.TMP_Text>();
                 roleSummaryTextMesh.alignment = TMPro.TextAlignmentOptions.TopLeft;
                 roleSummaryTextMesh.color = Color.white;
@@ -420,6 +452,7 @@ namespace TheOtherRoles.Patches {
             if (CheckAndEndGameForMiniLose(__instance)) return false;
             if (CheckAndEndGameForJesterWin(__instance)) return false;
             if (CheckAndEndGameForLawyerMeetingWin(__instance)) return false;
+            if (CheckAndEndGameForKataomoiWin(__instance)) return false;
             if (CheckAndEndGameForArsonistWin(__instance)) return false;
             if (CheckAndEndGameForVultureWin(__instance)) return false;
             if (CheckAndEndGameForSabotageWin(__instance)) return false;
@@ -453,6 +486,15 @@ namespace TheOtherRoles.Patches {
             if (Jester.triggerJesterWin) {
                 __instance.enabled = false;
                 UncheckedEndGame((GameOverReason)CustomGameOverReason.JesterWin, false);
+                return true;
+            }
+            return false;
+        }
+
+        private static bool CheckAndEndGameForKataomoiWin(ShipStatus __instance) {
+            if (Kataomoi.triggerKataomoiWin) {
+                __instance.enabled = false;
+                UncheckedEndGame((GameOverReason)CustomGameOverReason.KataomoiWin, false);
                 return true;
             }
             return false;

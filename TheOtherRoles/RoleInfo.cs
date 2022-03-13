@@ -74,6 +74,7 @@ namespace TheOtherRoles
         public static RoleInfo evilYasuna = new RoleInfo("Evil Yasuna", Palette.ImpostorRed, "Exile smart crewmates.", "Exile smart crewmates.", RoleId.EvilYasuna);
         public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
         public static RoleInfo doorHacker = new RoleInfo("DoorHacker", DoorHacker.color, "Slip through the door and cover your tracks.", "Slip through the door and cover your tracks.", RoleId.DoorHacker);
+        public static RoleInfo kataomoi = new RoleInfo("Kataomoi", Kataomoi.color, "Become one with your unrequited love.", "Become one with your unrequited love.", RoleId.Kataomoi, true);
 
         public static List<RoleInfo> allRoleInfos = new List<RoleInfo>() {
             impostor,
@@ -126,6 +127,7 @@ namespace TheOtherRoles
             evilYasuna,
             taskMaster,
             doorHacker,
+            kataomoi,
         };
 
         public static List<RoleInfo> getRoleInfoForPlayer(PlayerControl p) {
@@ -178,6 +180,7 @@ namespace TheOtherRoles
             if (p == Yasuna.yasuna) infos.Add(p.Data.Role.IsImpostor ? evilYasuna : yasuna);
             if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
             if (p == DoorHacker.doorHacker) infos.Add(doorHacker);
+            if (p == Kataomoi.kataomoi) infos.Add(kataomoi);
 
             // Default roles
             if (infos.Count == 0 && p.Data.Role.IsImpostor) infos.Add(impostor); // Just Impostor
@@ -197,6 +200,7 @@ namespace TheOtherRoles
 
             roleName = String.Join(" ", roleList.Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
             if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
+
             return roleName;
         }
     }
