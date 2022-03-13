@@ -4,6 +4,7 @@ This mod is The Other Roles extension mod which implements new roles and systems
   - [Yasuna](#yasuna-mr-edition-only)/[Evil Yasuna](#yasuna-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Task Master](#task-master-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Door Hacker](#door-hacker-mr-edition-only) by [miru-y](https://github.com/miru-y)
+  - [Kataomoi](#kataomoi-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Pepper, Tsunaarare)
 - **New Systems**
   - **System:** Added an option to set the "Vital" available time.
   - **System:** Added an option to set the "Security camera" available time.
@@ -18,6 +19,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v1.6.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.6.0) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.6.0/TheOtherRolesMR.zip)
 | [v1.5.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.5.0) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.5.0/TheOtherRolesMR.zip)
 | [v1.4.4](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.4) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.4/TheOtherRolesMR.zip)
 | [v1.4.3](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.4.3) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.4.3/TheOtherRolesMR.zip)
@@ -47,7 +49,7 @@ Even more roles are coming soon :)
 | [Camouflager](#camouflager) | [Engineer](#engineer) | [Sidekick](#sidekick) |  |
 | [Cleaner](#cleaner) | [Hacker](#hacker) | [Vulture](#vulture) |  |
 | [Eraser](#eraser) | [Lighter](#lighter) | [Lawyer](#lawyer) |  |
-| [Godfather (Mafia)](#mafia) | [Mayor](#mayor) |  |  |
+| [Godfather (Mafia)](#mafia) | [Mayor](#mayor) | [Kataomoi (MR Edition only)](#kataomoi-mr-edition-only) |  |
 | [Mafioso (Mafia)](#mafia) | [Medic](#medic) |  |  |
 | [Janitor (Mafia)](#mafia)  | [Security Guard](#security-guard) |  |  |
 | [Morphling](#morphling) | [Seer](#seer) |  |  |
@@ -1423,6 +1425,38 @@ The Pursuer is still a neutral role, but has a different goal to win the game; t
 In order to achieve this goal, the Pursuer has an ability called "Blank", where they can fill a killers (this also includes the Sheriff) weapon with a blank. So, if the killer attempts to kill someone, the killer will miss their target, and their cooldowns will be triggered as usual.
 If the killer fires the "Blank", shields (e.g. Medic shield or Time Master shield) will not be triggered.
 The Pursuer has tasks (which can already be done while being a Lawyer), that count towards the task win for the Crewmates. If the Pursuer dies, their tasks won't be counted anymore.
+
+-----------------------
+
+## Kataomoi (MR Edition only)
+### **Team: Neutral**
+Kataomoi is a Neutral role that aims for a solo victory by killing a specific target.\
+***Kataomoi = one-sided love**\
+At the beginning of the game, a specific target is displayed.\
+To kill a specific target, the player must approach the target several times and stare ("Stare button") at it for a certain period of time.\
+Kataomoi has two features that are useful for staring at a specific object.
+When the player is able to stare at a specific target several times, the "Stare button" changes to a "Love button".\
+Then, when the player approaches the target again and presses the Love button, solo victory.
+
+1. Search (Search button)\
+This is a feature that allows the location of a specific target to be indicated by a map or pink arrow for a certain period of time.
+
+2. Stalking (Stalking button)\
+This is a feature that makes the player invisible for a certain period of time.\
+While invisible, the player is invisible to other players.
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+| Kataomoi Stare Cooldown | Post-use cool time after Stare execution. |
+| Kataomoi Stare Duration | Time required to achieve Stare. |
+| Kataomoi Stare Count | Number of Stares achieved. (Kataomoi's win condition is achieved after this number of Stares) |
+| Kataomoi Stalking Cooldown | Cool time after use after Stalking execution. |
+| Kataomoi Stalking Duration | Effect duration of Stalking. |
+| Kataomoi Stalking Fade Time | Character fade in/out time at the start and end of Stalking. |
+| Kataomoi Search Cooldown | Post-use cool time after Search execution. |
+| Kataomoi Search Duration | Effect duration of Search. |
+-----------------------
 
 # Source code
 It's bad I know, this is a side project and my second week of modding. So there are no best practices around here.
