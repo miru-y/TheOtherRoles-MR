@@ -70,6 +70,12 @@ namespace TheOtherRoles.Patches {
                     killButton.SetFillUp(0.00000001f, 0.00000001f);
                     killButton.SetDisabled();
                     Helpers.hideGameObjects(Kataomoi.gaugeRenderer[0].gameObject);
+                    var components = killButton.GetComponents<Component>();
+                    foreach (var c in components) {
+                        if ((c as KillButton) == null && (c as SpriteRenderer) == null)
+                            GameObject.Destroy(c);
+                    }
+
                     Kataomoi.gaugeRenderer[0].sprite = Kataomoi.getLoveGaugeSprite(0);
                     Kataomoi.gaugeRenderer[0].color = new Color32(175, 175, 176, 255);
                     Kataomoi.gaugeRenderer[0].size = new Vector2(300f, 64f);
