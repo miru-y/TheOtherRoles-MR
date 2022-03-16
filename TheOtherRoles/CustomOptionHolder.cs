@@ -424,7 +424,7 @@ namespace TheOtherRoles {
             kataomoiStalkingCooldown = CustomOption.Create(910000304, "Kataomoi Stalking Cooldown", 20f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
             kataomoiStalkingDuration = CustomOption.Create(910000305, "Kataomoi Stalking Duration", 10f, 1f, 30f, 1f, kataomoiSpawnRate);
             kataomoiStalkingFadeTime = CustomOption.Create(910000306, "Kataomoi Stalking Fade Time", 0.5f, 0.0f, 2.5f, 0.5f, kataomoiSpawnRate);
-            kataomoiSearchCooldown = CustomOption.Create(910000307, "Kataomoi Search Cooldown", 20f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
+            kataomoiSearchCooldown = CustomOption.Create(910000307, "Kataomoi Search Cooldown", 10f, 2.5f, 60f, 2.5f, kataomoiSpawnRate);
             kataomoiSearchDuration = CustomOption.Create(910000308, "Kataomoi Search Duration", 10f, 1f, 30f, 1f, kataomoiSpawnRate);
 
             jackalSpawnRate = CustomOption.Create(220, cs(Jackal.color, "Jackal"), rates, null, true, true);
