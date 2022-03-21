@@ -18,15 +18,15 @@ namespace TheOtherRoles.Patches {
                 return;
             me.clearAllTasks();
             List<byte> list = new List<byte>(10);
-            SetTasksToList(
+            SetTasksToList2(
                 ref list,
                 ShipStatus.Instance.CommonTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateCommonTasks.getFloat()));
-            SetTasksToList(
+            SetTasksToList2(
                 ref list,
                 ShipStatus.Instance.LongTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateLongTasks.getFloat()));
-            SetTasksToList(
+            SetTasksToList2(
                 ref list,
                 ShipStatus.Instance.NormalTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateShortTasks.getFloat()));
@@ -56,6 +56,29 @@ namespace TheOtherRoles.Patches {
             int numTasks = Math.Min(playerTasks.Count, numConfiguredTasks);
             for (int i = 0; i < numTasks; i++) {
                 list.Add((byte)playerTasks[i].Index);
+            }
+        }
+
+
+        private static void SetTasksToList2(
+            ref List<byte> list,
+            List<NormalPlayerTask> playerTasks,
+            int numConfiguredTasks)
+        {
+            if (numConfiguredTasks == 0)
+                return;
+            List<TaskTypes> taskTypesList = new List<TaskTypes>();
+            playerTasks.Shuffle();
+            int count = 0;
+            int numTasks = Math.Min(playerTasks.Count, numConfiguredTasks);
+            for (int i = 0; i < playerTasks.Count; i++) {
+                if (taskTypesList.Contains(playerTasks[i].TaskType))
+                    continue;
+                taskTypesList.Add(playerTasks[i].TaskType);
+                ++count;
+                list.Add((byte)playerTasks[i].Index);
+                if (count >= numTasks)
+                    break;
             }
         }
     }
