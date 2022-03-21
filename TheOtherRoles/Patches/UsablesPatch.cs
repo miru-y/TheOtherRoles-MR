@@ -397,8 +397,10 @@ namespace TheOtherRoles.Patches {
 
                 if (PlayerControl.LocalPlayer.Data.IsDead)
                     return true;
+
                 if (CustomOptionHolder.enabledAdminTimer.getBool())
                     return MapOptions.AdminTimer > 0;
+                
                 return true;
             }
         }
@@ -415,7 +417,8 @@ namespace TheOtherRoles.Patches {
 
                 // Consume time to see admin map if the player is alive
                 if (!PlayerControl.LocalPlayer.Data.IsDead &&
-                    !(EvilHacker.evilHacker != null && EvilHacker.evilHacker == PlayerControl.LocalPlayer)) {
+                    !(EvilHacker.evilHacker != null && EvilHacker.evilHacker == PlayerControl.LocalPlayer) &&
+                    CustomOptionHolder.enabledAdminTimer.getBool()) {
                     // Show the grey map if players ran out of admin time.
                     if (MapOptions.AdminTimer <= 0) {
                         __instance.isSab = true;
