@@ -8,7 +8,10 @@ This mod is The Other Roles extension mod which implements new roles and systems
 - **New Systems**
   - **System:** Added an option to set the "Vital" available time.
   - **System:** Added an option to set the "Security camera" available time.
-  - **System:** Added "Custom Preset System".
+  - **System:** Added an option to "Enable Randomization In FixWiring Task".
+  - **System:** "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)".
+    - Reference from "[TheOtherRoles-GM-Haoming](https://github.com/haoming37/TheOtherRoles-GM-Haoming)".
+  - **System:** Added "Custom Preset System"
   - **Lobby UI:** Improve "The Other Roles Settings" display on the left.
 -  **New The Other Hats Skin**
    - Added [The Other Hats-MR](https://github.com/miru-y/TheOtherHats-MR/).
@@ -19,6 +22,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v1.7.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.7.2) | 2022.2.8s | [TheOtherRoles v3.4.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.4)/[v3.4.4.3+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.4.3%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.7.2/TheOtherRolesMR.zip)
 | [v1.7.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.7.1) | 2022.2.8s | [TheOtherRoles v3.4.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.4)/[v3.4.4.3+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.4.3%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.7.1/TheOtherRolesMR.zip)
 | [v1.7.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.7.0) | 2022.2.8s | [TheOtherRoles v3.4.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.4)/[v3.4.4.3+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.4.3%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.7.0/TheOtherRolesMR.zip)
 | [v1.6.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v1.6.2) | 2022.2.8s | [TheOtherRoles v3.4.3](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.3)/[For v2022.2.8](https://github.com/tomarai/TheOtherRoles/releases/tag/hotfix-0) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v1.6.2/TheOtherRolesMR.zip)
