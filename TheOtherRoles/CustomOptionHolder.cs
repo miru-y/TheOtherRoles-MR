@@ -285,6 +285,7 @@ namespace TheOtherRoles {
         public static CustomOption noVoteIsSelfVote;
         public static CustomOption hidePlayerNames;
         public static CustomOption allowParallelMedBayScans;
+        public static CustomOption enableRandomizationInFixWiringTask;
 
         public static CustomOption dynamicMap;
         public static CustomOption dynamicMapEnableSkeld;
@@ -577,6 +578,8 @@ namespace TheOtherRoles {
             madmateExileCrewmate = CustomOption.Create(918, "Exile A Crewmate When Madmate Is exiled", false, madmateSpawnRate);
 
             // Other options
+            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, "Enable Randomization In FixWiring Task", false);
+
             maxNumberOfMeetings = CustomOption.Create(3, "Number Of Meetings (excluding Mayor meeting)", 10, 0, 15, 1, null, true);
             blockSkippingInEmergencyMeetings = CustomOption.Create(4, "Block Skipping In Emergency Meetings", false);
             noVoteIsSelfVote = CustomOption.Create(5, "No Vote Is Self Vote", false, blockSkippingInEmergencyMeetings);
