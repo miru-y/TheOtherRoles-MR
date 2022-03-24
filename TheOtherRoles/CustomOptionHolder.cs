@@ -286,6 +286,7 @@ namespace TheOtherRoles {
         public static CustomOption hidePlayerNames;
         public static CustomOption allowParallelMedBayScans;
         public static CustomOption enableRandomizationInFixWiringTask;
+        public static CustomOption enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip;
 
         public static CustomOption dynamicMap;
         public static CustomOption dynamicMapEnableSkeld;
@@ -579,6 +580,7 @@ namespace TheOtherRoles {
 
             // Other options
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, "Enable Randomization In FixWiring Task", false);
+            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
 
             maxNumberOfMeetings = CustomOption.Create(3, "Number Of Meetings (excluding Mayor meeting)", 10, 0, 15, 1, null, true);
             blockSkippingInEmergencyMeetings = CustomOption.Create(4, "Block Skipping In Emergency Meetings", false);

@@ -100,6 +100,19 @@ namespace TheOtherRoles.Patches {
                     Kataomoi.gaugeTimer = 1.0f;
                 }
             }
+
+            if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip.getBool()) {
+                var objList = GameObject.FindObjectsOfType<Console>().ToList();
+                objList.Find(x => x.name == "task_garbage1").checkWalls = true;
+                objList.Find(x => x.name == "task_garbage2").checkWalls = true;
+                objList.Find(x => x.name == "task_garbage3").checkWalls = true;
+                objList.Find(x => x.name == "task_garbage4").checkWalls = true;
+                objList.Find(x => x.name == "task_garbage5").checkWalls = true;
+                objList.Find(x => x.name == "task_shower").checkWalls = true;
+                objList.Find(x => x.name == "task_developphotos").checkWalls = true;
+                objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.Armory).checkWalls = true;
+                objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.MainHall).checkWalls = true;
+            }
         }
     }
 
