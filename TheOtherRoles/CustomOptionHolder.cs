@@ -321,6 +321,10 @@ namespace TheOtherRoles {
             impostorRolesCountMin = CustomOption.Create(304, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Impostor Roles"), 0f, 0f, 3f, 1f);
             impostorRolesCountMax = CustomOption.Create(305, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Impostor Roles"), 0f, 0f, 3f, 1f);
 
+            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, "Enable Randomization In FixWiring Task", false);
+            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
+
+
             adminTimer = CustomOption.Create(999, "Admin Map Available Duration", 10f, 0f, 120f, 1f);
             enabledAdminTimer = CustomOption.Create(998, "Enable Admin Map Available Duration", true);
             heliSabotageSystemTimeLimit = CustomOption.Create(996, "Time Limit of Avert Crash Time", 90f, 5f, 120f, 5f);
