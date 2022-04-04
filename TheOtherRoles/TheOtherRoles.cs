@@ -1801,7 +1801,7 @@ namespace TheOtherRoles
 
                 if (kataomoi.isDead()) return;
                 if (_isStalking && stalkingTimer > 0) {
-                    kataomoi.myRend.material.SetFloat("_Outline", 0f);
+                    kataomoi.MyRend.material.SetFloat("_Outline", 0f);
                     stalkingTimer = Mathf.Max(0f, stalkingTimer - Time.fixedDeltaTime);
                     if (stalkingFadeTime > 0) {
                         float elapsedTime = stalkingDuration - stalkingTimer;

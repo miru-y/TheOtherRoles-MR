@@ -4,6 +4,7 @@ using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Hazel;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
@@ -17,8 +18,12 @@ namespace TheOtherRoles.Patches {
                 foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
                     GameData.PlayerInfo data = p.Data;
                     PoolablePlayer player = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, HudManager.Instance.transform);
-                    PlayerControl.SetPlayerMaterialColors(data.DefaultOutfit.ColorId, player.Body);
-                    DestroyableSingleton<HatManager>.Instance.SetSkin(player.Skin.layer, data.DefaultOutfit.SkinId);
+                    PlayerControl.SetPlayerMaterialColors(data.DefaultOutfit.ColorId, player.CurrentBodySprite.BodySprite);
+                    SkinData skinById = DestroyableSingleton<HatManager>.Instance.GetSkinById(data.DefaultOutfit.SkinId);
+                    if (skinById) {
+                        player.Skin.layer.sprite = skinById.viewData.viewData.IdleFrame;
+                    }
+
                     player.HatSlot.SetHat(data.DefaultOutfit.HatId, data.DefaultOutfit.ColorId);
                     PlayerControl.SetPetImage(data.DefaultOutfit.PetId, data.DefaultOutfit.ColorId, player.PetSlot);
                     player.NameText.text = data.PlayerName;
@@ -168,10 +173,30 @@ namespace TheOtherRoles.Patches {
             }
         }
 
-        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.SetUpRoleText))]
-        class SetUpRoleTextPatch {
+        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.ShowRole))]
+        class ShowRolePatch
+        {
             public static void Postfix(IntroCutscene __instance) {
                 if (!CustomOptionHolder.activateRoles.getBool()) return; // Don't override the intro of the vanilla roles
+                if (IntroCutsceneShowRoleUpdatePatch.introCutscene != null)
+                    IntroCutsceneShowRoleUpdatePatch.introCutscene = null;
+                else
+                    IntroCutsceneShowRoleUpdatePatch.introCutscene = __instance;
+            }
+        }
+ 
+
+        [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
+        public static class IntroCutsceneShowRoleUpdatePatch
+        {
+            public static IntroCutscene introCutscene;
+
+            public static void Postfix(HudManager __instance) {
+                UpdateRoleText();
+            }
+
+            static void UpdateRoleText() {
+                if (introCutscene == null) return;
 
                 List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
                 RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
@@ -180,37 +205,37 @@ namespace TheOtherRoles.Patches {
                     roleInfo = RoleInfo.crewmate;
 
                 if (roleInfo != null) {
-                    __instance.RoleText.text = roleInfo.name;
-                    __instance.RoleText.color = roleInfo.color;
-                    __instance.RoleBlurbText.text = roleInfo.introDescription;
-                    __instance.RoleBlurbText.color = roleInfo.color;
+                    introCutscene.RoleText.text = roleInfo.name;
+                    introCutscene.RoleText.color = roleInfo.color;
+                    introCutscene.RoleBlurbText.text = roleInfo.introDescription;
+                    introCutscene.RoleBlurbText.color = roleInfo.color;
                 }
 
                 if (infos.Any(info => info.roleId == RoleId.Lover)) {
                     PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
-                    __instance.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
+                    introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
                 }
                 if (infos.Any(info => info.roleId == RoleId.Kataomoi)) {
-                    __instance.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ Your unrequited love target is {Kataomoi.target?.Data?.PlayerName ?? ""} ♥");
+                    introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ Your unrequited love target is {Kataomoi.target?.Data?.PlayerName ?? ""} ♥");
                 }
                 if (Deputy.knowsSheriff && Deputy.deputy != null && Sheriff.sheriff != null) {
-                    if (infos.Any(info => info.roleId == RoleId.Sheriff)) 
-                        __instance.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Deputy is {Deputy.deputy?.Data?.PlayerName ?? ""}");
+                    if (infos.Any(info => info.roleId == RoleId.Sheriff))
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Deputy is {Deputy.deputy?.Data?.PlayerName ?? ""}");
                     else if (infos.Any(info => info.roleId == RoleId.Deputy))
-                        __instance.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Sheriff is {Sheriff.sheriff?.Data?.PlayerName ?? ""}");
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Sheriff is {Sheriff.sheriff?.Data?.PlayerName ?? ""}");
                 }
-
             }
         }
 
+
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
         class BeginCrewmatePatch {
-            public static void Prefix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
-                setupIntroTeamIcons(__instance, ref yourTeam);
+            public static void Prefix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay) {
+                setupIntroTeamIcons(__instance, ref teamToDisplay);
             }
 
-            public static void Postfix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
-                setupIntroTeam(__instance, ref yourTeam);
+            public static void Postfix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay) {
+                setupIntroTeam(__instance, ref teamToDisplay);
 
                 /*
                  * Workaround
