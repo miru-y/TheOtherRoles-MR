@@ -325,7 +325,7 @@ namespace TheOtherRoles.Patches {
                 poolablePlayer.transform.localScale = vector;
                 poolablePlayer.UpdateFromPlayerOutfit(winningPlayerData2, winningPlayerData2.IsDead);
                 if (winningPlayerData2.IsDead) {
-                    poolablePlayer.Body.sprite = __instance.GhostSprite;
+                    poolablePlayer.CurrentBodySprite.BodySprite.sprite = __instance.GhostSprite;
                     poolablePlayer.SetDeadFlipX(i % 2 == 0);
                 } else {
                     poolablePlayer.SetFlipX(i % 2 == 0);
