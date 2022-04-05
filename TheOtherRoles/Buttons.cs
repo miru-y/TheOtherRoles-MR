@@ -493,7 +493,9 @@ namespace TheOtherRoles
                 EvilHacker.getButtonSprite(),
                 new Vector3(-1.8f, -0.06f, 0),
                 __instance,
-                KeyCode.F
+                KeyCode.F,
+                false,
+                "ADMIN"
             );
 
             // EvilHacker creates madmate button
