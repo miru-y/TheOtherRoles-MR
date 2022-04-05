@@ -129,7 +129,7 @@ namespace TheOtherRoles.Modules {
         private static HatData CreateHatBehaviour(CustomHat ch, bool fromDisk = false, bool testOnly = false) {
             if (hatShader == null && DestroyableSingleton<HatManager>.InstanceExists) {
                 foreach (var h in DestroyableSingleton<HatManager>.Instance.allHats) {
-                    if (h.hatViewData.viewData.AltShader != null) {
+                    if (h.hatViewData?.viewData?.AltShader != null) {
                         hatShader = h.hatViewData.viewData.AltShader;
                         break;
                     }
@@ -137,6 +137,7 @@ namespace TheOtherRoles.Modules {
             }
 
             HatData hat = ScriptableObject.CreateInstance<HatData>();
+            hat.hatViewData.viewData = new HatViewData();
             hat.hatViewData.viewData.MainImage = CreateHatSprite(ch.resource, fromDisk);
             if (ch.backresource != null) {
                 hat.hatViewData.viewData.BackImage = CreateHatSprite(ch.backresource, fromDisk);
@@ -349,7 +350,7 @@ namespace TheOtherRoles.Modules {
 
                 var orderedKeys = packages.Keys.OrderBy((string x) => {
                     if (x == innerslothPackageName) return 1000;
-                    if (x == "Developer Hats") return 0;
+                    if (x == "Developer Hats") return 900;
                     return 500;
                 });
                 foreach (string key in orderedKeys) {
@@ -366,9 +367,9 @@ namespace TheOtherRoles.Modules {
     public class CustomHatLoader {
         public static bool running = false;
         private static readonly string[] Repos = new string[] {
-            "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
-            "https://raw.githubusercontent.com/Eisbison/TheOtherHats/master",
             "https://raw.githubusercontent.com/yukinogatari/TheOtherHats-GM/master",
+            "https://raw.githubusercontent.com/Eisbison/TheOtherHats/master",
+            "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
         };
 
         public static List<CustomHatOnline> hatdetails = new List<CustomHatOnline>();
