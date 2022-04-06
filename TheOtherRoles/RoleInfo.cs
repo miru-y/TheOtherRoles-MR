@@ -76,6 +76,9 @@ namespace TheOtherRoles
         public static RoleInfo doorHacker = new RoleInfo("DoorHacker", DoorHacker.color, "Slip through the door and cover your tracks.", "Slip through the door and cover your tracks.", RoleId.DoorHacker);
         public static RoleInfo kataomoi = new RoleInfo("Kataomoi", Kataomoi.color, "Become one with your unrequited love.", "Become one with your unrequited love.", RoleId.Kataomoi, true);
 
+        // Task Vs Mode
+        public static RoleInfo taskRacer = new RoleInfo("Task Racer", TaskRacer.color, "Finish the task before everyone\nelse and aim for 1st!", "Finish the task before everyone\nelse and aim for 1st!", RoleId.TaskRacer);
+
         public static List<RoleInfo> allRoleInfos = new List<RoleInfo>() {
             impostor,
             godfather,
@@ -128,6 +131,9 @@ namespace TheOtherRoles
             taskMaster,
             doorHacker,
             kataomoi,
+
+            // Task Vs Mode
+            taskRacer,
         };
 
         public static List<RoleInfo> getRoleInfoForPlayer(PlayerControl p) {
@@ -182,6 +188,10 @@ namespace TheOtherRoles
             if (p == DoorHacker.doorHacker) infos.Add(doorHacker);
             if (p == Kataomoi.kataomoi) infos.Add(kataomoi);
 
+            // Task Vs Mode
+            if (TaskRacer.isTaskRacer(p))
+                infos.Add(taskRacer);
+
             // Default roles
             if (infos.Count == 0 && p.Data.Role.IsImpostor) infos.Add(impostor); // Just Impostor
             if (infos.Count == 0 && !p.Data.Role.IsImpostor) infos.Add(crewmate); // Just Crewmate
@@ -194,12 +204,19 @@ namespace TheOtherRoles
 
         public static String GetRolesString(PlayerControl p, bool useColors, bool isDead) {
             string roleName;
-            var roleList = getRoleInfoForPlayer(p);
-            if (roleList.Count > 0 && roleList[0].roleId == RoleId.TaskMaster && !isDead && TaskMaster.becomeATaskMasterWhenCompleteAllTasks && !TaskMaster.isTaskComplete)
-                roleList[0] = RoleInfo.crewmate;
 
-            roleName = String.Join(" ", roleList.Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
-            if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
+            // Task Vs Mode
+            if (TaskRacer.isValid()) {
+                roleName = TaskRacer.getRankText(TaskRacer.getRank(p), useColors);
+            } else {
+                var roleList = getRoleInfoForPlayer(p);
+                if (roleList.Count > 0 && roleList[0].roleId == RoleId.TaskMaster && !isDead && TaskMaster.becomeATaskMasterWhenCompleteAllTasks && !TaskMaster.isTaskComplete)
+                    roleList[0] = RoleInfo.crewmate;
+
+                roleName = String.Join(" ", roleList.Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
+                if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
+
+            }
 
             return roleName;
         }

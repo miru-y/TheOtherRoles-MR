@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using InnerNet;
 
 namespace TheOtherRoles
 {
@@ -62,6 +63,7 @@ namespace TheOtherRoles
         TaskMaster,
         DoorHacker,
         Kataomoi,
+        TaskRacer, // Task Vs Mode Only
         Crewmate,
         Impostor
     }
@@ -83,6 +85,12 @@ namespace TheOtherRoles
         DynamicMapOption,
         ConsumeVitalTime,
         ConsumeSecurityCameraTime,
+        UncheckedEndGame,
+        TaskVsMode_Ready, // Task Vs Mode
+        TaskVsMode_Start, // Task Vs Mode
+        TaskVsMode_AllTaskCompleted, // Task Vs Mode
+        TaskVsMode_MakeItTheSameTaskAsTheHost, // Task Vs Mode
+        TaskVsMode_MakeItTheSameTaskAsTheHostDetail, // Task Vs Mode
 
         // Role functionality
 
@@ -317,6 +325,11 @@ namespace TheOtherRoles
                     case RoleId.Kataomoi:
                         Kataomoi.kataomoi = player;
                         break;
+
+                    // Task Vs Mode
+                    case RoleId.TaskRacer:
+                        TaskRacer.addTaskRacer(player);
+                        break;
                     }
                 }
         }
@@ -351,6 +364,10 @@ namespace TheOtherRoles
             if (source != null && target != null) {
                 if (showAnimation == 0) KillAnimationCoPerformKillPatch.hideNextAnimation = true;
                 source.MurderPlayer(target);
+                // Task Vs Mode
+                if (TaskRacer.isValid()) {
+                    TaskRacer.updateControl();
+                }
             }
         }
 
@@ -372,6 +389,38 @@ namespace TheOtherRoles
             SecurityCameraTimer -= delta;
         }
 
+        // Task Vs Mode
+        public static void taskVsModeReady(byte playerId) {
+            if (!TaskRacer.isValid()) return;
+            var taskRacer = TaskRacer.getTaskRacer(playerId);
+            if (taskRacer == null) return;
+            TaskRacer.onReady(taskRacer);
+        }
+
+        // Task Vs Mode
+        public static void taskVsModeStart() {
+            if (!TaskRacer.isValid()) return;
+            TaskRacer.startGame();
+        }
+
+        // Task Vs Mode
+        public static void taskVsModeAllTaskCompleted(byte playerId, ulong timeMilliSec) {
+            if (!TaskRacer.isValid()) return;
+            TaskRacer.setTaskCompleteTimeSec(playerId, timeMilliSec);
+        }
+
+        // Task Vs Mode
+        public static void taskVsModeMakeItTheSameTaskAsTheHost(byte[] taskTypeIds) {
+            if (!TaskRacer.isValid()) return;
+            TaskRacer.setHostTasks(taskTypeIds);
+        }
+
+        // Task Vs Mode
+        public static void taskVsModeMakeItTheSameTaskAsTheHostDetail(uint taskId, byte[] data) {
+            if (!TaskRacer.isValid()) return;
+            TaskRacer.setHostTaskDetail(taskId, data);
+        }
+
         public static void uncheckedExilePlayer(byte targetId) {
             PlayerControl target = Helpers.playerById(targetId);
             if (target != null) target.Exiled();
@@ -379,6 +428,25 @@ namespace TheOtherRoles
 
         public static void dynamicMapOption(byte mapId) {
             PlayerControl.GameOptions.MapId = mapId;
+        }
+
+        public static void uncheckedEndGame(byte reason) {
+            AmongUsClient.Instance.GameState = InnerNetClient.GameStates.Ended;
+            Il2CppSystem.Collections.Generic.List<ClientData> allClients = AmongUsClient.Instance.allClients;
+            lock (allClients) {
+                AmongUsClient.Instance.allClients.Clear();
+            }
+            var dispatcher = AmongUsClient.Instance.Dispatcher;
+            lock (dispatcher) {
+                AmongUsClient.Instance.Dispatcher.Add(new Action(() => {
+                    ShipStatus.Instance.enabled = false;
+                    ShipStatus.Instance.BeginCalled = false;
+                    AmongUsClient.Instance.OnGameEnd(new EndGameResult((GameOverReason)reason, false));
+                    if (AmongUsClient.Instance.AmHost) {
+                        ShipStatus.RpcEndGame((GameOverReason)reason, false);
+                    }
+                }));
+            }
         }
 
         // Role functionality
@@ -1046,6 +1114,32 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.ConsumeSecurityCameraTime:
                     RPCProcedure.consumeSecurityCameraTime(reader.ReadSingle());
                     break;
+                case (byte)CustomRPC.UncheckedEndGame:
+                    byte reason = reader.ReadByte();
+                    RPCProcedure.uncheckedEndGame(reason);
+                    break;
+                case (byte)CustomRPC.TaskVsMode_Ready: // Task Vs Mode
+                    RPCProcedure.taskVsModeReady(reader.ReadByte());
+                    break;
+                case (byte)CustomRPC.TaskVsMode_Start: // Task Vs Mode
+                    RPCProcedure.taskVsModeStart();
+                    break;
+                case (byte)CustomRPC.TaskVsMode_AllTaskCompleted: // Task Vs Mode
+                    playerId = reader.ReadByte();
+                    var timeMilliSec = reader.ReadUInt64();
+                    RPCProcedure.taskVsModeAllTaskCompleted(playerId, timeMilliSec);
+                    break;
+
+                case (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHost: // Task Vs Mode
+                    byte[] taskTypeIds = reader.BytesRemaining > 0 ? reader.ReadBytes(reader.BytesRemaining) : null;
+                    RPCProcedure.taskVsModeMakeItTheSameTaskAsTheHost(taskTypeIds);
+                    break;
+
+                case (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHostDetail: // Task Vs Mode
+                    uint taskId = reader.ReadUInt32();
+                    byte[] data = reader.BytesRemaining > 0 ? reader.ReadBytes(reader.BytesRemaining) : null;
+                    RPCProcedure.taskVsModeMakeItTheSameTaskAsTheHostDetail(taskId, data);
+                    break;
 
                 // Role functionality
 
@@ -1180,7 +1274,7 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.TaskMasterSetExTasks:
                     playerId = reader.ReadByte();
                     byte oldTaskMasterPlayerId = reader.ReadByte();
-                    byte[] taskTypeIds = reader.BytesRemaining > 0 ? reader.ReadBytes(reader.BytesRemaining) : null;
+                    taskTypeIds = reader.BytesRemaining > 0 ? reader.ReadBytes(reader.BytesRemaining) : null;
                     RPCProcedure.taskMasterSetExTasks(playerId, oldTaskMasterPlayerId, taskTypeIds);
                     break;
                 case (byte)CustomRPC.TaskMasterUpdateExTasks:

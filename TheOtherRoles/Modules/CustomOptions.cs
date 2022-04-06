@@ -335,7 +335,7 @@ namespace TheOtherRoles {
 
             StringBuilder sb = new StringBuilder();
             foreach (CustomOption option in CustomOption.options) {
-                if (option.parent == null) {
+                if (option.parent == null || option.parent == CustomOptionHolder.enabledTaskVsMode) {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Crewmate Roles");
                         var min = CustomOptionHolder.crewmateRolesCountMin.getSelection();
@@ -359,6 +359,8 @@ namespace TheOtherRoles {
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax)) {
                         continue;
+                    } else if (option.parent == CustomOptionHolder.enabledTaskVsMode) { // Task Vs Mode
+                        sb.AppendLine($"\t{option.name}: {option.selections[option.selection].ToString()}");
                     } else if (!option.isRole) {
                         sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }

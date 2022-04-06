@@ -30,13 +30,19 @@ namespace TheOtherRoles.Patches {
         }
 
         private static void assignRoles() {
-            var data = getRoleAssignmentData();
-            assignSpecialRoles(data); // Assign special roles like mafia and lovers first as they assign a role to multiple players and the chances are independent of the ticket system
-            selectFactionForFactionIndependentRoles(data);
-            assignEnsuredRoles(data); // Assign roles that should always be in the game next
-            assignDependentRoles(data); // Assign roles that may have a dependent role
-            assignChanceRoles(data); // Assign roles that may or may not be in the game last
-            assignRoleTargets(data);
+            // Task Vs Mode
+            if (CustomOptionHolder.enabledTaskVsMode.getBool()) {
+                foreach (var player in PlayerControl.AllPlayerControls)
+                    setRole((byte)RoleId.TaskRacer, player.PlayerId);
+            } else {
+                var data = getRoleAssignmentData();
+                assignSpecialRoles(data); // Assign special roles like mafia and lovers first as they assign a role to multiple players and the chances are independent of the ticket system
+                selectFactionForFactionIndependentRoles(data);
+                assignEnsuredRoles(data); // Assign roles that should always be in the game next
+                assignDependentRoles(data); // Assign roles that may have a dependent role
+                assignChanceRoles(data); // Assign roles that may or may not be in the game last
+                assignRoleTargets(data);
+            }
         }
 
         private static RoleAssignmentData getRoleAssignmentData() {
@@ -414,16 +420,18 @@ namespace TheOtherRoles.Patches {
 
             if (removePlayer) playerList.RemoveAt(index);
 
+            setRole(roleId, playerId, flag);
+            return playerId;
+        }
+
+        private static void setRole(byte roleId, byte playerId, byte flag = 0) {
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetRole, Hazel.SendOption.Reliable, -1);
             writer.Write(roleId);
             writer.Write(playerId);
             writer.Write(flag);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
             RPCProcedure.setRole(roleId, playerId, flag);
-            return playerId;
         }
-
-
 
         private class RoleAssignmentData {
             public List<PlayerControl> crewmates {get;set;}

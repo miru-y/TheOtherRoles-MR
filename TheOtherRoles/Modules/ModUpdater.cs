@@ -28,7 +28,12 @@ using Twitch;
 namespace TheOtherRoles.Modules {
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
     public class ModUpdaterButton {
+        public static AudioClip selectSfx = null;
+
         private static void Prefix(MainMenuManager __instance) {
+
+            selectSfx = AccountManager.Instance.accountTab.signIntoAccountButton.GetComponent<PassiveButton>().ClickSound;
+
             CustomHatLoader.LaunchHatFetcher();
             ModUpdater.LaunchUpdater();
             if (!ModUpdater.hasUpdate) return;
@@ -41,7 +46,8 @@ namespace TheOtherRoles.Modules {
             PassiveButton passiveButton = button.GetComponent<PassiveButton>();
             passiveButton.OnClick = new Button.ButtonClickedEvent();
             passiveButton.OnClick.AddListener((UnityEngine.Events.UnityAction)onClick);
-            
+            selectSfx = passiveButton.ClickSound;
+
             var text = button.transform.GetChild(0).GetComponent<TMPro.TMP_Text>();
             __instance.StartCoroutine(Effects.Lerp(0.1f, new System.Action<float>((p) => {
                 text.SetText("Update\nThe Other Roles MR");

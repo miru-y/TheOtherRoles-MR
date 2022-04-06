@@ -418,7 +418,7 @@ namespace TheOtherRoles.Patches
             foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
                 bool isKataomoi = PlayerControl.LocalPlayer == Kataomoi.kataomoi;
                 bool isKataomoiTarget = (Kataomoi.kataomoi != null && p == Kataomoi.target && (p.isDead() || p != PlayerControl.LocalPlayer));
-                if ((Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target) || p == PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.Data.IsDead || (isKataomoi && isKataomoiTarget)) {
+                if ((Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target) || p == PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.Data.IsDead || TaskRacer.isValid() || (isKataomoi && isKataomoiTarget)) {
                     Transform playerInfoTransform = p.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo == null) {
@@ -466,7 +466,7 @@ namespace TheOtherRoles.Patches
                     if (isKataomoiTarget)
                         extraInfoText = Helpers.cs(Kataomoi.color, "Kataomoi Target");
 
-                    if (p == PlayerControl.LocalPlayer) {
+                    if (p == PlayerControl.LocalPlayer || TaskRacer.isValid()) {
                         playerInfoText = $"{roleNames}";
                         if (DestroyableSingleton<TaskPanelBehaviour>.InstanceExists) {
                             TMPro.TextMeshPro tabText = DestroyableSingleton<TaskPanelBehaviour>.Instance.tab.transform.FindChild("TabText_TMP").GetComponent<TMPro.TextMeshPro>();
@@ -924,6 +924,10 @@ namespace TheOtherRoles.Patches
                 doorHackerUpdate();
                 // Kataomoi
                 kataomoiUpdate();
+
+                // Task Vs Mode
+                if (TaskRacer.isValid())
+                    TaskRacer.update();
             }
         }
     }
@@ -937,6 +941,19 @@ namespace TheOtherRoles.Patches
                 float currentScaling = (Mini.growingProgress() + 1) * 0.5f;
                 __instance.myPlayer.Collider.offset = currentScaling * Mini.defaultColliderOffset * Vector2.down;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerControl), "CanMove", MethodType.Getter)]
+    class PlayerControlCanMovePatch {
+        public static bool Prefix(PlayerControl __instance, ref bool __result) {
+            // Task Vs Mode
+            if (TaskRacer.isValid() && !TaskRacer.canMove()) {
+                __result = false;
+                return false;
+            }
+
+            return true;
         }
     }
 

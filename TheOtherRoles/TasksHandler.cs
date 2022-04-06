@@ -61,6 +61,10 @@ namespace TheOtherRoles {
         private static class GameDataCompleteTaskPatch {
             private static void Postfix(GameData __instance, [HarmonyArgument(0)] PlayerControl pc, [HarmonyArgument(1)] uint taskId) {
 
+                if (TaskRacer.isValid()) {
+                    TaskRacer.updateTask(pc);
+                }
+
                 if (AmongUsClient.Instance.AmHost && !pc.Data.IsDead && TaskMaster.isTaskMaster(pc.PlayerId)) {
                     byte clearTasks = 0;
                     for (int i = 0; i < pc.Data.Tasks.Count; ++i) {

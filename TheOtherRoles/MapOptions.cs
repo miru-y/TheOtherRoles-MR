@@ -64,7 +64,7 @@ public static void clearAndReloadMapOptions() {
 
         public static int UpdateAdminTimerText(int viewIndex)
         {
-            if (!CustomOptionHolder.enabledAdminTimer.getBool())
+            if (!CustomOptionHolder.enabledAdminTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (HudManager.Instance == null)
                 return viewIndex;
@@ -88,7 +88,7 @@ public static void clearAndReloadMapOptions() {
         }
 
         public static int UpdateVitalsTimerText(int viewIndex) {
-            if (!CustomOptionHolder.enabledVitalsTimer.getBool())
+            if (!CustomOptionHolder.enabledVitalsTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (HudManager.Instance == null)
                 return viewIndex;
@@ -113,7 +113,7 @@ public static void clearAndReloadMapOptions() {
 
 
         public static int UpdateSecurityCameraTimerText(int viewIndex) {
-            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool())
+            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (HudManager.Instance == null)
                 return viewIndex;

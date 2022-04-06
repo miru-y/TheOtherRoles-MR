@@ -43,7 +43,7 @@ Design by <color=#FCCE03FF>Bavari</color>
         }
 
         [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
-        private static class PingTrackerPatch
+        public static class PingTrackerPatch
         {
             private static GameObject modStamp;
             public static GameObject customPreset;
@@ -116,6 +116,9 @@ Design by <color=#FCCE03FF>Bavari</color>
                 torLogo.transform.position = Vector3.up;
                 var renderer = torLogo.AddComponent<SpriteRenderer>();
                 renderer.sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.Banner.png", 300f);
+
+                // Task Vs Mode
+                TaskRacer.clearAndReload();
             }
         }
     }

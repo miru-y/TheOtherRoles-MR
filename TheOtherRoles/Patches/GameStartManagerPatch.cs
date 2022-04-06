@@ -37,6 +37,9 @@ namespace TheOtherRoles.Patches {
                 string code = InnerNet.GameCode.IntToGameName(AmongUsClient.Instance.GameId);
                 GUIUtility.systemCopyBuffer = code;
                 lobbyCodeText = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.RoomCode, new Il2CppReferenceArray<Il2CppSystem.Object>(0)) + "\r\n" + code;
+
+                // Task Vs Mode
+                TaskRacer.clearAndReload();
             }
         }
 
@@ -114,6 +117,15 @@ namespace TheOtherRoles.Patches {
                     }
                 }
 
+                // Task Vs Mode
+                if (CustomOptionHolder.enabledTaskVsMode.getBool()) {
+                    __instance.StartButton.color = Palette.EnabledColor;
+                    __instance.startLabelText.color = Palette.EnabledColor;
+                    if (__instance.StartButtonGlyph != null)
+                        __instance.StartButtonGlyph.SetColor(Palette.EnabledColor);
+                }
+
+
                 // Lobby code replacement
                 __instance.GameRoomName.text = TheOtherRolesPlugin.StreamerMode.Value ? $"<color={TheOtherRolesPlugin.StreamerModeReplacementColor.Value}>{TheOtherRolesPlugin.StreamerModeReplacementText.Value}</color>" : lobbyCodeText;
 
@@ -184,6 +196,15 @@ namespace TheOtherRoles.Patches {
                         RPCProcedure.dynamicMapOption(chosenMapId);
                     }
                 }
+
+                if (continueStart) {
+                    // Task Vs Mode
+                    if (CustomOptionHolder.enabledTaskVsMode.getBool()) {
+                        __instance.ReallyBegin(false);
+                        return false;
+                    }
+                }
+
                 return continueStart;
             }
         }

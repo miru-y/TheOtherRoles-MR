@@ -23,6 +23,10 @@ namespace TheOtherRoles {
         public static CustomOption impostorRolesCountMin;
         public static CustomOption impostorRolesCountMax;
 
+        public static CustomOption enabledTaskVsMode;
+        public static CustomOption taskVsModeEnabledMakeItTheSameTaskAsTheHost;
+        public static CustomOption taskVsModeVision;
+
         public static CustomOption adminTimer;
         public static CustomOption enabledAdminTimer;
         public static CustomOption heliSabotageSystemTimeLimit;
@@ -321,6 +325,10 @@ namespace TheOtherRoles {
             impostorRolesCountMin = CustomOption.Create(304, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Impostor Roles"), 0f, 0f, 3f, 1f);
             impostorRolesCountMax = CustomOption.Create(305, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Impostor Roles"), 0f, 0f, 3f, 1f);
 
+            enabledTaskVsMode = CustomOption.Create(900010001, cs(TaskRacer.color, "Enable Task Vs Mode"), false);
+            taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
+            taskVsModeVision = CustomOption.Create(900010003, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
+
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, "Enable Randomization In FixWiring Task", false);
             enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
 
@@ -583,9 +591,6 @@ namespace TheOtherRoles {
             madmateExileCrewmate = CustomOption.Create(918, "Exile A Crewmate When Madmate Is exiled", false, madmateSpawnRate);
 
             // Other options
-            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, "Enable Randomization In FixWiring Task", false);
-            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
-
             maxNumberOfMeetings = CustomOption.Create(3, "Number Of Meetings (excluding Mayor meeting)", 10, 0, 15, 1, null, true);
             blockSkippingInEmergencyMeetings = CustomOption.Create(4, "Block Skipping In Emergency Meetings", false);
             noVoteIsSelfVote = CustomOption.Create(5, "No Vote Is Self Vote", false, blockSkippingInEmergencyMeetings);

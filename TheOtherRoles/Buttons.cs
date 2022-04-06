@@ -50,6 +50,7 @@ namespace TheOtherRoles
         public static CustomButton pursuerButton;
         public static CustomButton witchSpellButton;
         public static CustomButton doorHackerButton;
+        public static CustomButton taskVsModeRetireButton;
 
         public static Dictionary<byte, List<CustomButton>> deputyHandcuffedButtons = null;
 
@@ -98,6 +99,7 @@ namespace TheOtherRoles
             trackerTrackCorpsesButton.MaxTimer = Tracker.corpsesTrackingCooldown;
             witchSpellButton.MaxTimer = Witch.cooldown;
             doorHackerButton.MaxTimer = DoorHacker.cooldown;
+            taskVsModeRetireButton.MaxTimer = 0f;
 
             timeMasterShieldButton.EffectDuration = TimeMaster.shieldDuration;
             hackerButton.EffectDuration = Hacker.duration;
@@ -119,6 +121,7 @@ namespace TheOtherRoles
             securityGuardCamButton.EffectDuration = SecurityGuard.duration;
             // Already set the timer to the max, as the button is enabled during the game and not available at the start
             lightsOutButton.Timer = lightsOutButton.MaxTimer;
+            taskVsModeRetireButton.EffectDuration = TaskRacer.effectDuration;
         }
 
         public static void resetTimeMasterButton() {
@@ -1513,6 +1516,42 @@ namespace TheOtherRoles
             doorHackerButtonUsesText.transform.localScale = Vector3.one * 0.5f;
             doorHackerButtonUsesText.transform.localPosition += new Vector3(0.5f, 0.3f, 0);
 
+            // Task Vs Mode retire button
+            taskVsModeRetireButton = new CustomButton(
+                () => {
+                    if (!TaskRacer.isValid()) return;
+                    TaskRacer.onRetireStart(PlayerControl.LocalPlayer.GetTruePosition());
+                },
+                () => {
+                    return TaskRacer.isValid() && !PlayerControl.LocalPlayer.isDead() && !TaskRacer.getTaskRacer(PlayerControl.LocalPlayer.PlayerId).isTaskComplete();
+                },
+                () => {
+                    if (taskVsModeRetireButton.isEffectActive && TaskRacer.isRetireCancel(PlayerControl.LocalPlayer.GetTruePosition())) {
+                        taskVsModeRetireButton.Timer = 0f;
+                        taskVsModeRetireButton.isEffectActive = false;
+                    }
+                    return PlayerControl.LocalPlayer.CanMove;
+                },
+                () => {
+                    taskVsModeRetireButton.isEffectActive = false;
+                },
+                TaskRacer.getRetireSprites(),
+                new Vector3(0, 1, 0),
+                __instance,
+                null,
+                true,
+                TaskRacer.effectDuration,
+                () => {
+                    taskVsModeRetireButton.Timer = 0f;
+
+                    MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+                    killWriter.Write(PlayerControl.LocalPlayer.PlayerId);
+                    killWriter.Write(PlayerControl.LocalPlayer.PlayerId);
+                    killWriter.Write(byte.MaxValue);
+                    AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                    RPCProcedure.uncheckedMurderPlayer(PlayerControl.LocalPlayer.PlayerId, PlayerControl.LocalPlayer.PlayerId, Byte.MaxValue);
+                }
+            );
 
             // Set the default (or settings from the previous game) timers/durations when spawning the buttons
             setCustomButtonCooldowns();

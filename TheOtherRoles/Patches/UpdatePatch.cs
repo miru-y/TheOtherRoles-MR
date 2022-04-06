@@ -92,14 +92,12 @@ namespace TheOtherRoles.Patches {
                 if (Deputy.deputy != null && Deputy.knowsSheriff) {
                     setPlayerNameColor(Deputy.deputy, Deputy.color);
                 }
-            }
-            else if (Deputy.deputy != null && Deputy.deputy == PlayerControl.LocalPlayer) {
+            } else if (Deputy.deputy != null && Deputy.deputy == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Deputy.deputy, Deputy.color);
                 if (Sheriff.sheriff != null && Deputy.knowsSheriff) {
                     setPlayerNameColor(Sheriff.sheriff, Sheriff.color);
                 }
-            }
-            else if (Lighter.lighter != null && Lighter.lighter == PlayerControl.LocalPlayer)
+            } else if (Lighter.lighter != null && Lighter.lighter == PlayerControl.LocalPlayer)
                 setPlayerNameColor(Lighter.lighter, Lighter.color);
             else if (Detective.detective != null && Detective.detective == PlayerControl.LocalPlayer)
                 setPlayerNameColor(Detective.detective, Detective.color);
@@ -128,8 +126,7 @@ namespace TheOtherRoles.Patches {
                 if (Jackal.fakeSidekick != null) {
                     setPlayerNameColor(Jackal.fakeSidekick, Jackal.color);
                 }
-            }
-            else if (Spy.spy != null && Spy.spy == PlayerControl.LocalPlayer) {
+            } else if (Spy.spy != null && Spy.spy == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Spy.spy, Spy.color);
             } else if (SecurityGuard.securityGuard != null && SecurityGuard.securityGuard == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(SecurityGuard.securityGuard, SecurityGuard.color);
@@ -159,6 +156,9 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Kataomoi.kataomoi, Kataomoi.color);
                 if (Kataomoi.target != null)
                     setPlayerNameColor(Kataomoi.target, Kataomoi.color);
+            } else if (TaskRacer.isValid()) {
+                for (int i = 0; i < TaskRacer.taskRacers.Count; ++i)
+                    setPlayerNameColor(TaskRacer.taskRacers[i].player, TaskRacer.getRankTextColor(i + 1));
             }
 
             // No else if here, as a Lover of team Jackal needs the colors
@@ -298,6 +298,19 @@ namespace TheOtherRoles.Patches {
 
         }
 
+        static void updateTaskRacer(HudManager __instance)
+        {
+            // Task Vs Mode
+            if (!TaskRacer.isValid()) return;
+
+            __instance.UseButton.ToggleVisible(MapBehaviour.Instance == null || !MapBehaviour.Instance.IsOpen);
+            __instance.AbilityButton.ToggleVisible(false);
+            __instance.ReportButton.ToggleVisible(false);
+            __instance.KillButton.ToggleVisible(false);
+            __instance.SabotageButton.ToggleVisible(false);
+            __instance.ImpostorVentButton.ToggleVisible(false);
+        }
+
         static void Postfix(HudManager __instance)
         {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
@@ -319,6 +332,8 @@ namespace TheOtherRoles.Patches {
             updateReportButton(__instance);
             updateVentButton(__instance);
 
+            // Task Vs Mode
+            updateTaskRacer(__instance);
         }
     }
 }

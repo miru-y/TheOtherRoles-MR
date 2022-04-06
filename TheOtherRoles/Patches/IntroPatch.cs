@@ -43,6 +43,35 @@ namespace TheOtherRoles.Patches {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
                         player.transform.localScale = Vector3.one * 0.4f;
                         player.gameObject.SetActive(true);
+                    } else if (TaskRacer.isTaskRacer(PlayerControl.LocalPlayer)) { // Task Vs Mode
+                        var position = bottomLeft + new Vector3(-0.55f, -0.45f, 0) + Vector3.right * playerCounter++ * 0.35f;
+                        TaskRacer.rankUIPositions.Add(position);
+                        player.transform.localPosition = position;
+                        player.transform.localScale = Vector3.one * 0.2f;
+                        player.setSemiTransparent(false);
+                        player.gameObject.SetActive(true);
+
+                        int index = playerCounter - 1;
+                        var taskFinishedMark = new GameObject("TaskFinishedMark_" + (index + 1));
+
+                        var rend = taskFinishedMark.AddComponent<SpriteRenderer>();
+                        rend.sprite = TaskRacer.getTaskFinishedSprites();
+                        rend.color = new Color(1, 1, 1, 1);
+                        taskFinishedMark.transform.parent = HudManager.Instance.transform;
+                        taskFinishedMark.transform.localPosition = position;
+                        taskFinishedMark.transform.localScale = Vector3.one * 0.8f;
+                        taskFinishedMark.SetActive(false);
+                        TaskRacer.taskFinishedMarkTable.Add(p.PlayerId, taskFinishedMark);
+
+                        if (playerCounter >= 1 && playerCounter <= 3) {
+                            TaskRacer.rankMarkObjects[index] = new GameObject("RankMarkObject_" + (index + 1));
+                            rend = TaskRacer.rankMarkObjects[index].AddComponent<SpriteRenderer>();
+                            rend.sprite = TaskRacer.getRankGameSprites(playerCounter);
+                            rend.color = new Color(1, 1, 1, 1);
+                            TaskRacer.rankMarkObjects[index].transform.parent = HudManager.Instance.transform;
+                            TaskRacer.rankMarkObjects[index].transform.localPosition = position + new Vector3(0f, 0.39f, -8f);
+                            TaskRacer.rankMarkObjects[index].transform.localScale = Vector3.one * 0.8f;
+                        }
                     } else {
                         player.gameObject.SetActive(false);
                     }
@@ -106,6 +135,31 @@ namespace TheOtherRoles.Patches {
                 }
             }
 
+            // Task Vs Mode
+            if (TaskRacer.isValid()) {
+                TaskRacer.startText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                TaskRacer.startText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y);
+                TaskRacer.startText.name = "TaskVsMode_Start";
+
+                TaskRacer.timerText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
+                TaskRacer.timerText.transform.localPosition = new Vector3(0.89f, 2.76f, TaskRacer.timerText.transform.localPosition.z);
+                TaskRacer.timerText.transform.localScale *= 0.4f;
+                TaskRacer.timerText.name = "TaskVsMode_Timer";
+                TaskRacer.timerText.gameObject.SetActive(false);
+
+                if (PlayerControl.GameOptions.MapId != (byte)MapId.Airship) {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                        PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.TaskVsMode_Ready,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.taskVsModeReady(PlayerControl.LocalPlayer.PlayerId);
+                }
+            }
+
             if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip.getBool()) {
                 var objList = GameObject.FindObjectsOfType<Console>().ToList();
                 objList.Find(x => x.name == "task_garbage1").checkWalls = true;
@@ -159,7 +213,12 @@ namespace TheOtherRoles.Patches {
             List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
             RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
             if (roleInfo == null) return;
-            if (roleInfo.isNeutral) {
+            if (roleInfo.roleId == RoleId.TaskRacer) {
+                __instance.BackgroundBar.material.color = roleInfo.color;
+                __instance.TeamTitle.text = "Task Vs Mode";
+                __instance.TeamTitle.color = roleInfo.color;
+                __instance.ImpostorText.gameObject.SetActive(false);
+            } else if (roleInfo.isNeutral) {
                 var neutralColor = new Color32(76, 84, 78, 255);
                 __instance.BackgroundBar.material.color = neutralColor;
                 __instance.TeamTitle.text = "Neutral";
@@ -227,15 +286,20 @@ namespace TheOtherRoles.Patches {
             }
         }
 
-
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
         class BeginCrewmatePatch {
             public static void Prefix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay) {
-                setupIntroTeamIcons(__instance, ref teamToDisplay);
+                if (TaskRacer.isValid())
+                    teamToDisplay = PlayerControl.AllPlayerControls;
+                else
+                    setupIntroTeamIcons(__instance, ref teamToDisplay);
             }
 
             public static void Postfix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay) {
-                setupIntroTeam(__instance, ref teamToDisplay);
+                if (TaskRacer.isValid())
+                    teamToDisplay = PlayerControl.AllPlayerControls;
+
+                 setupIntroTeam(__instance, ref teamToDisplay);
 
                 /*
                  * Workaround
@@ -247,17 +311,90 @@ namespace TheOtherRoles.Patches {
                     && Madmate.noticeImpostors) {
                     MadmateTaskHelper.SetMadmateTasks();
                 }
+
+                // Task Vs Mode
+                IntroPatchHelper.CheckTaskRacer();
             }
         }
 
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
         class BeginImpostorPatch {
             public static void Prefix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
-                setupIntroTeamIcons(__instance, ref yourTeam);
+                if (TaskRacer.isValid())
+                    yourTeam = PlayerControl.AllPlayerControls;
+                else
+                    setupIntroTeamIcons(__instance, ref yourTeam);
             }
 
             public static void Postfix(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
+                if (TaskRacer.isValid())
+                    yourTeam = PlayerControl.AllPlayerControls;
+
                 setupIntroTeam(__instance, ref yourTeam);
+
+                // Task Vs Mode
+                IntroPatchHelper.CheckTaskRacer();
+            }
+        }
+
+        public static class IntroPatchHelper
+        {
+            public static void CheckTaskRacer() {
+                // Task Vs Mode
+                if (!TaskRacer.isValid() || !CustomOptionHolder.taskVsModeEnabledMakeItTheSameTaskAsTheHost.getBool())
+                    return;
+
+                if (AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost) {
+
+                    // Init host's tasks.
+                    List<byte> taskTypeIdList = new List<byte>();
+                    for (int i = 0; i < PlayerControl.LocalPlayer.Data.Tasks.Count; ++i)
+                        taskTypeIdList.Add(PlayerControl.LocalPlayer.Data.Tasks[i].TypeId);
+
+                    var taskIdDataTable = new Dictionary<uint, byte[]>();
+                    var playerData = PlayerControl.LocalPlayer.Data;
+                    playerData.Object.clearAllTasks();
+                    playerData.Tasks = new Il2CppSystem.Collections.Generic.List<GameData.TaskInfo>(taskTypeIdList.Count);
+                    for (int j = 0; j < taskTypeIdList.Count; j++) {
+                        playerData.Tasks.Add(new GameData.TaskInfo(taskTypeIdList[j], (uint)j));
+                        playerData.Tasks[j].Id = (uint)j;
+                    }
+                    for (int j = 0; j < playerData.Tasks.Count; j++) {
+                        GameData.TaskInfo taskInfo = playerData.Tasks[j];
+                        NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
+                        normalPlayerTask.Id = taskInfo.Id;
+                        normalPlayerTask.Owner = playerData.Object;
+                        normalPlayerTask.Initialize();
+                        if (normalPlayerTask.Data != null && normalPlayerTask.Data.Length > 0)
+                            taskIdDataTable.Add(normalPlayerTask.Id, normalPlayerTask.Data);
+                        playerData.Object.myTasks.Add(normalPlayerTask);
+                    }
+
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                        PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHost,
+                        Hazel.SendOption.Reliable,
+                        -1);
+                    byte[] taskTypeIds = taskTypeIdList.ToArray();
+                    if (taskTypeIdList.Count > 0)
+                        writer.Write(taskTypeIds);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    TaskRacer.setHostTasks(taskTypeIds);
+                    foreach (var pair in taskIdDataTable) {
+                        MessageWriter writer2 = AmongUsClient.Instance.StartRpcImmediately(
+                            PlayerControl.LocalPlayer.NetId,
+                            (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHostDetail,
+                            Hazel.SendOption.Reliable,
+                            -1);
+                        writer2.Write(pair.Key);
+                        writer2.Write(pair.Value);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer2);
+                        TaskRacer.setHostTaskDetail(pair.Key, pair.Value);
+                    }
+                    TaskRacer.applyHostTasks();
+                } else {
+                    TaskRacer.applyHostTasks();
+                }
             }
         }
     }
