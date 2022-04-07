@@ -158,6 +158,9 @@ namespace TheOtherRoles.Patches {
                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                     RPCProcedure.taskVsModeReady(PlayerControl.LocalPlayer.PlayerId);
                 }
+
+                // Task Vs Mode
+                IntroPatch.IntroPatchHelper.CheckTaskRacer();
             }
 
             if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip.getBool()) {
@@ -311,9 +314,6 @@ namespace TheOtherRoles.Patches {
                     && Madmate.noticeImpostors) {
                     MadmateTaskHelper.SetMadmateTasks();
                 }
-
-                // Task Vs Mode
-                IntroPatchHelper.CheckTaskRacer();
             }
         }
 
@@ -331,9 +331,6 @@ namespace TheOtherRoles.Patches {
                     yourTeam = PlayerControl.AllPlayerControls;
 
                 setupIntroTeam(__instance, ref yourTeam);
-
-                // Task Vs Mode
-                IntroPatchHelper.CheckTaskRacer();
             }
         }
 
@@ -369,31 +366,28 @@ namespace TheOtherRoles.Patches {
                             taskIdDataTable.Add(normalPlayerTask.Id, normalPlayerTask.Data);
                         playerData.Object.myTasks.Add(normalPlayerTask);
                     }
+                    foreach (var pair in taskIdDataTable) {
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                            PlayerControl.LocalPlayer.NetId,
+                            (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHostDetail,
+                            Hazel.SendOption.Reliable,
+                            -1);
+                        writer.Write(pair.Key);
+                        writer.Write(pair.Value);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                        TaskRacer.setHostTaskDetail(pair.Key, pair.Value);
+                    }
 
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
+                    MessageWriter writer2 = AmongUsClient.Instance.StartRpcImmediately(
                         PlayerControl.LocalPlayer.NetId,
                         (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHost,
                         Hazel.SendOption.Reliable,
                         -1);
                     byte[] taskTypeIds = taskTypeIdList.ToArray();
                     if (taskTypeIdList.Count > 0)
-                        writer.Write(taskTypeIds);
-                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                        writer2.Write(taskTypeIds);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer2);
                     TaskRacer.setHostTasks(taskTypeIds);
-                    foreach (var pair in taskIdDataTable) {
-                        MessageWriter writer2 = AmongUsClient.Instance.StartRpcImmediately(
-                            PlayerControl.LocalPlayer.NetId,
-                            (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHostDetail,
-                            Hazel.SendOption.Reliable,
-                            -1);
-                        writer2.Write(pair.Key);
-                        writer2.Write(pair.Value);
-                        AmongUsClient.Instance.FinishRpcImmediately(writer2);
-                        TaskRacer.setHostTaskDetail(pair.Key, pair.Value);
-                    }
-                    TaskRacer.applyHostTasks();
-                } else {
-                    TaskRacer.applyHostTasks();
                 }
             }
         }

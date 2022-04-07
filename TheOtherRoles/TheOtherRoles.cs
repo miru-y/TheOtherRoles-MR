@@ -2065,6 +2065,9 @@ namespace TheOtherRoles
         }
 
         public static void update() {
+            if (hostTaskTypeIds != null && CustomOptionHolder.taskVsModeEnabledMakeItTheSameTaskAsTheHost.getBool()) {
+                applyHostTasks();
+            }
 
             // Start Direction
             if (startTime > 0.0f) {
@@ -2315,7 +2318,7 @@ namespace TheOtherRoles
             hostTaskIdDataTable.Add(taskId, data);
         }
 
-        public static void applyHostTasks() {
+        static void applyHostTasks() {
             if (hostTaskTypeIds == null || hostTaskTypeIds.Length == 0) return;
 
             for (int i = 0; i < taskRacers.Count; ++i) {
@@ -2348,6 +2351,8 @@ namespace TheOtherRoles
                     playerData.Object.myTasks.Add(normalPlayerTask);
                 }
             }
+            hostTaskTypeIds = null;
+            hostTaskIdDataTable.Clear();
         }
     }
 }
