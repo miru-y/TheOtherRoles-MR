@@ -27,6 +27,8 @@ namespace TheOtherRoles.Patches
 
         // Task Vs Mode
         TaskVsModeEnd = 130,
+
+        Unused = byte.MaxValue,
     }
 
     enum WinCondition
@@ -332,6 +334,8 @@ namespace TheOtherRoles.Patches
                         PlayerControl.AllPlayerControls.Remove(DebugManager.bots[i]);
                     DebugManager.bots.Clear();
                 }
+
+
             }
         }
 
@@ -497,6 +501,16 @@ namespace TheOtherRoles.Patches
                     roleSummaryTextMesh.text = roleSummaryText.ToString();
                 }
                 AdditionalTempData.clear();
+
+                if (RPCProcedure.uncheckedEndGameReason != (byte)CustomGameOverReason.Unused) {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId,
+                        (byte)CustomRPC.UncheckedEndGame_Response, Hazel.SendOption.Reliable, -1);
+                    writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.uncheckedEndGameResponse(PlayerControl.LocalPlayer.PlayerId);
+                    if (!AmongUsClient.Instance.AmHost)
+                        RPCProcedure.uncheckedEndGameReason = (byte)CustomGameOverReason.Unused;
+                }
             }
         }
 

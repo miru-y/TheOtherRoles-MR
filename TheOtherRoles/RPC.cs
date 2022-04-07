@@ -86,6 +86,7 @@ namespace TheOtherRoles
         ConsumeVitalTime,
         ConsumeSecurityCameraTime,
         UncheckedEndGame,
+        UncheckedEndGame_Response,
         TaskVsMode_Ready, // Task Vs Mode
         TaskVsMode_Start, // Task Vs Mode
         TaskVsMode_AllTaskCompleted, // Task Vs Mode
@@ -140,6 +141,8 @@ namespace TheOtherRoles
     }
 
     public static class RPCProcedure {
+        public static byte uncheckedEndGameReason = (byte)CustomGameOverReason.Unused;
+        static HashSet<byte> uncheckedEndGameResponsePlayerId = new HashSet<byte>();
 
         // Main Controls
 
@@ -431,6 +434,7 @@ namespace TheOtherRoles
         }
 
         public static void uncheckedEndGame(byte reason) {
+            uncheckedEndGameReason = reason;
             AmongUsClient.Instance.GameState = InnerNetClient.GameStates.Ended;
             Il2CppSystem.Collections.Generic.List<ClientData> allClients = AmongUsClient.Instance.allClients;
             lock (allClients) {
@@ -442,10 +446,27 @@ namespace TheOtherRoles
                     ShipStatus.Instance.enabled = false;
                     ShipStatus.Instance.BeginCalled = false;
                     AmongUsClient.Instance.OnGameEnd(new EndGameResult((GameOverReason)reason, false));
-                    if (AmongUsClient.Instance.AmHost) {
-                        ShipStatus.RpcEndGame((GameOverReason)reason, false);
-                    }
                 }));
+            }
+        }
+
+        public static void uncheckedEndGameResponse(byte playerId) {
+            if (!uncheckedEndGameResponsePlayerId.Contains(playerId))
+                uncheckedEndGameResponsePlayerId.Add(playerId);
+
+            if (AmongUsClient.Instance.AmHost) {
+                bool is_send = true;
+                foreach (var p in PlayerControl.AllPlayerControls) {
+                    if (!p.isDummy && !p.notRealPlayer && !p.Data.Disconnected && !uncheckedEndGameResponsePlayerId.Contains(p.PlayerId)) {
+                        is_send = false;
+                        break;
+                    }
+                }
+                if (is_send) {
+                    ShipStatus.RpcEndGame((GameOverReason)uncheckedEndGameReason, false);
+                    uncheckedEndGameReason = (byte)CustomGameOverReason.Unused;
+                    uncheckedEndGameResponsePlayerId.Clear();
+                }
             }
         }
 
@@ -1117,6 +1138,10 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.UncheckedEndGame:
                     byte reason = reader.ReadByte();
                     RPCProcedure.uncheckedEndGame(reason);
+                    break;
+                case (byte)CustomRPC.UncheckedEndGame_Response:
+                    playerId = reader.ReadByte();
+                    RPCProcedure.uncheckedEndGameResponse(playerId);
                     break;
                 case (byte)CustomRPC.TaskVsMode_Ready: // Task Vs Mode
                     RPCProcedure.taskVsModeReady(reader.ReadByte());
