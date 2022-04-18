@@ -22,6 +22,7 @@ namespace TheOtherRoles.Patches
         public GameObject contents { get; private set; }
         public bool defaultValue { get; private set; }
         public Transform _transform { get; private set; }
+        public Func<bool> onClick { get; private set; }
 
         public class InitDesc
         {
@@ -46,7 +47,6 @@ namespace TheOtherRoles.Patches
         Color mouseOverColor;
         SelectionBehaviourObservable observable;
         ToggleButtonBehaviour button;
-        Func<bool> onClick;
         ButtonClickedEvent onButtonClick;
 
 
