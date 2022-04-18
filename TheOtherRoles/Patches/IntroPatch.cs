@@ -19,11 +19,7 @@ namespace TheOtherRoles.Patches {
                     GameData.PlayerInfo data = p.Data;
                     PoolablePlayer player = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, HudManager.Instance.transform);
                     PlayerControl.SetPlayerMaterialColors(data.DefaultOutfit.ColorId, player.CurrentBodySprite.BodySprite);
-                    SkinData skinById = DestroyableSingleton<HatManager>.Instance.GetSkinById(data.DefaultOutfit.SkinId);
-                    if (skinById) {
-                        player.Skin.layer.sprite = skinById.viewData.viewData.IdleFrame;
-                    }
-
+                    player.SetSkin(data.DefaultOutfit.SkinId, data.DefaultOutfit.ColorId);
                     player.HatSlot.SetHat(data.DefaultOutfit.HatId, data.DefaultOutfit.ColorId);
                     PlayerControl.SetPetImage(data.DefaultOutfit.PetId, data.DefaultOutfit.ColorId, player.PetSlot);
                     player.NameText.text = data.PlayerName;
@@ -262,7 +258,6 @@ namespace TheOtherRoles.Patches {
 
                 List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
                 RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
-
                 if (roleInfo.roleId == RoleId.TaskMaster && TaskMaster.becomeATaskMasterWhenCompleteAllTasks)
                     roleInfo = RoleInfo.crewmate;
 
@@ -272,7 +267,6 @@ namespace TheOtherRoles.Patches {
                     introCutscene.RoleBlurbText.text = roleInfo.introDescription;
                     introCutscene.RoleBlurbText.color = roleInfo.color;
                 }
-
                 if (infos.Any(info => info.roleId == RoleId.Lover)) {
                     PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
                     introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
@@ -390,6 +384,19 @@ namespace TheOtherRoles.Patches {
                     TaskRacer.setHostTasks(taskTypeIds);
                 }
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Constants), nameof(Constants.ShouldHorseAround))]
+    public static class ShouldAlwaysHorseAround {
+        public static bool isHorseMode;
+        public static bool Prefix(ref bool __result) {
+            if (isHorseMode != MapOptions.enableHorseMode && LobbyBehaviour.Instance != null) __result = isHorseMode;
+            else {
+                __result = MapOptions.enableHorseMode;
+                isHorseMode = MapOptions.enableHorseMode;
+            }
+            return false;
         }
     }
 }

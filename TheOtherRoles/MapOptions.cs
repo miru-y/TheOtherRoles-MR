@@ -17,6 +17,7 @@ namespace TheOtherRoles{
         public static bool showRoleSummary = true;
         public static bool allowParallelMedBayScans = false;
         public static bool showLighterDarker = true;
+        public static bool enableHorseMode = false;
 
         // Updating values
         public static int meetingsCount = 0;
@@ -33,7 +34,7 @@ namespace TheOtherRoles{
         const float TimerUIBaseX = -3.5f;
         const float TimerUIMoveX = 2.5f;
 
-public static void clearAndReloadMapOptions() {
+        public static void clearAndReloadMapOptions() {
             meetingsCount = 0;
             camerasToAdd = new List<SurvCamera>();
             ventsToSeal = new List<Vent>();
@@ -50,11 +51,16 @@ public static void clearAndReloadMapOptions() {
             noVoteIsSelfVote = CustomOptionHolder.noVoteIsSelfVote.getBool();
             hidePlayerNames = CustomOptionHolder.hidePlayerNames.getBool();
             allowParallelMedBayScans = CustomOptionHolder.allowParallelMedBayScans.getBool();
+        }
+
+        public static void reloadPluginOptions() {
             ghostsSeeRoles = TheOtherRolesPlugin.GhostsSeeRoles.Value;
             ghostsSeeTasks = TheOtherRolesPlugin.GhostsSeeTasks.Value;
             ghostsSeeVotes = TheOtherRolesPlugin.GhostsSeeVotes.Value;
             showRoleSummary = TheOtherRolesPlugin.ShowRoleSummary.Value;
             showLighterDarker = TheOtherRolesPlugin.ShowLighterDarker.Value;
+            enableHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
+            Patches.ShouldAlwaysHorseAround.isHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
         }
 
         public static void MeetingEndedUpdate()

@@ -127,17 +127,14 @@ namespace TheOtherRoles.Modules {
         }
 
         private static HatData CreateHatBehaviour(CustomHat ch, bool fromDisk = false, bool testOnly = false) {
-            if (hatShader == null && DestroyableSingleton<HatManager>.InstanceExists) {
-                foreach (var h in DestroyableSingleton<HatManager>.Instance.allHats) {
-                    if (h.hatViewData?.viewData?.AltShader != null) {
-                        hatShader = h.hatViewData.viewData.AltShader;
-                        break;
-                    }
-                }
+            if (hatShader == null) {
+                Material tmpShader = new Material("PlayerMaterial");
+                tmpShader.shader = Shader.Find("Unlit/PlayerShader");
+                hatShader = tmpShader;
             }
 
             HatData hat = ScriptableObject.CreateInstance<HatData>();
-            hat.hatViewData.viewData = new HatViewData();
+            hat.hatViewData.viewData = ScriptableObject.CreateInstance<HatViewData>();
             hat.hatViewData.viewData.MainImage = CreateHatSprite(ch.resource, fromDisk);
             if (ch.backresource != null) {
                 hat.hatViewData.viewData.BackImage = CreateHatSprite(ch.backresource, fromDisk);
@@ -224,14 +221,14 @@ namespace TheOtherRoles.Modules {
                     if (__instance.rend.flipX) {
                         hp.FrontLayer.sprite = extend.FlipImage;
                     } else {
-                        hp.FrontLayer.sprite = hp.Hat.hatViewData.viewData.MainImage;
+                        hp.FrontLayer.sprite = hp.hatView.MainImage;
                     }
                 }
                 if (extend.BackFlipImage != null) {
                     if (__instance.rend.flipX) {
                         hp.BackLayer.sprite = extend.BackFlipImage;
                     } else {
-                        hp.BackLayer.sprite = hp.Hat.hatViewData.viewData.BackImage;
+                        hp.BackLayer.sprite = hp.hatView.BackImage;
                     }
                 }
             }
