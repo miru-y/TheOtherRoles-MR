@@ -41,13 +41,13 @@ namespace TheOtherRoles {
             private static bool Prefix(GameData __instance) {
                 __instance.TotalTasks = 0;
                 __instance.CompletedTasks = 0;
-                for (int i = 0; i < __instance.AllPlayers.Count; i++) {
-                    GameData.PlayerInfo playerInfo = __instance.AllPlayers[i];
+                foreach (var playerInfo in GameData.Instance.AllPlayers)
+                {
                     if (playerInfo.Object
-                    && playerInfo.Object.hasAliveKillingLover() // Tasks do not count if a Crewmate has an alive killing Lover
-                    || playerInfo.PlayerId == Lawyer.lawyer?.PlayerId // Tasks of the Lawyer do not count
-                    || (playerInfo.PlayerId == Pursuer.pursuer?.PlayerId && Pursuer.pursuer.Data.IsDead) // Tasks of the Pursuer only count, if he's alive
-                    )
+                        && playerInfo.Object.hasAliveKillingLover() // Tasks do not count if a Crewmate has an alive killing Lover
+                        || playerInfo.PlayerId == Lawyer.lawyer?.PlayerId // Tasks of the Lawyer do not count
+                        || (playerInfo.PlayerId == Pursuer.pursuer?.PlayerId && Pursuer.pursuer.Data.IsDead) // Tasks of the Pursuer only count, if he's alive
+                       )
                         continue;
                     var (playerCompleted, playerTotal) = taskInfo(playerInfo);
                     __instance.TotalTasks += playerTotal;

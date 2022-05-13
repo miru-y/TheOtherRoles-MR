@@ -8,9 +8,20 @@ using Hazel;
 using System.Reflection;
 using System.Text;
 using static TheOtherRoles.TheOtherRoles;
+using TheOtherRoles;
 
 namespace TheOtherRoles {
     public class CustomOption {
+        public enum CustomOptionType {
+            Vanilla,
+            General,
+            Impostor,
+            Neutral,
+            Crewmate,
+            Modifier,
+            sizeof_CustomOptionType,
+        }
+
         public static List<CustomOption> options = new List<CustomOption>();
         public static int preset = 0;
 
@@ -24,11 +35,11 @@ namespace TheOtherRoles {
         public OptionBehaviour optionBehaviour;
         public CustomOption parent;
         public bool isHeader;
-        public bool isRole;
+        public CustomOptionType type;
 
         // Option creation
 
-        public CustomOption(int id, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader, bool isRole) {
+        public CustomOption(int id, CustomOptionType type, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader) {
             this.id = id;
             this.name = parent == null ? name : "- " + name;
             this.selections = selections;
@@ -36,7 +47,7 @@ namespace TheOtherRoles {
             this.defaultSelection = index >= 0 ? index : 0;
             this.parent = parent;
             this.isHeader = isHeader;
-            this.isRole = isRole;
+            this.type = type;
             selection = 0;
             if (id != 0) {
                 entry = TheOtherRolesPlugin.Instance.Config.Bind($"Preset{preset}", id.ToString(), defaultSelection);
@@ -45,19 +56,19 @@ namespace TheOtherRoles {
             options.Add(this);
         }
 
-        public static CustomOption Create(int id, string name, string[] selections, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
-            return new CustomOption(id, name, selections, "", parent, isHeader, isRole);
+        public static CustomOption Create(int id, CustomOptionType type, string name, string[] selections, CustomOption parent = null, bool isHeader = false) {
+            return new CustomOption(id, type, name, selections, "", parent, isHeader);
         }
 
-        public static CustomOption Create(int id, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
+        public static CustomOption Create(int id, CustomOptionType type, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false) {
             List<float> selections = new List<float>();
             for (float s = min; s <= max; s += step)
                 selections.Add(s);
-            return new CustomOption(id, name, selections.Cast<object>().ToArray(), defaultValue, parent, isHeader, isRole);
+            return new CustomOption(id, type, name, selections.Cast<object>().ToArray(), defaultValue, parent, isHeader);
         }
 
-        public static CustomOption Create(int id, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false, bool isRole = false) {
-            return new CustomOption(id, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader, isRole);
+        public static CustomOption Create(int id, CustomOptionType type, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false) {
+            return new CustomOption(id, type, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader);
         }
 
         // Static behaviour
@@ -102,6 +113,14 @@ namespace TheOtherRoles {
             return (float)selections[selection];
         }
 
+        public int getQuantity() {
+            return selection + 1;
+        }
+
+        public bool isRoleHeader() {
+            return type != CustomOptionType.General && parent == null;
+        }
+
         // Option changes
 
         public void updateSelection(int newSelection, bool isShareOption = true) {
@@ -127,15 +146,48 @@ namespace TheOtherRoles {
                 GameObject.Find("TORSettings").transform.FindChild("GameGroup").FindChild("Text").GetComponent<TMPro.TextMeshPro>().SetText("The Other Roles Settings");
                 return;
             }
+            if (GameObject.Find("ImpostorSettings") != null) {
+                GameObject.Find("ImpostorSettings").transform.FindChild("GameGroup").FindChild("Text").GetComponent<TMPro.TextMeshPro>().SetText("Impostor Roles Settings");
+                return;
+            }
+            if (GameObject.Find("NeutralSettings") != null) {
+                GameObject.Find("NeutralSettings").transform.FindChild("GameGroup").FindChild("Text").GetComponent<TMPro.TextMeshPro>().SetText("Neutral Roles Settings");
+                return;
+            }
+            if (GameObject.Find("CrewmateSettings") != null) {
+                GameObject.Find("CrewmateSettings").transform.FindChild("GameGroup").FindChild("Text").GetComponent<TMPro.TextMeshPro>().SetText("Crewmate Roles Settings");
+                return;
+            }
+            if (GameObject.Find("ModifierSettings") != null) {
+                GameObject.Find("ModifierSettings").transform.FindChild("GameGroup").FindChild("Text").GetComponent<TMPro.TextMeshPro>().SetText("Modifier Settings");
+                return;
+            }
 
             // Setup TOR tab
             var template = UnityEngine.Object.FindObjectsOfType<StringOption>().FirstOrDefault();
             if (template == null) return;
             var gameSettings = GameObject.Find("Game Settings");
             var gameSettingMenu = UnityEngine.Object.FindObjectsOfType<GameSettingMenu>().FirstOrDefault();
+            
             var torSettings = UnityEngine.Object.Instantiate(gameSettings, gameSettings.transform.parent);
             var torMenu = torSettings.transform.FindChild("GameGroup").FindChild("SliderInner").GetComponent<GameOptionsMenu>();
             torSettings.name = "TORSettings";
+
+            var impostorSettings = UnityEngine.Object.Instantiate(gameSettings, gameSettings.transform.parent);
+            var impostorMenu = impostorSettings.transform.FindChild("GameGroup").FindChild("SliderInner").GetComponent<GameOptionsMenu>();
+            impostorSettings.name = "ImpostorSettings";
+
+            var neutralSettings = UnityEngine.Object.Instantiate(gameSettings, gameSettings.transform.parent);
+            var neutralMenu = neutralSettings.transform.FindChild("GameGroup").FindChild("SliderInner").GetComponent<GameOptionsMenu>();
+            neutralSettings.name = "NeutralSettings";
+
+            var crewmateSettings = UnityEngine.Object.Instantiate(gameSettings, gameSettings.transform.parent);
+            var crewmateMenu = crewmateSettings.transform.FindChild("GameGroup").FindChild("SliderInner").GetComponent<GameOptionsMenu>();
+            crewmateSettings.name = "CrewmateSettings";
+
+            var modifierSettings = UnityEngine.Object.Instantiate(gameSettings, gameSettings.transform.parent);
+            var modifierMenu = modifierSettings.transform.FindChild("GameGroup").FindChild("SliderInner").GetComponent<GameOptionsMenu>();
+            modifierSettings.name = "ModifierSettings";
 
             var roleTab = GameObject.Find("RoleTab");
             var gameTab = GameObject.Find("GameTab");
@@ -143,24 +195,57 @@ namespace TheOtherRoles {
             var torTab = UnityEngine.Object.Instantiate(roleTab, roleTab.transform.parent);
             var torTabHighlight = torTab.transform.FindChild("Hat Button").FindChild("Tab Background").GetComponent<SpriteRenderer>();
             torTab.transform.FindChild("Hat Button").FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TabIcon.png", 100f);
-    
-            gameTab.transform.position += Vector3.left * 0.5f;
-            torTab.transform.position += Vector3.right * 0.5f;
-            roleTab.transform.position += Vector3.left * 0.5f;  
 
-            var tabs = new GameObject[]{gameTab, roleTab, torTab};
+            var impostorTab = UnityEngine.Object.Instantiate(roleTab, torTab.transform);
+            var impostorTabHighlight = impostorTab.transform.FindChild("Hat Button").FindChild("Tab Background").GetComponent<SpriteRenderer>();
+            impostorTab.transform.FindChild("Hat Button").FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TabIconImpostor.png", 100f);
+            impostorTab.name = "ImpostorTab";
+
+            var neutralTab = UnityEngine.Object.Instantiate(roleTab, impostorTab.transform);
+            var neutralTabHighlight = neutralTab.transform.FindChild("Hat Button").FindChild("Tab Background").GetComponent<SpriteRenderer>();
+            neutralTab.transform.FindChild("Hat Button").FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TabIconNeutral.png", 100f);
+            neutralTab.name = "NeutralTab";
+
+            var crewmateTab = UnityEngine.Object.Instantiate(roleTab, neutralTab.transform);
+            var crewmateTabHighlight = crewmateTab.transform.FindChild("Hat Button").FindChild("Tab Background").GetComponent<SpriteRenderer>();
+            crewmateTab.transform.FindChild("Hat Button").FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TabIconCrewmate.png", 100f);
+            crewmateTab.name = "CrewmateTab";
+
+            var modifierTab = UnityEngine.Object.Instantiate(roleTab, crewmateTab.transform);
+            var modifierTabHighlight = modifierTab.transform.FindChild("Hat Button").FindChild("Tab Background").GetComponent<SpriteRenderer>();
+            modifierTab.transform.FindChild("Hat Button").FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.TabIconModifier.png", 100f);
+            modifierTab.name = "ModifierTab";
+
+            // Position of Tab Icons
+            gameTab.transform.position += Vector3.left * 3f;
+            roleTab.transform.position += Vector3.left * 3f;
+            torTab.transform.position += Vector3.left * 2f;
+            impostorTab.transform.localPosition = Vector3.right * 1f;
+            neutralTab.transform.localPosition = Vector3.right * 1f;
+            crewmateTab.transform.localPosition = Vector3.right * 1f;
+            modifierTab.transform.localPosition = Vector3.right * 1f;
+
+            var tabs = new GameObject[] { gameTab, roleTab, torTab, impostorTab, neutralTab, crewmateTab, modifierTab};
             for (int i = 0; i < tabs.Length; i++) {
                 var button = tabs[i].GetComponentInChildren<PassiveButton>();
                 if (button == null) continue;
                 int copiedIndex = i;
                 button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
-                button.OnClick.AddListener((UnityEngine.Events.UnityAction)(() => {
+                button.OnClick.AddListener((System.Action)(() => {
                     gameSettingMenu.RegularGameSettings.SetActive(false);
                     gameSettingMenu.RolesSettings.gameObject.SetActive(false);
                     torSettings.gameObject.SetActive(false);
+                    impostorSettings.gameObject.SetActive(false);
+                    neutralSettings.gameObject.SetActive(false);
+                    crewmateSettings.gameObject.SetActive(false);
+                    modifierSettings.gameObject.SetActive(false);
                     gameSettingMenu.GameSettingsHightlight.enabled = false;
                     gameSettingMenu.RolesSettingsHightlight.enabled = false;
                     torTabHighlight.enabled = false;
+                    impostorTabHighlight.enabled = false;
+                    neutralTabHighlight.enabled = false;
+                    crewmateTabHighlight.enabled = false;
+                    modifierTabHighlight.enabled = false;
                     if (copiedIndex == 0) {
                         gameSettingMenu.RegularGameSettings.SetActive(true);
                         gameSettingMenu.GameSettingsHightlight.enabled = true;  
@@ -170,20 +255,52 @@ namespace TheOtherRoles {
                     } else if (copiedIndex == 2) {
                         torSettings.gameObject.SetActive(true);
                         torTabHighlight.enabled = true;
+                    } else if (copiedIndex == 3) {
+                        impostorSettings.gameObject.SetActive(true);
+                        impostorTabHighlight.enabled = true;
+                    } else if (copiedIndex == 4) {
+                        neutralSettings.gameObject.SetActive(true);
+                        neutralTabHighlight.enabled = true;
+                    } else if (copiedIndex == 5) {
+                        crewmateSettings.gameObject.SetActive(true);
+                        crewmateTabHighlight.enabled = true;
+                    } else if (copiedIndex == 6) {
+                        modifierSettings.gameObject.SetActive(true);
+                        modifierTabHighlight.enabled = true;
                     }
-               }));
+                }));
             }
 
             foreach (OptionBehaviour option in torMenu.GetComponentsInChildren<OptionBehaviour>())
                 UnityEngine.Object.Destroy(option.gameObject);
-            List<OptionBehaviour> torOptions = new List<OptionBehaviour>();
+            List<OptionBehaviour> torOptions = new List<OptionBehaviour>();          
+
+            foreach (OptionBehaviour option in impostorMenu.GetComponentsInChildren<OptionBehaviour>())
+                UnityEngine.Object.Destroy(option.gameObject);
+            List<OptionBehaviour> impostorOptions = new List<OptionBehaviour>();
+
+            foreach (OptionBehaviour option in neutralMenu.GetComponentsInChildren<OptionBehaviour>())
+                UnityEngine.Object.Destroy(option.gameObject);
+            List<OptionBehaviour> neutralOptions = new List<OptionBehaviour>();
+
+            foreach (OptionBehaviour option in crewmateMenu.GetComponentsInChildren<OptionBehaviour>())
+                UnityEngine.Object.Destroy(option.gameObject);
+            List<OptionBehaviour> crewmateOptions = new List<OptionBehaviour>();
+
+            foreach (OptionBehaviour option in modifierMenu.GetComponentsInChildren<OptionBehaviour>())
+                UnityEngine.Object.Destroy(option.gameObject);
+            List<OptionBehaviour> modifierOptions = new List<OptionBehaviour>();
+
+
+            List<Transform> menus = new List<Transform>() {null, torMenu.transform, impostorMenu.transform, neutralMenu.transform, crewmateMenu.transform, modifierMenu.transform};
+            List<List<OptionBehaviour>> optionBehaviours = new List<List<OptionBehaviour>>() { null, torOptions, impostorOptions, neutralOptions, crewmateOptions, modifierOptions };
 
             for (int i = 0; i < CustomOption.options.Count; i++) {
                 CustomOption option = CustomOption.options[i];
                 if (option.optionBehaviour == null) {
-                    StringOption stringOption = UnityEngine.Object.Instantiate(template, torMenu.transform);
-                    torOptions.Add(stringOption);
-                    stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => {});
+                    StringOption stringOption = UnityEngine.Object.Instantiate(template, menus[(int)option.type]);
+                    optionBehaviours[(int)option.type].Add(stringOption);
+                    stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
                     stringOption.ValueText.text = option.selections[option.selection].ToString();
@@ -195,6 +312,18 @@ namespace TheOtherRoles {
 
             torMenu.Children = torOptions.ToArray();
             torSettings.gameObject.SetActive(false);
+
+            impostorMenu.Children = impostorOptions.ToArray();
+            impostorSettings.gameObject.SetActive(false);
+
+            neutralMenu.Children = neutralOptions.ToArray();
+            neutralSettings.gameObject.SetActive(false);
+
+            crewmateMenu.Children = crewmateOptions.ToArray();
+            crewmateSettings.gameObject.SetActive(false);
+
+            modifierMenu.Children = modifierOptions.ToArray();
+            modifierSettings.gameObject.SetActive(false);
 
             // Adapt task count for main options
 
@@ -263,15 +392,27 @@ namespace TheOtherRoles {
     {
         private static float timer = 1f;
         public static void Postfix(GameOptionsMenu __instance) {
-            if (__instance.Children.Length < 100) return; // TODO: Introduce a cleaner way to seperate the TOR settings from the game settings
+            // Return Menu Update if in normal among us settings 
+            var gameSettingMenu = UnityEngine.Object.FindObjectsOfType<GameSettingMenu>().FirstOrDefault();
+            if (gameSettingMenu.RegularGameSettings.active || gameSettingMenu.RolesSettings.gameObject.active) return;
 
-            __instance.GetComponentInParent<Scroller>().ContentYBounds.max = -0.5F + __instance.Children.Length * 0.55F; 
+            __instance.GetComponentInParent<Scroller>().ContentYBounds.max = -0.5F + __instance.Children.Length * 0.55F;
             timer += Time.deltaTime;
             if (timer < 0.1f) return;
             timer = 0f;
 
             float offset = 2.75f;
             foreach (CustomOption option in CustomOption.options) {
+                if (GameObject.Find("TORSettings") && option.type != CustomOption.CustomOptionType.General)
+                    continue;
+                if (GameObject.Find("ImpostorSettings") && option.type != CustomOption.CustomOptionType.Impostor)
+                    continue;
+                if (GameObject.Find("NeutralSettings") && option.type != CustomOption.CustomOptionType.Neutral)
+                    continue;
+                if (GameObject.Find("CrewmateSettings") && option.type != CustomOption.CustomOptionType.Crewmate)
+                    continue;
+                if (GameObject.Find("ModifierSettings") && option.type != CustomOption.CustomOptionType.Modifier)
+                    continue;
                 if (option?.optionBehaviour != null && option.optionBehaviour.gameObject != null) {
                     bool enabled = true;
                     var parent = option.parent;
@@ -323,19 +464,19 @@ namespace TheOtherRoles {
     [HarmonyPatch] 
     class GameOptionsDataPatch
     {
-        private const int PageRoles = 5;
-
         private static IEnumerable<MethodBase> TargetMethods() {
             return typeof(GameOptionsData).GetMethods().Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(int));
         }
 
-        private static List<StringBuilder> CreateCustomOptionTextList()
-        {
-            List<StringBuilder> sbList = new List<StringBuilder>();
-
-            StringBuilder sb = new StringBuilder();
-            foreach (CustomOption option in CustomOption.options) {
-                if (option.parent == null || option.parent == CustomOptionHolder.enabledTaskVsMode) {
+        private static string buildOptionsOfType(CustomOption.CustomOptionType type) {
+            StringBuilder sb = new StringBuilder("\n");
+            var options = CustomOption.options.Where(o => o.type == type);
+            foreach (CustomOption option in options) {
+                if (option.parent != null) {
+                    bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
+                    if (isIrrelevant) continue;
+                    sb.AppendLine($"  {option.name}: {option.selections[option.selection].ToString()}");
+                } else {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Crewmate Roles");
                         var min = CustomOptionHolder.crewmateRolesCountMin.getSelection();
@@ -357,54 +498,55 @@ namespace TheOtherRoles {
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
                         sb.AppendLine($"{optionName}: {optionValue}");
-                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax)) {
+                    } else if (option == CustomOptionHolder.modifiersCountMin) {
+                        var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Modifiers");
+                        var min = CustomOptionHolder.modifiersCountMin.getSelection();
+                        var max = CustomOptionHolder.modifiersCountMax.getSelection();
+                        if (min > max) min = max;
+                        var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        sb.AppendLine($"{optionName}: {optionValue}");
+                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax) {
                         continue;
-                    } else if (option.parent == CustomOptionHolder.enabledTaskVsMode) { // Task Vs Mode
-                        sb.AppendLine($"\t{option.name}: {option.selections[option.selection].ToString()}");
-                    } else if (!option.isRole) {
+                    } else {
+                        bool isIrrelevant = type != CustomOption.CustomOptionType.General && option.getSelection() == 0;
+                        if (isIrrelevant) continue;
                         sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }
                 }
             }
-            sbList.Add(sb);
-            sb = null;
-
-            int roleCount = 0;
-            foreach (CustomOption option in CustomOption.options) {
-                if (option.isRole && option.selection > 0) {
-                    if (sb == null)
-                        sb = new StringBuilder();
-                    sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
-                    foreach (CustomOption childOption in CustomOption.options) {
-                        CustomOption parent = childOption.parent;
-                        while (parent != null && parent != option)
-                            parent = parent.parent;
-                        if (parent != null)
-                            sb.AppendLine($"\t{childOption.name}: {childOption.selections[childOption.selection].ToString()}");
-                    }
-                    if (++roleCount == PageRoles) {
-                        sbList.Add(sb);
-                        sb = null;
-                        roleCount = 0;
-                    }
-                }
-            }
-
-            if (sb != null)
-                sbList.Add(sb);
-
-            return sbList;
+            return sb.ToString();
         }
 
         private static void Postfix(ref string __result)
         {
-            List<StringBuilder> sbList = new List<StringBuilder>();
-            sbList.Add(new StringBuilder(__result));
-            sbList.AddRange(CreateCustomOptionTextList());
-            TheOtherRolesPlugin.optionsPageMax = sbList.Count;
-            TheOtherRolesPlugin.optionsPage = Mathf.Clamp(TheOtherRolesPlugin.optionsPage, 0, TheOtherRolesPlugin.optionsPageMax - 1);
-            string title = $"[Press tab for more... ({TheOtherRolesPlugin.optionsPage + 1}/{TheOtherRolesPlugin.optionsPageMax})]\n";
-            __result = title + sbList[TheOtherRolesPlugin.optionsPage];
+            int counter = TheOtherRolesPlugin.optionsPage;
+            string hudString = counter != 0 ? Helpers.cs(DateTime.Now.Second % 2 == 0 ? Color.white : Color.red, "(Use scroll wheel if necessary)\n\n") : "";
+
+            var type = (CustomOption.CustomOptionType)counter;
+            int page = counter + 1;
+            switch (type) {
+                case CustomOption.CustomOptionType.Vanilla:
+                    hudString += $"Page {page}: Vanilla Settings\n\n{__result}";
+                    break;
+                case CustomOption.CustomOptionType.General:
+                    hudString += $"Page {page}: The Other Roles Settings\n{buildOptionsOfType(type)}";
+                    break;
+                case CustomOption.CustomOptionType.Impostor:
+                    hudString += $"Page {page}: Impostor Role Settings\n{buildOptionsOfType(type)}";
+                    break;
+                case CustomOption.CustomOptionType.Neutral:
+                    hudString += $"Page {page}: Neutral Role Settings\n{buildOptionsOfType(type)}";
+                    break;
+                case CustomOption.CustomOptionType.Crewmate:
+                    hudString += $"Page {page}: Crewmate Role Settings\n{buildOptionsOfType(type)}";
+                    break;
+                case CustomOption.CustomOptionType.Modifier:
+                    hudString += $"Page {page}: Modifier Settings\n{buildOptionsOfType(type)}";
+                    break;
+            }
+
+            hudString += $"\n Press TAB or Page Number for more... ({page}/{(int)CustomOption.CustomOptionType.sizeof_CustomOptionType})";
+            __result = hudString;
         }
     }
 
@@ -413,8 +555,33 @@ namespace TheOtherRoles {
     {
         public static void Postfix(KeyboardJoystick __instance)
         {
-            if(Input.GetKeyDown(KeyCode.Tab)) {
-                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % TheOtherRolesPlugin.optionsPageMax;
+            int page = TheOtherRolesPlugin.optionsPage;
+            if (Input.GetKeyDown(KeyCode.Tab)) {
+                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % (int)CustomOption.CustomOptionType.sizeof_CustomOptionType;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Vanilla;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.General;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Impostor;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Neutral;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Crewmate;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha6) || Input.GetKeyDown(KeyCode.Keypad6)) {
+                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Modifier;
+            }
+            if (page != TheOtherRolesPlugin.optionsPage) {
+                Vector3 position = (Vector3)HudManager.Instance?.GameSettings?.transform.localPosition;
+                if (position != null) {
+                    HudManager.Instance.GameSettings.transform.localPosition = new Vector3(position.x, 2.9f, position.z);
+                }
             }
         }
     }
@@ -424,6 +591,83 @@ namespace TheOtherRoles {
     public class GameSettingsScalePatch {
         public static void Prefix(HudManager __instance) {
             if (__instance.GameSettings != null) __instance.GameSettings.fontSize = 1.2f; 
+        }
+    }
+
+
+    // This class is taken from Town of Us Reactivated, https://github.com/eDonnes124/Town-Of-Us-R/blob/master/source/Patches/CustomOption/Patches.cs, Licensed under GPLv3
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
+    public class HudManagerUpdate {
+        public static float
+            MinX,/*-5.3F*/
+            OriginalY = 2.9F,
+            MinY = 2.9F;
+
+
+        public static Scroller Scroller;
+        private static Vector3 LastPosition;
+        private static float lastAspect;
+        private static bool setLastPosition = false;
+
+        public static void Prefix(HudManager __instance) {
+            if (__instance.GameSettings?.transform == null) return;
+
+            // Sets the MinX position to the left edge of the screen + 0.1 units
+            Rect safeArea = Screen.safeArea;
+            float aspect = Mathf.Min((Camera.main).aspect, safeArea.width / safeArea.height);
+            float safeOrthographicSize = CameraSafeArea.GetSafeOrthographicSize(Camera.main);
+            MinX = 0.1f - safeOrthographicSize * aspect;
+
+            if (!setLastPosition || aspect != lastAspect) {
+                LastPosition = new Vector3(MinX, MinY);
+                lastAspect = aspect;
+                setLastPosition = true;
+                if (Scroller != null) Scroller.ContentXBounds = new FloatRange(MinX, MinX);                
+            }
+
+            CreateScroller(__instance);
+
+            Scroller.gameObject.SetActive(__instance.GameSettings.gameObject.activeSelf);
+
+            if (!Scroller.gameObject.active) return;
+
+            var rows = __instance.GameSettings.text.Count(c => c == '\n');
+            float LobbyTextRowHeight = 0.06F;
+            var maxY = Mathf.Max(MinY, rows * LobbyTextRowHeight + (rows - 38) * LobbyTextRowHeight);
+
+            Scroller.ContentYBounds = new FloatRange(MinY, maxY);
+
+            // Prevent scrolling when the player is interacting with a menu
+            if (PlayerControl.LocalPlayer?.CanMove != true) {
+                __instance.GameSettings.transform.localPosition = LastPosition;
+
+                return;
+            }
+
+            if (__instance.GameSettings.transform.localPosition.x != MinX ||
+                __instance.GameSettings.transform.localPosition.y < MinY) return;
+
+            LastPosition = __instance.GameSettings.transform.localPosition;
+        }
+
+        private static void CreateScroller(HudManager __instance) {
+            if (Scroller != null) return;
+
+            Scroller = new GameObject("SettingsScroller").AddComponent<Scroller>();
+            Scroller.transform.SetParent(__instance.GameSettings.transform.parent);
+            Scroller.gameObject.layer = 5;
+
+            Scroller.transform.localScale = Vector3.one;
+            Scroller.allowX = false;
+            Scroller.allowY = true;
+            Scroller.active = true;
+            Scroller.velocity = new Vector2(0, 0);
+            Scroller.ScrollbarYBounds = new FloatRange(0, 0);
+            Scroller.ContentXBounds = new FloatRange(MinX, MinX);
+            Scroller.enabled = true;
+
+            Scroller.Inner = __instance.GameSettings.transform;
+            __instance.GameSettings.transform.SetParent(Scroller.transform);
         }
     }
 }

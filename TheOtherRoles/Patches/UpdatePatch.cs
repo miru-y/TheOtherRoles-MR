@@ -97,7 +97,9 @@ namespace TheOtherRoles.Patches {
                 if (Sheriff.sheriff != null && Deputy.knowsSheriff) {
                     setPlayerNameColor(Sheriff.sheriff, Sheriff.color);
                 }
-            } else if (Lighter.lighter != null && Lighter.lighter == PlayerControl.LocalPlayer)
+            } else if (Portalmaker.portalmaker != null && Portalmaker.portalmaker == PlayerControl.LocalPlayer)
+                setPlayerNameColor(Portalmaker.portalmaker, Portalmaker.color);
+            else if (Lighter.lighter != null && Lighter.lighter == PlayerControl.LocalPlayer)
                 setPlayerNameColor(Lighter.lighter, Lighter.color);
             else if (Detective.detective != null && Detective.detective == PlayerControl.LocalPlayer)
                 setPlayerNameColor(Detective.detective, Detective.color);
@@ -136,8 +138,6 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Guesser.niceGuesser, Guesser.color);
             } else if (Guesser.evilGuesser != null && Guesser.evilGuesser == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Guesser.evilGuesser, Palette.ImpostorRed);
-            } else if (Bait.bait != null && Bait.bait == PlayerControl.LocalPlayer) {
-                setPlayerNameColor(Bait.bait, Bait.color);
             } else if (Vulture.vulture != null && Vulture.vulture == PlayerControl.LocalPlayer) {
                 setPlayerNameColor(Vulture.vulture, Vulture.color);
             } else if (Medium.medium != null && Medium.medium == PlayerControl.LocalPlayer) {
@@ -173,6 +173,12 @@ namespace TheOtherRoles.Patches {
             // No else if here, as the Impostors need the Spy name to be colored
             if (Spy.spy != null && PlayerControl.LocalPlayer.Data.Role.IsImpostor) {
                 setPlayerNameColor(Spy.spy, Spy.color);
+            }
+            if (Sidekick.sidekick != null && Sidekick.wasTeamRed && PlayerControl.LocalPlayer.Data.Role.IsImpostor) {
+                setPlayerNameColor(Sidekick.sidekick, Spy.color);
+            }
+            if (Jackal.jackal != null && Jackal.wasTeamRed && PlayerControl.LocalPlayer.Data.Role.IsImpostor) {
+                setPlayerNameColor(Jackal.jackal, Spy.color);
             }
 
             // Crewmate roles with no changes: Mini
@@ -212,9 +218,7 @@ namespace TheOtherRoles.Patches {
             }
 
             // Lawyer
-            bool localIsLawyer = Lawyer.lawyer != null && Lawyer.target != null && Lawyer.lawyer == PlayerControl.LocalPlayer;
-            bool localIsKnowingTarget = Lawyer.lawyer != null && Lawyer.target != null && Lawyer.targetKnows && Lawyer.target == PlayerControl.LocalPlayer;
-            if (localIsLawyer || (localIsKnowingTarget && !Lawyer.lawyer.Data.IsDead)) {
+            if (Lawyer.lawyer != null && Lawyer.target != null && Lawyer.lawyer == PlayerControl.LocalPlayer) {
                 string suffix = Helpers.cs(Lawyer.color, " §");
                 Lawyer.target.nameText.text += suffix;
 
@@ -251,7 +255,7 @@ namespace TheOtherRoles.Patches {
         }
 
         public static void miniUpdate() {
-            if (Mini.mini == null || Camouflager.camouflageTimer > 0f) return;
+            if (Mini.mini == null || Camouflager.camouflageTimer > 0f || Mini.mini == Morphling.morphling && Morphling.morphTimer > 0f) return;
                 
             float growingProgress = Mini.growingProgress();
             float scale = growingProgress * 0.35f + 0.35f;
@@ -271,7 +275,11 @@ namespace TheOtherRoles.Patches {
         }
 
         static void updateImpostorKillButton(HudManager __instance) {
-            if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor || MeetingHud.Instance) return;
+            if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor) return;
+            if (MeetingHud.Instance) {
+                __instance.KillButton.Hide();
+                return;
+            }
             bool enabled = true;
             if (Vampire.vampire != null && Vampire.vampire == PlayerControl.LocalPlayer)
                 enabled = false;
@@ -296,6 +304,14 @@ namespace TheOtherRoles.Patches {
             if (Deputy.handcuffedKnows.ContainsKey(PlayerControl.LocalPlayer.PlayerId) && Deputy.handcuffedKnows[PlayerControl.LocalPlayer.PlayerId] > 0 || MeetingHud.Instance) __instance.ImpostorVentButton.Hide();
             else if (PlayerControl.LocalPlayer.roleCanUseVents() && !__instance.ImpostorVentButton.isActiveAndEnabled) __instance.ImpostorVentButton.Show();
 
+        }
+
+        static void updateUseButton(HudManager __instance) {
+            if (MeetingHud.Instance) __instance.UseButton.Hide();
+        }
+
+        static void updateSabotageButton(HudManager __instance) {
+            if (MeetingHud.Instance) __instance.SabotageButton.Hide();
         }
 
         static void updateTaskRacer(HudManager __instance)
@@ -331,6 +347,9 @@ namespace TheOtherRoles.Patches {
             // Deputy Sabotage, Use and Vent Button Disabling
             updateReportButton(__instance);
             updateVentButton(__instance);
+            // Meeting hide buttons if needed (used for the map usage, because closing the map would show buttons)
+            updateSabotageButton(__instance);
+            updateUseButton(__instance);
 
             // Task Vs Mode
             updateTaskRacer(__instance);

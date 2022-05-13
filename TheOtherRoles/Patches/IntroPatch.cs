@@ -86,6 +86,18 @@ namespace TheOtherRoles.Patches {
                 }
             }
 
+            // First kill
+            if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "") {
+                PlayerControl target = PlayerControl.AllPlayerControls.ToArray().ToList().FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
+                if (target != null) {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetFirstKill, Hazel.SendOption.Reliable, -1);
+                    writer.Write(target.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.setFirstKill(target.PlayerId);
+                }
+            }
+
+            MapOptions.firstKillName = "";
             if (Kataomoi.kataomoi != null && PlayerControl.LocalPlayer == Kataomoi.kataomoi) {
                 if (HudManager.Instance != null) {
                     Vector3 bottomLeft = new Vector3(-HudManager.Instance.UseButton.transform.localPosition.x, HudManager.Instance.UseButton.transform.localPosition.y, HudManager.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
@@ -210,7 +222,7 @@ namespace TheOtherRoles.Patches {
 
         public static void setupIntroTeam(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
             List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
-            RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
+            RoleInfo roleInfo = infos.Where(info => !info.isModifier).FirstOrDefault();
             if (roleInfo == null) return;
             if (roleInfo.roleId == RoleId.TaskRacer) {
                 __instance.BackgroundBar.material.color = roleInfo.color;
@@ -257,7 +269,9 @@ namespace TheOtherRoles.Patches {
                 if (introCutscene == null) return;
 
                 List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
-                RoleInfo roleInfo = infos.Where(info => info.roleId != RoleId.Lover).FirstOrDefault();
+                RoleInfo roleInfo = infos.Where(info => !info.isModifier).FirstOrDefault();
+                RoleInfo modifierInfo = infos.Where(info => info.isModifier).FirstOrDefault();
+                introCutscene.RoleBlurbText.text = "";
                 if (roleInfo.roleId == RoleId.TaskMaster && TaskMaster.becomeATaskMasterWhenCompleteAllTasks)
                     roleInfo = RoleInfo.crewmate;
 
@@ -267,9 +281,13 @@ namespace TheOtherRoles.Patches {
                     introCutscene.RoleBlurbText.text = roleInfo.introDescription;
                     introCutscene.RoleBlurbText.color = roleInfo.color;
                 }
-                if (infos.Any(info => info.roleId == RoleId.Lover)) {
-                    PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
-                    introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
+                if (modifierInfo != null) {
+                    if (modifierInfo.roleId != RoleId.Lover)
+                        introCutscene.RoleBlurbText.text += Helpers.cs(modifierInfo.color, $"\n{modifierInfo.introDescription}");
+                    else {
+                        PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
+                    }
                 }
                 if (infos.Any(info => info.roleId == RoleId.Kataomoi)) {
                     introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ Your unrequited love target is {Kataomoi.target?.Data?.PlayerName ?? ""} ♥");

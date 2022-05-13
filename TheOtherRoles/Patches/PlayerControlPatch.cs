@@ -28,9 +28,8 @@ namespace TheOtherRoles.Patches
             }
 
             Vector2 truePosition = targetingPlayer.GetTruePosition();
-            Il2CppSystem.Collections.Generic.List<GameData.PlayerInfo> allPlayers = GameData.Instance.AllPlayers;
-            for (int i = 0; i < allPlayers.Count; i++) {
-                GameData.PlayerInfo playerInfo = allPlayers[i];
+            foreach (var playerInfo in GameData.Instance.AllPlayers)
+            {
                 if (!playerInfo.Disconnected && playerInfo.PlayerId != targetingPlayer.PlayerId && !playerInfo.IsDead && (!onlyCrewmates || !playerInfo.Role.IsImpostor)) {
                     PlayerControl @object = playerInfo.Object;
                     if (untargetablePlayers != null && untargetablePlayers.Any(x => x == @object)) {
@@ -66,15 +65,23 @@ namespace TheOtherRoles.Patches
 
                 bool isMorphedMorphling = target == Morphling.morphling && Morphling.morphTarget != null && Morphling.morphTimer > 0f;
                 bool hasVisibleShield = false;
+                Color color = Medic.shieldedColor;
                 if (Camouflager.camouflageTimer <= 0f && Medic.shielded != null && ((target == Medic.shielded && !isMorphedMorphling) || (isMorphedMorphling && Morphling.morphTarget == Medic.shielded))) {
                     hasVisibleShield = Medic.showShielded == 0 // Everyone
                         || (Medic.showShielded == 1 && (PlayerControl.LocalPlayer == Medic.shielded || PlayerControl.LocalPlayer == Medic.medic)) // Shielded + Medic
                         || (Medic.showShielded == 2 && PlayerControl.LocalPlayer == Medic.medic); // Medic only
+                    // Make shield invisible till after the next meeting if the option is set (the medic can already see the shield)
+                    hasVisibleShield = hasVisibleShield && (Medic.meetingAfterShielding || !Medic.showShieldAfterMeeting || PlayerControl.LocalPlayer == Medic.medic);
+                }
+
+                if (Camouflager.camouflageTimer <= 0f && MapOptions.firstKillPlayer != null && MapOptions.shieldFirstKill && ((target == MapOptions.firstKillPlayer && !isMorphedMorphling) || (isMorphedMorphling && Morphling.morphTarget == MapOptions.firstKillPlayer))) {
+                    hasVisibleShield = true;
+                    color = Color.blue;
                 }
 
                 if (hasVisibleShield) {
-                    target.MyRend.material.SetFloat("_Outline", 1f);
-                    target.MyRend.material.SetColor("_OutlineColor", Medic.shieldedColor);
+                target.MyRend.material.SetFloat("_Outline", 1f);
+                target.MyRend.material.SetColor("_OutlineColor", color);
                 }
                 else {
                     target.MyRend.material.SetFloat("_Outline", 0f);
@@ -105,6 +112,9 @@ namespace TheOtherRoles.Patches
                     }
                     else if (localPlayerPositions.Any(x => x.Item2 == true)) {
                         PlayerControl.LocalPlayer.transform.position = next.Item1;
+                    }
+                    if (SubmergedCompatibility.isSubmerged()) {
+                        SubmergedCompatibility.ChangeFloor(next.Item1.y > -7);
                     }
 
                     localPlayerPositions.RemoveAt(0);
@@ -197,16 +207,16 @@ namespace TheOtherRoles.Patches
             if (Vampire.vampire == null || Vampire.vampire != PlayerControl.LocalPlayer) return;
 
             PlayerControl target = null;
-            if (Spy.spy != null) {
+            if (Spy.spy != null || Sidekick.wasSpy || Jackal.wasSpy) {
                 if (Spy.impostorsCanKillAnyone) {
                     target = setTarget(false, true);
                 }
                 else {
-                    target = setTarget(true, true, new List<PlayerControl>() { Spy.spy });
+                    target = setTarget(true, true, new List<PlayerControl>() { Spy.spy, Sidekick.wasTeamRed ? Sidekick.sidekick : null, Jackal.wasTeamRed ? Jackal.jackal : null });
                 }
             }
             else {
-                target = setTarget(true, true);
+                target = setTarget(true, true, new List<PlayerControl>() { Sidekick.wasImpostor ? Sidekick.sidekick : null, Jackal.wasImpostor ? Jackal.jackal : null });
             }
 
             bool targetNearGarlic = false;
@@ -259,6 +269,8 @@ namespace TheOtherRoles.Patches
 
             List<PlayerControl> untargetables = new List<PlayerControl>();
             if (Spy.spy != null) untargetables.Add(Spy.spy);
+            if (Sidekick.wasTeamRed) untargetables.Add(Sidekick.sidekick);
+            if (Jackal.wasTeamRed) untargetables.Add(Jackal.jackal);
             Eraser.currentTarget = setTarget(onlyCrewmates: !Eraser.canEraseAnyone, untargetablePlayers: Eraser.canEraseAnyone ? new List<PlayerControl>() : untargetables);
             setPlayerOutline(Eraser.currentTarget, Eraser.color);
         }
@@ -304,16 +316,16 @@ namespace TheOtherRoles.Patches
             }
 
             PlayerControl target = null;
-            if (Spy.spy != null) {
+            if (Spy.spy != null || Sidekick.wasSpy || Jackal.wasSpy) {
                 if (Spy.impostorsCanKillAnyone) {
                     target = setTarget(false, true);
                 }
                 else {
-                    target = setTarget(true, true, new List<PlayerControl>() { Spy.spy });
+                    target = setTarget(true, true, new List<PlayerControl>() { Spy.spy, Sidekick.wasTeamRed ? Sidekick.sidekick : null, Jackal.wasTeamRed ? Jackal.jackal : null});
                 }
             }
             else {
-                target = setTarget(true, true);
+                target = setTarget(true, true, new List<PlayerControl>() { Sidekick.wasImpostor ? Sidekick.sidekick : null, Jackal.wasImpostor ? Jackal.jackal : null});
             }
 
             HudManager.Instance.KillButton.SetTarget(target); // Includes setPlayerOutline(target, Palette.ImpstorRed);
@@ -332,6 +344,36 @@ namespace TheOtherRoles.Patches
             else {
                 Warlock.curseVictimTarget = setTarget(targetingPlayer: Warlock.curseVictim);
                 setPlayerOutline(Warlock.curseVictimTarget, Warlock.color);
+            }
+        }
+
+        static void ninjaUpdate()
+        {
+            if (Ninja.arrow?.arrow != null)
+            {
+                if (Ninja.ninja == null || Ninja.ninja != PlayerControl.LocalPlayer || !Ninja.knowsTargetLocation) {
+                    Ninja.arrow.arrow.SetActive(false);
+                    return;
+                }
+                if (Ninja.ninjaMarked != null && !PlayerControl.LocalPlayer.Data.IsDead)
+                {
+                    bool trackedOnMap = !Ninja.ninjaMarked.Data.IsDead;
+                    Vector3 position = Ninja.ninjaMarked.transform.position;
+                    if (!trackedOnMap)
+                    { // Check for dead body
+                        DeadBody body = UnityEngine.Object.FindObjectsOfType<DeadBody>().FirstOrDefault(b => b.ParentId == Ninja.ninjaMarked.PlayerId);
+                        if (body != null)
+                        {
+                            trackedOnMap = true;
+                            position = body.transform.position;
+                        }
+                    }
+                    Ninja.arrow.Update(position);
+                    Ninja.arrow.arrow.SetActive(trackedOnMap);
+                } else
+                {
+                    Ninja.arrow.arrow.SetActive(false);
+                }
             }
         }
 
@@ -398,7 +440,7 @@ namespace TheOtherRoles.Patches
             collider.offset = Mini.defaultColliderOffset * Vector2.down;
 
             // Set adapted player size to Mini and Morphling
-            if (Mini.mini == null || Camouflager.camouflageTimer > 0f) return;
+            if (Mini.mini == null || Camouflager.camouflageTimer > 0f || Mini.mini == Morphling.morphling && Morphling.morphTimer > 0) return;
 
             float growingProgress = Mini.growingProgress();
             float scale = growingProgress * 0.35f + 0.35f;
@@ -456,18 +498,21 @@ namespace TheOtherRoles.Patches
                     bool isTaskMasterExTask = TaskMaster.isTaskMaster(p.PlayerId) && TaskMaster.isTaskComplete;
                     var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(p.Data, true);
                     var (exTasksCompleted, exTasksTotal) = TasksHandler.taskInfo(p.Data, true, true);
-                    string roleNames = RoleInfo.GetRolesString(p, true, PlayerControl.LocalPlayer.Data.IsDead);
+                    string roleNames = RoleInfo.GetRolesString(p, true, false, false);
+                    string roleText = RoleInfo.GetRolesString(p, true, MapOptions.ghostsSeeModifier, PlayerControl.LocalPlayer.Data.IsDead);
                     string taskInfo = tasksTotal > 0 ? $"<color=#FAD934FF>({tasksCompleted}/{tasksTotal})</color>" : "";
                     string exTaskInfo = exTasksTotal > 0 ? $"<color=#E1564BFF>Ex ({exTasksCompleted}/{exTasksTotal})</color>" : "";
                     string playerInfoText = "";
-                    string meetingInfoText = "";
+                    string meetingInfoText = "";                    
 
                     string extraInfoText = "";
                     if (isKataomoiTarget)
                         extraInfoText = Helpers.cs(Kataomoi.color, "Kataomoi Target");
 
                     if (p == PlayerControl.LocalPlayer || TaskRacer.isValid()) {
+                        if (p.Data.IsDead) roleNames = roleText;
                         playerInfoText = $"{roleNames}";
+                        if (p == Swapper.swapper) playerInfoText = $"{roleNames}" + Helpers.cs(Swapper.color, $" ({Swapper.charges})");
                         if (DestroyableSingleton<TaskPanelBehaviour>.InstanceExists) {
                             TMPro.TextMeshPro tabText = DestroyableSingleton<TaskPanelBehaviour>.Instance.tab.transform.FindChild("TabText_TMP").GetComponent<TMPro.TextMeshPro>();
                             tabText.SetText(string.Format("{0} {1}", isTaskMasterExTask ? "Ex Tasks" : "Tasks", isTaskMasterExTask ? exTaskInfo : taskInfo));
@@ -485,9 +530,9 @@ namespace TheOtherRoles.Patches
                     }
                     else if (MapOptions.ghostsSeeRoles && MapOptions.ghostsSeeTasks) {
                         if (!isTaskMasterExTask)
-                            playerInfoText = $"{roleNames} {taskInfo}".Trim();
+                            playerInfoText = $"{roleText} {taskInfo}".Trim();
                         else
-                            playerInfoText = $"{roleNames} {taskInfo} {exTaskInfo}".Trim();
+                            playerInfoText = $"{roleText} {taskInfo} {exTaskInfo}".Trim();
                         meetingInfoText = playerInfoText;
                         if (!string.IsNullOrEmpty(extraInfoText))
                             playerInfoText += " " + extraInfoText;
@@ -497,7 +542,7 @@ namespace TheOtherRoles.Patches
                         meetingInfoText = playerInfoText;
                     }
                     else if (MapOptions.ghostsSeeRoles || (Lawyer.lawyerKnowsRole && PlayerControl.LocalPlayer == Lawyer.lawyer && p == Lawyer.target)) {
-                        playerInfoText = $"{roleNames}";
+                        playerInfoText = $"{roleText}";
                         meetingInfoText = playerInfoText;
                         if (!string.IsNullOrEmpty(extraInfoText))
                             playerInfoText += " " + extraInfoText;
@@ -520,6 +565,7 @@ namespace TheOtherRoles.Patches
             for (int i = 0; i < ShipStatus.Instance.AllVents.Length; i++) {
                 Vent vent = ShipStatus.Instance.AllVents[i];
                 if (vent.gameObject.name.StartsWith("JackInTheBoxVent_") || vent.gameObject.name.StartsWith("SealedVent_") || vent.gameObject.name.StartsWith("FutureSealedVent_")) continue;
+                if (SubmergedCompatibility.isSubmerged() && vent.Id == 9) continue; // cannot seal submergeds exit only vent!
                 float distance = Vector2.Distance(vent.transform.position, truePosition);
                 if (distance <= vent.UsableDistance && distance < closestDistance) {
                     closestDistance = distance;
@@ -621,7 +667,7 @@ namespace TheOtherRoles.Patches
                 BountyHunter.bountyUpdateTimer = BountyHunter.bountyDuration;
                 var possibleTargets = new List<PlayerControl>();
                 foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
-                    if (!p.Data.IsDead && !p.Data.Disconnected && p != p.Data.Role.IsImpostor && p != Spy.spy && (p != Mini.mini || Mini.isGrownUp()) && (Lovers.getPartner(BountyHunter.bountyHunter) == null || p != Lovers.getPartner(BountyHunter.bountyHunter))) possibleTargets.Add(p);
+                    if (!p.Data.IsDead && !p.Data.Disconnected && p != p.Data.Role.IsImpostor && p != Spy.spy && (p != Sidekick.sidekick || !Sidekick.wasTeamRed) && (p != Jackal.jackal || !Jackal.wasTeamRed) && (p != Mini.mini || Mini.isGrownUp()) && (Lovers.getPartner(BountyHunter.bountyHunter) == null || p != Lovers.getPartner(BountyHunter.bountyHunter))) possibleTargets.Add(p);
                 }
                 BountyHunter.bounty = possibleTargets[TheOtherRoles.rnd.Next(0, possibleTargets.Count)];
                 if (BountyHunter.bounty == null) return;
@@ -647,49 +693,6 @@ namespace TheOtherRoles.Patches
                     BountyHunter.arrowUpdateTimer = BountyHunter.arrowUpdateIntervall;
                 }
                 BountyHunter.arrow.Update();
-            }
-        }
-
-        static void baitUpdate() {
-            if (Bait.bait == null || Bait.bait != PlayerControl.LocalPlayer) return;
-
-            // Bait report
-            if (Bait.bait.Data.IsDead && !Bait.reported) {
-                Bait.reportDelay -= Time.fixedDeltaTime;
-                DeadPlayer deadPlayer = deadPlayers?.Where(x => x.player?.PlayerId == Bait.bait.PlayerId)?.FirstOrDefault();
-                if (deadPlayer.killerIfExisting != null && Bait.reportDelay <= 0f) {
-
-                    Helpers.handleVampireBiteOnBodyReport(); // Manually call Vampire handling, since the CmdReportDeadBody Prefix won't be called
-                    RPCProcedure.uncheckedCmdReportDeadBody(deadPlayer.killerIfExisting.PlayerId, Bait.bait.PlayerId);
-
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedCmdReportDeadBody, Hazel.SendOption.Reliable, -1);
-                    writer.Write(deadPlayer.killerIfExisting.PlayerId);
-                    writer.Write(Bait.bait.PlayerId);
-                    AmongUsClient.Instance.FinishRpcImmediately(writer);
-                    Bait.reported = true;
-                }
-            }
-
-            // Bait Vents
-            if (ShipStatus.Instance?.AllVents != null) {
-                var ventsWithPlayers = new List<int>();
-                foreach (PlayerControl player in PlayerControl.AllPlayerControls) {
-                    if (player.inVent) {
-                        Vent target = ShipStatus.Instance.AllVents.OrderBy(x => Vector2.Distance(x.transform.position, player.GetTruePosition())).FirstOrDefault();
-                        if (target != null) ventsWithPlayers.Add(target.Id);
-                    }
-                }
-
-                foreach (Vent vent in ShipStatus.Instance.AllVents) {
-                    if (vent.myRend == null || vent.myRend.material == null) continue;
-                    if (ventsWithPlayers.Contains(vent.Id) || (ventsWithPlayers.Count > 0 && Bait.highlightAllVents)) {
-                        vent.myRend.material.SetFloat("_Outline", 1f);
-                        vent.myRend.material.SetColor("_OutlineColor", Color.yellow);
-                    }
-                    else {
-                        vent.myRend.material.SetFloat("_Outline", 0);
-                    }
-                }
             }
         }
 
@@ -761,15 +764,6 @@ namespace TheOtherRoles.Patches
         public static void lawyerUpdate() {
             if (Lawyer.lawyer == null || Lawyer.lawyer != PlayerControl.LocalPlayer) return;
 
-            // Meeting win
-            if (Lawyer.winsAfterMeetings && Lawyer.neededMeetings == Lawyer.meetings && Lawyer.target != null && !Lawyer.target.Data.IsDead) {
-                Lawyer.winsAfterMeetings = false; // Avoid sending mutliple RPCs until the host finshes the game
-                MessageWriter winWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.LawyerWin, Hazel.SendOption.Reliable, -1);
-                AmongUsClient.Instance.FinishRpcImmediately(winWriter);
-                RPCProcedure.lawyerWin();
-                return;
-            }
-
             // Promote to Pursuer
             if (Lawyer.target != null && Lawyer.target.Data.Disconnected) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.LawyerPromotesToPursuer, Hazel.SendOption.Reliable, -1);
@@ -789,6 +783,16 @@ namespace TheOtherRoles.Patches
             }
         }
 
+        // For swapper swap charges        
+        public static void swapperUpdate() {
+            if (Swapper.swapper == null || PlayerControl.LocalPlayer != Swapper.swapper || PlayerControl.LocalPlayer.Data.IsDead) return;
+            var (playerCompleted, _) = TasksHandler.taskInfo(PlayerControl.LocalPlayer.Data);
+            if (playerCompleted == Swapper.rechargedTasks) {
+                Swapper.rechargedTasks += Swapper.rechargeTasksNumber;
+                Swapper.charges++;
+            }
+        }
+
         static void pursuerSetTarget() {
             if (Pursuer.pursuer == null || Pursuer.pursuer != PlayerControl.LocalPlayer) return;
             Pursuer.target = setTarget();
@@ -803,19 +807,77 @@ namespace TheOtherRoles.Patches
             else {
                 untargetables = new List<PlayerControl>(); // Also target players that have already been spelled, to hide spells that were blanks/blocked by shields
                 if (Spy.spy != null && !Witch.canSpellAnyone) untargetables.Add(Spy.spy);
+                if (Sidekick.wasTeamRed && !Witch.canSpellAnyone) untargetables.Add(Sidekick.sidekick);
+                if (Jackal.wasTeamRed && !Witch.canSpellAnyone) untargetables.Add(Jackal.jackal);
             }
             Witch.currentTarget = setTarget(onlyCrewmates: !Witch.canSpellAnyone, untargetablePlayers: untargetables);
             setPlayerOutline(Witch.currentTarget, Witch.color);
+        }
+
+        static void ninjaSetTarget()
+        {
+            if (Ninja.ninja == null || Ninja.ninja != PlayerControl.LocalPlayer) return;
+            List<PlayerControl> untargetables = new List<PlayerControl>();
+            if (Spy.spy != null && !Spy.impostorsCanKillAnyone) untargetables.Add(Spy.spy);
+            if (Mini.mini != null) untargetables.Add(Mini.mini);
+            if (Sidekick.wasTeamRed && !Spy.impostorsCanKillAnyone) untargetables.Add(Sidekick.sidekick);
+            if (Jackal.wasTeamRed && !Spy.impostorsCanKillAnyone) untargetables.Add(Jackal.jackal);
+            Ninja.currentTarget = setTarget(onlyCrewmates: true, untargetablePlayers: untargetables);
+            setPlayerOutline(Ninja.currentTarget, Ninja.color);
         }
 
         static void doorHackerUpdate() {
             if (DoorHacker.doorHacker == null) return;
             float oldDoorHackerTimer = DoorHacker.doorHackerTimer;
             if (oldDoorHackerTimer <= 0f) return;
-
             DoorHacker.doorHackerTimer = Mathf.Max(0f, DoorHacker.doorHackerTimer - Time.fixedDeltaTime);
             if (DoorHacker.doorHackerTimer <= 0f) {
                 DoorHacker.ResetDoors(true);
+            }
+        }
+        static void baitUpdate() {
+            if (!Bait.active.Any()) return;
+
+            // Bait report
+            foreach (KeyValuePair<DeadPlayer, float> entry in new Dictionary<DeadPlayer, float>(Bait.active)) {
+                Bait.active[entry.Key] = entry.Value - Time.fixedDeltaTime;
+                if (entry.Value <= 0) {
+                    Bait.active.Remove(entry.Key);
+                    if (entry.Key.killerIfExisting != null) {
+                        Helpers.handleVampireBiteOnBodyReport(); // Manually call Vampire handling, since the CmdReportDeadBody Prefix won't be called
+                        RPCProcedure.uncheckedCmdReportDeadBody(entry.Key.killerIfExisting.PlayerId, entry.Key.player.PlayerId);
+
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedCmdReportDeadBody, Hazel.SendOption.Reliable, -1);
+                        writer.Write(entry.Key.killerIfExisting.PlayerId);
+                        writer.Write(entry.Key.player.PlayerId);
+                        AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    }
+                }
+            }
+        }
+
+        static void bloodyUpdate() {
+            if (!Bloody.active.Any()) return;
+            foreach (KeyValuePair<byte, float> entry in new Dictionary<byte, float>(Bloody.active)) {
+                PlayerControl player = Helpers.playerById(entry.Key);
+                PlayerControl bloodyPlayer = Helpers.playerById(Bloody.bloodyKillerMap[player.PlayerId]);                
+                new Bloodytrail(player, bloodyPlayer);
+                Bloody.active[entry.Key] = entry.Value - Time.fixedDeltaTime;
+                if (entry.Value <= 0) Bloody.active.Remove(entry.Key);
+            }
+        }
+
+        // Mini set adapted button cooldown for Vampire, Sheriff, Jackal, Sidekick, Warlock, Cleaner
+        public static void miniCooldownUpdate() {
+            if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini) {
+                var multiplier = Mini.isGrownUp() ? 0.66f : 2f;
+                HudManagerStartPatch.sheriffKillButton.MaxTimer = Sheriff.cooldown * multiplier;
+                HudManagerStartPatch.vampireKillButton.MaxTimer = Vampire.cooldown * multiplier;
+                HudManagerStartPatch.jackalKillButton.MaxTimer = Jackal.cooldown * multiplier;
+                HudManagerStartPatch.sidekickKillButton.MaxTimer = Sidekick.cooldown * multiplier;
+                HudManagerStartPatch.warlockCurseButton.MaxTimer = Warlock.cooldown * multiplier;
+                HudManagerStartPatch.cleanerCleanButton.MaxTimer = Cleaner.cooldown * multiplier;
+                HudManagerStartPatch.witchSpellButton.MaxTimer = (Witch.cooldown + Witch.currentCooldownAddition) * multiplier;
             }
         }
 
@@ -838,7 +900,8 @@ namespace TheOtherRoles.Patches
             }
         }
 
-        public static void Postfix(PlayerControl __instance) {
+
+    public static void Postfix(PlayerControl __instance) {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
 
             // Mini and Morphling shrink
@@ -905,8 +968,6 @@ namespace TheOtherRoles.Patches
                 snitchUpdate();
                 // BountyHunter
                 bountyHunterUpdate();
-                // Bait
-                baitUpdate();
                 // Vulture
                 vultureUpdate();
                 // Medium
@@ -919,16 +980,33 @@ namespace TheOtherRoles.Patches
                 pursuerSetTarget();
                 // Witch
                 witchSetTarget();
+                // Ninja
+                ninjaSetTarget();
+                NinjaTrace.UpdateAll();
+                ninjaUpdate();
+
                 hackerUpdate();
+                swapperUpdate();
+
                 // DoorHacker
                 doorHackerUpdate();
                 // Kataomoi
                 kataomoiUpdate();
 
                 // Task Vs Mode
-                if (TaskRacer.isValid())
-                    TaskRacer.update();
-            }
+                TaskRacer.update();
+
+                // Hacker
+                hackerUpdate();
+
+                // --MODIFIER--
+                // Bait
+                baitUpdate();
+                // Bloody
+                bloodyUpdate();
+                // mini (for the cooldowns)
+                miniCooldownUpdate();
+            } 
         }
     }
 
@@ -937,6 +1015,7 @@ namespace TheOtherRoles.Patches
         private static Vector2 offset = Vector2.zero;
         public static void Prefix(PlayerPhysics __instance) {
             bool correctOffset = Camouflager.camouflageTimer <= 0f && (__instance.myPlayer == Mini.mini ||  (Morphling.morphling != null && __instance.myPlayer == Morphling.morphling && Morphling.morphTarget == Mini.mini && Morphling.morphTimer > 0f));
+            correctOffset = correctOffset && !(Mini.mini == Morphling.morphling && Morphling.morphTimer > 0f);
             if (correctOffset) {
                 float currentScaling = (Mini.growingProgress() + 1) * 0.5f;
                 __instance.myPlayer.Collider.offset = currentScaling * Mini.defaultColliderOffset * Vector2.down;
@@ -1064,22 +1143,6 @@ namespace TheOtherRoles.Patches
                 RPCProcedure.lawyerPromotesToPursuer();
             }
 
-            // Cleaner Button Sync
-            if (Cleaner.cleaner != null && PlayerControl.LocalPlayer == Cleaner.cleaner && __instance == Cleaner.cleaner && HudManagerStartPatch.cleanerCleanButton != null) 
-                HudManagerStartPatch.cleanerCleanButton.Timer = Cleaner.cleaner.killTimer;
-
-
-            // Witch Button Sync
-            if (Witch.triggerBothCooldowns && Witch.witch != null && PlayerControl.LocalPlayer == Witch.witch && __instance == Witch.witch && HudManagerStartPatch.witchSpellButton != null) 
-                HudManagerStartPatch.witchSpellButton.Timer = HudManagerStartPatch.witchSpellButton.MaxTimer;
-
-            // Warlock Button Sync
-            if (Warlock.warlock != null && PlayerControl.LocalPlayer == Warlock.warlock && __instance == Warlock.warlock && HudManagerStartPatch.warlockCurseButton != null) {
-                if (Warlock.warlock.killTimer > HudManagerStartPatch.warlockCurseButton.Timer) {
-                    HudManagerStartPatch.warlockCurseButton.Timer = Warlock.warlock.killTimer;
-                }
-            }
-
             // Seer show flash and add dead player position
             if (Seer.seer != null && PlayerControl.LocalPlayer == Seer.seer && !Seer.seer.Data.IsDead && Seer.seer != target && Seer.mode <= 1) {
                 Helpers.showFlash(new Color(42f / 255f, 187f / 255f, 245f / 255f));
@@ -1094,12 +1157,6 @@ namespace TheOtherRoles.Patches
                 Medium.featureDeadBodies.Add(new Tuple<DeadPlayer, Vector3>(deadPlayer, target.transform.position));
             }
 
-            // Mini set adapted kill cooldown
-            if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini && Mini.mini.Data.Role.IsImpostor && Mini.mini == __instance) {
-                var multiplier = Mini.isGrownUp() ? 0.66f : 2f;
-                Mini.mini.SetKillTimer(PlayerControl.GameOptions.KillCooldown * multiplier);
-            }
-
             // Set bountyHunter cooldown
             if (BountyHunter.bountyHunter != null && PlayerControl.LocalPlayer == BountyHunter.bountyHunter && __instance == BountyHunter.bountyHunter) {
                 if (target == BountyHunter.bounty) {
@@ -1110,10 +1167,62 @@ namespace TheOtherRoles.Patches
                     BountyHunter.bountyHunter.SetKillTimer(PlayerControl.GameOptions.KillCooldown + BountyHunter.punishmentTime); 
             }
 
-            // Show flash on bait kill to the killer if enabled
-            if (Bait.bait != null && target == Bait.bait && Bait.showKillFlash && __instance == PlayerControl.LocalPlayer) {
-                Helpers.showFlash(new Color(204f / 255f, 102f / 255f, 0f / 255f));
+            // Mini Set Impostor Mini kill timer (Due to mini being a modifier, all "SetKillTimers" must have happened before this!)
+            if (Mini.mini != null && __instance == Mini.mini && __instance == PlayerControl.LocalPlayer) {
+                float multiplier = 1f;
+                if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini) multiplier = Mini.isGrownUp() ? 0.66f : 2f;
+                Mini.mini.SetKillTimer(__instance.killTimer * multiplier);
             }
+
+            // Cleaner Button Sync
+            if (Cleaner.cleaner != null && PlayerControl.LocalPlayer == Cleaner.cleaner && __instance == Cleaner.cleaner && HudManagerStartPatch.cleanerCleanButton != null)
+                HudManagerStartPatch.cleanerCleanButton.Timer = Cleaner.cleaner.killTimer;
+
+            // Witch Button Sync
+            if (Witch.triggerBothCooldowns && Witch.witch != null && PlayerControl.LocalPlayer == Witch.witch && __instance == Witch.witch && HudManagerStartPatch.witchSpellButton != null)
+                HudManagerStartPatch.witchSpellButton.Timer = HudManagerStartPatch.witchSpellButton.MaxTimer;
+
+            // Warlock Button Sync
+            if (Warlock.warlock != null && PlayerControl.LocalPlayer == Warlock.warlock && __instance == Warlock.warlock && HudManagerStartPatch.warlockCurseButton != null) {
+                if (Warlock.warlock.killTimer > HudManagerStartPatch.warlockCurseButton.Timer) {
+                    HudManagerStartPatch.warlockCurseButton.Timer = Warlock.warlock.killTimer;
+                }
+            }
+            // Ninja Button Sync
+            if (Ninja.ninja != null && PlayerControl.LocalPlayer == Ninja.ninja && __instance == Ninja.ninja && HudManagerStartPatch.ninjaButton != null)
+                HudManagerStartPatch.ninjaButton.Timer = HudManagerStartPatch.ninjaButton.MaxTimer;
+
+
+            // Bait
+            if (Bait.bait.FindAll(x => x.PlayerId == target.PlayerId).Count > 0) {
+                float reportDelay = (float) rnd.Next((int)Bait.reportDelayMin, (int)Bait.reportDelayMax + 1);
+                Bait.active.Add(deadPlayer, reportDelay);
+
+                if (Bait.showKillFlash && __instance == PlayerControl.LocalPlayer) Helpers.showFlash(new Color(204f / 255f, 102f / 255f, 0f / 255f));
+            }
+
+            // Add Bloody Modifier
+            if (Bloody.bloody.FindAll(x => x.PlayerId == target.PlayerId).Count > 0) {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.Bloody, Hazel.SendOption.Reliable, -1);
+                writer.Write(__instance.PlayerId);
+                writer.Write(target.PlayerId);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.bloody(__instance.PlayerId, target.PlayerId);
+            }
+
+            // VIP Modifier
+            if (Vip.vip.FindAll(x => x.PlayerId == target.PlayerId).Count > 0) {
+                Color color = Color.yellow;
+                if (Vip.showColor) {
+                    color = Color.white;
+                    if (target.Data.Role.IsImpostor) color = Color.red;
+                    else if (RoleInfo.getRoleInfoForPlayer(target, false).FirstOrDefault().isNeutral) color = Color.blue;
+                }
+                Helpers.showFlash(color, 1.5f);
+            }
+
+            // First kill
+            if (MapOptions.firstKillName == "") MapOptions.firstKillName = target.Data.PlayerName;
         }
     }
 
@@ -1123,7 +1232,7 @@ namespace TheOtherRoles.Patches
             if (PlayerControl.GameOptions.KillCooldown <= 0f) return false;
             float multiplier = 1f;
             float addition = 0f;
-            if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini && Mini.mini.Data.Role.IsImpostor) multiplier = Mini.isGrownUp() ? 0.66f : 2f;
+            if (Mini.mini != null && PlayerControl.LocalPlayer == Mini.mini) multiplier = Mini.isGrownUp() ? 0.66f : 2f;
             if (BountyHunter.bountyHunter != null && PlayerControl.LocalPlayer == BountyHunter.bountyHunter) addition = BountyHunter.punishmentTime;
 
             __instance.killTimer = Mathf.Clamp(time, 0f, PlayerControl.GameOptions.KillCooldown * multiplier + addition);
@@ -1199,12 +1308,25 @@ namespace TheOtherRoles.Patches
                 RPCProcedure.sidekickPromotes();
             }
 
-            // Pursuer promotion trigger on exile (the host sends the call such that everyone recieves the update before a possible game End)
-            if (__instance == Lawyer.target && AmongUsClient.Instance.AmHost) {
+            // Pursuer promotion trigger on exile & suicide (the host sends the call such that everyone recieves the update before a possible game End)
+            if (__instance == Lawyer.target && Lawyer.target != Jester.jester && AmongUsClient.Instance.AmHost) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.LawyerPromotesToPursuer, Hazel.SendOption.Reliable, -1);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.lawyerPromotesToPursuer();
             }
+            if (__instance == Lawyer.target)
+            {
+                if (Lawyer.lawyer != null) Lawyer.lawyer.Exiled();
+                if (Pursuer.pursuer != null) Pursuer.pursuer.Exiled();
+            }
+
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.FixedUpdate))]
+    public static class PlayerPhysicsFixedUpdate {
+        public static void Postfix(PlayerPhysics __instance) {
+            if (__instance.AmOwner && !PlayerControl.LocalPlayer.Data.IsDead && Invert.invert.FindAll(x => x.PlayerId == PlayerControl.LocalPlayer.PlayerId).Count > 0 && Invert.meetings > 0 && GameData.Instance && __instance.myPlayer.CanMove)  __instance.body.velocity *= -1;
         }
     }
 }
