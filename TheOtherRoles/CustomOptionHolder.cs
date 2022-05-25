@@ -372,7 +372,7 @@ namespace TheOtherRoles {
             // custom options
             adminTimer = CustomOption.Create(999, Types.General, "Admin Map Available Duration", 10f, 0f, 120f, 1f);
             enabledAdminTimer = CustomOption.Create(998, Types.General, "Enable Admin Map Available Duration", true);
-            heliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time", 90f, 1f, 120f, 5f);
+            heliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time", 90f, 5f, 120f, 5f);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false);
             enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false);
             taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
