@@ -4,13 +4,14 @@ using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using TheOtherRoles.Players;
 
 namespace TheOtherRoles.Patches {
     class MadmateTaskHelper
     {
         public static void SetMadmateTasks()
         {
-            PlayerControl me = PlayerControl.LocalPlayer;
+            PlayerControl me = CachedPlayer.LocalPlayer.PlayerControl;
             if (me == null)
                 return;
             GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(me.PlayerId);

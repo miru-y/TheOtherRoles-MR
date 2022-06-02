@@ -3,10 +3,13 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using TheOtherRoles.Utilities;
 using TMPro;
+using UnityEngine.Events;
 using static UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 using System.Reflection;
+using TheOtherRoles.Players;
 
 namespace TheOtherRoles.Patches 
 {
@@ -86,7 +89,7 @@ namespace TheOtherRoles.Patches
                 }
                 TheOtherRolesPlugin.Instance.Config.Save();
                 CustomOption.ShareOptionSelections();
-                PlayerControl.LocalPlayer.RpcSyncSettings(SaveManager.hostOptionsData);
+                CachedPlayer.LocalPlayer.PlayerControl.RpcSyncSettings(SaveManager.hostOptionsData);
             }
 
             public void OnRename(string newPresetName) {
@@ -258,8 +261,8 @@ namespace TheOtherRoles.Patches
         static void OnMoreButton(OptionsMenuBehaviour __instance) {
             if (!popUp) return;
 
-            if (__instance.transform.parent && __instance.transform.parent == HudManager.Instance.transform) {
-                popUp.transform.SetParent(HudManager.Instance.transform);
+            if (__instance.transform.parent && __instance.transform.parent == FastDestroyableSingleton<HudManager>.Instance.transform) {
+                popUp.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
                 popUp.transform.localPosition = new Vector3(0, 0, -800f);
             } else {
                 popUp.transform.SetParent(null);

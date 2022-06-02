@@ -1,9 +1,7 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 using UnityEngine;
 using static UnityEngine.UI.Button;
 
@@ -24,7 +22,7 @@ Design by <color=#FCCE03FF>Bavari</color>
 
         public static string contributorsCredentials =
 $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color> 
-GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit</size>";
+GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit, probablyadnf</size>";
 
         [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
         private static class VersionShowerPatch
@@ -46,7 +44,7 @@ GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit</siz
         [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
         public static class PingTrackerPatch
         {
-            private static GameObject modStamp;
+            public static GameObject modStamp;
             public static GameObject customPreset;
             static void Prefix(PingTracker __instance) {
                 if (modStamp == null) {
@@ -55,10 +53,10 @@ GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit</siz
                     rend.sprite = TheOtherRolesPlugin.GetModStamp();
                     rend.color = new Color(1, 1, 1, 0.5f);
                     modStamp.transform.parent = __instance.transform.parent;
-                    modStamp.transform.localScale *= 0.6f;
+                    modStamp.transform.localScale *= SubmergedCompatibility.Loaded ? 0 : 0.6f;
                 }
                 if (customPreset == null) {
-                    var buttonBehaviour = UnityEngine.Object.Instantiate(HudManager.Instance.GameMenu.CensorChatButton);
+                    var buttonBehaviour = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.GameMenu.CensorChatButton);
                     buttonBehaviour.Text.text = "";
                     buttonBehaviour.Background.sprite = TheOtherRolesPlugin.GetCustomPreset();
                     buttonBehaviour.Background.color = new Color(1, 1, 1, 1);
@@ -74,11 +72,11 @@ GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit</siz
                     button.OnClick = new ButtonClickedEvent();
                     button.OnClick.AddListener((Action)(() => {
                         ClientOptionsPatch.isOpenPreset = true;
-                        HudManager.Instance.GameMenu.Open();
+                        FastDestroyableSingleton<HudManager>.Instance.GameMenu.Open();
                     }));
                 }
                 float offset = (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) ? 0.75f : 0f;
-                modStamp.transform.position = HudManager.Instance.MapButton.transform.position + Vector3.down * offset;
+                modStamp.transform.position = FastDestroyableSingleton<HudManager>.Instance.MapButton.transform.position + Vector3.down * offset;
                 if (customPreset) {
                     customPreset.transform.position = modStamp.transform.position + Vector3.down * 0.75f;
                     if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && customPreset.gameObject.activeSelf)
@@ -91,7 +89,7 @@ GitHub Contributors: Gendelo, Alex2911, amsyarasyiq, MaximeGillot, Psynomit</siz
                 __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) {
                     __instance.text.text = $"<size=130%><color=#ff351f>TheOtherRoles MR</color></size> v{TheOtherRolesPlugin.Version.ToString()}\n" + __instance.text.text;
-                    if (PlayerControl.LocalPlayer.Data.IsDead || (!(PlayerControl.LocalPlayer == null) && (PlayerControl.LocalPlayer == Lovers.lover1 || PlayerControl.LocalPlayer == Lovers.lover2))) {
+                    if (CachedPlayer.LocalPlayer.Data.IsDead || (!(CachedPlayer.LocalPlayer.PlayerControl == null) && (CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 || CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover2))) {
                         __instance.transform.localPosition = new Vector3(3.45f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
                     } else {
                         __instance.transform.localPosition = new Vector3(4.2f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);

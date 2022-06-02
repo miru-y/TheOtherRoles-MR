@@ -24,6 +24,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v2.1.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.1) | 2022.3.29s | [TheOtherRoles v4.1.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.4)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.1/TheOtherRolesMR.zip)
 | [v2.1.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.0) | 2022.3.29s | [TheOtherRoles v4.1.1](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.1)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.0/TheOtherRolesMR.zip)
 | [v2.0.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.0.2) | 2022.3.29s | [TheOtherRoles v3.4.5](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.5)/[v3.4.5.2+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.5.2%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.0.2/TheOtherRolesMR.zip)
 | [v2.0.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.0.1) | 2022.3.29s | [TheOtherRoles v3.4.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v3.4.4)/[v3.4.4.3+](https://github.com/tomarai/TheOtherRoles/releases/tag/v3.4.4.3%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.0.1/TheOtherRolesMR.zip)
@@ -85,6 +86,32 @@ The [Role Assignment](#role-assignment) sections explains how the roles are bein
 # Changelog
 <details>
   <summary>Click to show the Changelog</summary>
+  
+**Version 4.1.4**
+- Added auto updating for BepInEx
+- Fixed hat testing in freeplay for meetings / exile etc.
+- Fixed players not being able to move
+- Fixed getting stuck on the polus laboratory vent
+- Fixed Sherrif suicide with bloody modifier having a trail as a ghost
+- Fixed being able to kill the first killed protected player when a meeting was starting
+- Fixed some cases of the Reliable Packet Not Ack'ed disconnections
+- Fixed the double mod stamp being shown in game
+- Further improvements towards rubberbanding
+
+**Version 4.1.3**
+- Fixed morphling's being morphed during meetings
+- Fixed hide player names hiding the player's name during meetings
+- Added an option to the mayor: "Number Of Remote Meetings", so that the amount of mobile meetings is limited.
+
+**Version 4.1.2**
+- Made some general performance fixes. Special thanks to [probablyadnf](https://github.com/simonkellly)
+- Added an option to the ninja to get invisible after kill for x-seconds
+- Added a zoom out/overview function if you're dead and done with tasks
+- Added the sampled player to the morphling button
+- Fixed a bug where footsteps of the Detective and certain other game objects were visible in the fog of war
+- Fixed lawyer being exiled when their client is guessed in a meeting
+- Fixed multiple mod icons being shown when Submerged is loaded
+
 
 **Version 4.1.1**
 - Fixed a bug where the download submerged button did not work
@@ -572,8 +599,10 @@ The mod adds a few new settings to Among Us (in addition to the role settings):
 - **Play On A Random Map** If enabled it allows you to set a rotation of all current maps, except ehT dlekS 
 - **Ghosts Can See Roles**
 - **Ghosts Can See Votes**
+- **Ghosts Can Additionally See Modifier**
 - **Ghosts Can See The Number Of Remaining Tasks**
 - **The map is accessable during a meeting and will show your last location when a body gets reported/meeting gets called**
+- **When you're a ghost and done with tasks, you'll get a zoom out/overview function**
 - **Task Counts:** You are now able to select more tasks.
 - **Role Summary:** When a game ends there will be a list of all players and their roles and their task progress
 - **Darker/Lighter:** Displays color type of each player in meetings
@@ -630,8 +659,6 @@ Here are a few instructions, on how to create a custom hat:
 # Roles
 
 ## Role Assignment
-We are still improving the role assignment system. It's not that intuitive right now, but it's more flexible than the older one
-if you're using it right.
 
 First you need to choose how many special roles of each kind (Impostor/Neutral/Crewmate) you want in the game.
 The count you set will only be reached, if there are enough Crewmates/Impostors in the game and if enough roles are set to be in the game (i.e. they are set to > 0%). The roles are then being distributed as follows:
@@ -855,6 +882,7 @@ The Ninja is an Impostor who has the ability to kill another player all over the
 You can mark a player with your ability and by using the ability again, you jump to the position of the marked player and kill it.\
 Depending on the options you know where your marked player is.\
 If the Ninja uses its ability, it will leave a trace (leaves) for a configurable amount of time where it activated the ability and additionally where it killed the before marked player.\
+When performing a ninja ability kill, the ninja can be invisible for some seconds (depends on options)\
 \
 **NOTE:**
 - The Ninja has a 5 second cooldown after marking a player
@@ -872,6 +900,7 @@ If the Ninja uses its ability, it will leave a trace (leaves) for a configurable
 | Ninja Knows Location Of Target | -
 | Trace Duration | -
 | Time Till Trace Color Has Faded | -
+| Time The Ninja Is Invisible | -
 -----------------------
 
 ## Door Hacker (MR Edition only)
@@ -1735,5 +1764,4 @@ The Invert can affect all teams (Impostor, Neutral, Crewmate).
 
 
 # Source code
-It's bad I know, this is a side project and my second week of modding. So there are no best practices around here.
 You can use parts of the code but don't copy paste the whole thing. Make sure you give credits to the other developers, because some parts of the code are based on theirs.

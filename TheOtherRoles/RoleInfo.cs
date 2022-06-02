@@ -1,7 +1,7 @@
-using HarmonyLib;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using TheOtherRoles.Players;
 using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 
@@ -243,7 +243,7 @@ namespace TheOtherRoles
                     roleList[0] = RoleInfo.crewmate;
 
                 roleName = String.Join(" ", roleList.Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
-                if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
+                if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && CachedPlayer.LocalPlayer.PlayerControl != Lawyer.target) roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
             }
 
             return roleName;

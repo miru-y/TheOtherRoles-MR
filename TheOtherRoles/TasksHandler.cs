@@ -1,10 +1,9 @@
 using HarmonyLib;
-using static TheOtherRoles.TheOtherRoles;
-using System.Collections;
-using System.Collections.Generic;
 using System;
+using TheOtherRoles.Utilities;
 using Hazel;
 using TheOtherRoles.Patches;
+using TheOtherRoles.Players;
 
 namespace TheOtherRoles {
     [HarmonyPatch]
@@ -15,9 +14,8 @@ namespace TheOtherRoles {
             int CompletedTasks = 0;
             if (!playerInfo.Disconnected && playerInfo.Tasks != null &&
                 playerInfo.Object &&
-                (PlayerControl.GameOptions.GhostsDoTasks || !playerInfo.IsDead) &&
                 playerInfo.Role && playerInfo.Role.TasksCountTowardProgress &&
-                (playerInfo.Object != Madmate.madmate || (madmateCount && PlayerControl.LocalPlayer == Madmate.madmate)) &&
+                (playerInfo.Object != Madmate.madmate || (madmateCount && CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate)) &&
                 !playerInfo.Object.hasFakeTasks()
                 ) {
                 bool isOldTaskMasterEx = TaskMaster.taskMaster && TaskMaster.oldTaskMasterPlayerId == playerInfo.PlayerId;
@@ -25,11 +23,9 @@ namespace TheOtherRoles {
                 if (isOldTaskMasterEx || (!isResult && isTaskMasterEx)) {
                     TotalTasks = CompletedTasks = PlayerControl.GameOptions.NumCommonTasks + PlayerControl.GameOptions.NumLongTasks + PlayerControl.GameOptions.NumShortTasks;
                 } else {
-                    for (int j = 0; j < playerInfo.Tasks.Count; j++) {
+                    foreach (var playerInfoTask in playerInfo.Tasks.GetFastEnumerator()) {
+                        if (playerInfoTask.Complete) CompletedTasks++;
                         TotalTasks++;
-                        if (playerInfo.Tasks[j].Complete) {
-                            CompletedTasks++;
-                        }
                     }
                 }
             }
@@ -39,9 +35,12 @@ namespace TheOtherRoles {
         [HarmonyPatch(typeof(GameData), nameof(GameData.RecomputeTaskCounts))]
         private static class GameDataRecomputeTaskCountsPatch {
             private static bool Prefix(GameData __instance) {
-                __instance.TotalTasks = 0;
-                __instance.CompletedTasks = 0;
-                foreach (var playerInfo in GameData.Instance.AllPlayers)
+               
+
+                var totalTasks = 0;
+                var completedTasks = 0;
+                
+                foreach (var playerInfo in GameData.Instance.AllPlayers.GetFastEnumerator())
                 {
                     if (playerInfo.Object
                         && playerInfo.Object.hasAliveKillingLover() // Tasks do not count if a Crewmate has an alive killing Lover
@@ -50,9 +49,12 @@ namespace TheOtherRoles {
                        )
                         continue;
                     var (playerCompleted, playerTotal) = taskInfo(playerInfo);
-                    __instance.TotalTasks += playerTotal;
-                    __instance.CompletedTasks += playerCompleted;
+                    totalTasks += playerTotal;
+                    completedTasks += playerCompleted;
                 }
+                
+                __instance.TotalTasks = totalTasks;
+                __instance.CompletedTasks = completedTasks;
                 return false;
             }
         }
@@ -79,7 +81,7 @@ namespace TheOtherRoles {
                                 if (pc.Data.Tasks[i].Complete)
                                     ++clearTasks;
                             }
-                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.TaskMasterUpdateExTasks, Hazel.SendOption.Reliable, -1);
+                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.TaskMasterUpdateExTasks, Hazel.SendOption.Reliable, -1);
                             writer.Write(clearTasks);
                             writer.Write((byte)pc.Data.Tasks.Count);
                             AmongUsClient.Instance.FinishRpcImmediately(writer);
@@ -90,7 +92,7 @@ namespace TheOtherRoles {
                     if (allTasksCompleted) {
                         if (!TaskMaster.isTaskComplete) {
                             byte[] taskTypeIds = TaskMasterTaskHelper.GetTaskMasterTasks(pc);
-                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.TaskMasterSetExTasks, Hazel.SendOption.Reliable, -1);
+                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.TaskMasterSetExTasks, Hazel.SendOption.Reliable, -1);
                             writer.Write(pc.PlayerId);
                             writer.Write(byte.MaxValue);
                             writer.Write(taskTypeIds);

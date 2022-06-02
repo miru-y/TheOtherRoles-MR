@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Collections;
-using System;
+using TheOtherRoles.Utilities;
 using UnityEngine;
-using static TheOtherRoles.TheOtherRoles;
 
 namespace TheOtherRoles{
     static class MapOptions {
@@ -79,9 +77,9 @@ namespace TheOtherRoles{
         {
             if (!CustomOptionHolder.enabledAdminTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
-            if (HudManager.Instance == null)
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            AdminTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
+            AdminTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
             AdminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (AdminTimer > 0)
                 AdminTimerText.text = $"Admin: {AdminTimer.ToString("#0.0")} sec remaining";
@@ -103,9 +101,9 @@ namespace TheOtherRoles{
         public static int UpdateVitalsTimerText(int viewIndex) {
             if (!CustomOptionHolder.enabledVitalsTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
-            if (HudManager.Instance == null)
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            VitalsTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
+            VitalsTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
             VitalsTimerText.color = Color.green;
             VitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (VitalsTimer > 0)
@@ -128,9 +126,9 @@ namespace TheOtherRoles{
         public static int UpdateSecurityCameraTimerText(int viewIndex) {
             if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
-            if (HudManager.Instance == null)
+            if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            SecurityCameraTimerText = UnityEngine.Object.Instantiate(HudManager.Instance.TaskText, HudManager.Instance.transform);
+            SecurityCameraTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
             SecurityCameraTimerText.color = Color.red;
             SecurityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (SecurityCameraTimer > 0)

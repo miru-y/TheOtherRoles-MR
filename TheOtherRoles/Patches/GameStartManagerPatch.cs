@@ -5,7 +5,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using Hazel;
 using System;
-using UnhollowerBaseLib;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     public class GameStartManagerPatch  {
@@ -18,7 +19,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]
         public class AmongUsClientOnPlayerJoinedPatch {
             public static void Postfix() {
-                if (PlayerControl.LocalPlayer != null) {
+                if (CachedPlayer.LocalPlayer != null) {
                     Helpers.shareGameVersion();
                 }
             }
@@ -36,7 +37,7 @@ namespace TheOtherRoles.Patches {
                 // Copy lobby code
                 string code = InnerNet.GameCode.IntToGameName(AmongUsClient.Instance.GameId);
                 GUIUtility.systemCopyBuffer = code;
-                lobbyCodeText = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.RoomCode, new Il2CppReferenceArray<Il2CppSystem.Object>(0)) + "\r\n" + code;
+                lobbyCodeText = FastDestroyableSingleton<TranslationController>.Instance.GetString(StringNames.RoomCode, new Il2CppReferenceArray<Il2CppSystem.Object>(0)) + "\r\n" + code;
 
                 // Task Vs Mode
                 TaskRacer.clearAndReload();
@@ -54,8 +55,8 @@ namespace TheOtherRoles.Patches {
             }
 
             public static void Postfix(GameStartManager __instance) {
-                // Send version as soon as PlayerControl.LocalPlayer exists
-                if (PlayerControl.LocalPlayer != null && !versionSent) {
+                // Send version as soon as CachedPlayer.LocalPlayer.PlayerControl exists
+                if (CachedPlayer.LocalPlayer != null && !versionSent) {
                     versionSent = true;
                     Helpers.shareGameVersion();
                 }
@@ -152,7 +153,7 @@ namespace TheOtherRoles.Patches {
                 bool continueStart = true;
 
                 if (AmongUsClient.Instance.AmHost) {
-                    foreach (InnerNet.ClientData client in AmongUsClient.Instance.allClients) {
+                    foreach (InnerNet.ClientData client in AmongUsClient.Instance.allClients.GetFastEnumerator()) {
                         if (client.Character == null) continue;
                         var dummyComponent = client.Character.GetComponent<DummyBehaviour>();
                         if (dummyComponent != null && dummyComponent.enabled)
@@ -190,7 +191,7 @@ namespace TheOtherRoles.Patches {
                             possibleMaps.Add(5);
                         byte chosenMapId  = possibleMaps[TheOtherRoles.rnd.Next(possibleMaps.Count)];
 
-                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.DynamicMapOption, Hazel.SendOption.Reliable, -1);
+                        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.DynamicMapOption, Hazel.SendOption.Reliable, -1);
                         writer.Write(chosenMapId);
                         AmongUsClient.Instance.FinishRpcImmediately(writer);
                         RPCProcedure.dynamicMapOption(chosenMapId);

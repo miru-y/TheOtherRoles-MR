@@ -5,19 +5,23 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Hazel;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
     class IntroCutsceneOnDestroyPatch
     {
+        public static PoolablePlayer playerPrefab;
         public static void Prefix(IntroCutscene __instance) {
             // Generate and initialize player icons
             int playerCounter = 0;
-            if (PlayerControl.LocalPlayer != null && HudManager.Instance != null) {
-                Vector3 bottomLeft = new Vector3(-HudManager.Instance.UseButton.transform.localPosition.x, HudManager.Instance.UseButton.transform.localPosition.y, HudManager.Instance.UseButton.transform.localPosition.z);
-                foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
+            if (CachedPlayer.LocalPlayer != null && FastDestroyableSingleton<HudManager>.Instance != null) {
+                Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z);
+                foreach (PlayerControl p in CachedPlayer.AllPlayers) {
                     GameData.PlayerInfo data = p.Data;
-                    PoolablePlayer player = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, HudManager.Instance.transform);
+                    PoolablePlayer player = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, FastDestroyableSingleton<HudManager>.Instance.transform);
+                    playerPrefab = __instance.PlayerPrefab;
                     PlayerControl.SetPlayerMaterialColors(data.DefaultOutfit.ColorId, player.CurrentBodySprite.BodySprite);
                     player.SetSkin(data.DefaultOutfit.SkinId, data.DefaultOutfit.ColorId);
                     player.HatSlot.SetHat(data.DefaultOutfit.HatId, data.DefaultOutfit.ColorId);
@@ -26,20 +30,20 @@ namespace TheOtherRoles.Patches {
                     player.SetFlipX(true);
                     MapOptions.playerIcons[p.PlayerId] = player;
 
-                    if (PlayerControl.LocalPlayer == Arsonist.arsonist && p != Arsonist.arsonist) {
+                    if (CachedPlayer.LocalPlayer.PlayerControl == Arsonist.arsonist && p != Arsonist.arsonist) {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, -0.25f, 0) + Vector3.right * playerCounter++ * 0.35f;
                         player.transform.localScale = Vector3.one * 0.2f;
                         player.setSemiTransparent(true);
                         player.gameObject.SetActive(true);
-                    } else if (PlayerControl.LocalPlayer == BountyHunter.bountyHunter) {
+                    } else if (CachedPlayer.LocalPlayer.PlayerControl == BountyHunter.bountyHunter) {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
                         player.transform.localScale = Vector3.one * 0.4f;
                         player.gameObject.SetActive(false);
-                    } else if (PlayerControl.LocalPlayer == Kataomoi.kataomoi && p == Kataomoi.target) {
+                    } else if (CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi && p == Kataomoi.target) {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
                         player.transform.localScale = Vector3.one * 0.4f;
                         player.gameObject.SetActive(true);
-                    } else if (TaskRacer.isTaskRacer(PlayerControl.LocalPlayer)) { // Task Vs Mode
+                    } else if (TaskRacer.isTaskRacer(CachedPlayer.LocalPlayer.PlayerControl)) { // Task Vs Mode
                         var position = bottomLeft + new Vector3(-0.55f, -0.45f, 0) + Vector3.right * playerCounter++ * 0.35f;
                         TaskRacer.rankUIPositions.Add(position);
                         player.transform.localPosition = position;
@@ -53,7 +57,7 @@ namespace TheOtherRoles.Patches {
                         var rend = taskFinishedMark.AddComponent<SpriteRenderer>();
                         rend.sprite = TaskRacer.getTaskFinishedSprites();
                         rend.color = new Color(1, 1, 1, 1);
-                        taskFinishedMark.transform.parent = HudManager.Instance.transform;
+                        taskFinishedMark.transform.parent = FastDestroyableSingleton<HudManager>.Instance.transform;
                         taskFinishedMark.transform.localPosition = position;
                         taskFinishedMark.transform.localScale = Vector3.one * 0.8f;
                         taskFinishedMark.SetActive(false);
@@ -64,7 +68,7 @@ namespace TheOtherRoles.Patches {
                             rend = TaskRacer.rankMarkObjects[index].AddComponent<SpriteRenderer>();
                             rend.sprite = TaskRacer.getRankGameSprites(playerCounter);
                             rend.color = new Color(1, 1, 1, 1);
-                            TaskRacer.rankMarkObjects[index].transform.parent = HudManager.Instance.transform;
+                            TaskRacer.rankMarkObjects[index].transform.parent = FastDestroyableSingleton<HudManager>.Instance.transform;
                             TaskRacer.rankMarkObjects[index].transform.localPosition = position + new Vector3(0f, 0.39f, -8f);
                             TaskRacer.rankMarkObjects[index].transform.localScale = Vector3.one * 0.8f;
                         }
@@ -75,11 +79,11 @@ namespace TheOtherRoles.Patches {
             }
 
             // Force Bounty Hunter to load a new Bounty when the Intro is over
-            if (BountyHunter.bounty != null && PlayerControl.LocalPlayer == BountyHunter.bountyHunter) {
+            if (BountyHunter.bounty != null && CachedPlayer.LocalPlayer.PlayerControl == BountyHunter.bountyHunter) {
                 BountyHunter.bountyUpdateTimer = 0f;
-                if (HudManager.Instance != null) {
-                    Vector3 bottomLeft = new Vector3(-HudManager.Instance.UseButton.transform.localPosition.x, HudManager.Instance.UseButton.transform.localPosition.y, HudManager.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
-                    BountyHunter.cooldownText = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                if (FastDestroyableSingleton<HudManager>.Instance != null) {
+                    Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
+                    BountyHunter.cooldownText = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
                     BountyHunter.cooldownText.alignment = TMPro.TextAlignmentOptions.Center;
                     BountyHunter.cooldownText.transform.localPosition = bottomLeft + new Vector3(0f, -1f, -1f);
                     BountyHunter.cooldownText.gameObject.SetActive(true);
@@ -90,7 +94,7 @@ namespace TheOtherRoles.Patches {
             if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "") {
                 PlayerControl target = PlayerControl.AllPlayerControls.ToArray().ToList().FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
                 if (target != null) {
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.SetFirstKill, Hazel.SendOption.Reliable, -1);
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SetFirstKill, Hazel.SendOption.Reliable, -1);
                     writer.Write(target.PlayerId);
                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                     RPCProcedure.setFirstKill(target.PlayerId);
@@ -98,15 +102,15 @@ namespace TheOtherRoles.Patches {
             }
 
             MapOptions.firstKillName = "";
-            if (Kataomoi.kataomoi != null && PlayerControl.LocalPlayer == Kataomoi.kataomoi) {
-                if (HudManager.Instance != null) {
-                    Vector3 bottomLeft = new Vector3(-HudManager.Instance.UseButton.transform.localPosition.x, HudManager.Instance.UseButton.transform.localPosition.y, HudManager.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
-                    Kataomoi.stareText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+            if (Kataomoi.kataomoi != null && CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi) {
+                if (FastDestroyableSingleton<HudManager>.Instance != null) {
+                    Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
+                    Kataomoi.stareText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
                     Kataomoi.stareText.alignment = TMPro.TextAlignmentOptions.Center;
                     Kataomoi.stareText.transform.localPosition = bottomLeft + new Vector3(0f, -1f, -1f);
                     Kataomoi.stareText.gameObject.SetActive(true);
 
-                    Kataomoi.gaugeRenderer[0] = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.graphic, HudManager.Instance.transform);
+                    Kataomoi.gaugeRenderer[0] = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.graphic, FastDestroyableSingleton<HudManager>.Instance.transform);
                     var killButton = Kataomoi.gaugeRenderer[0].GetComponent<KillButton>();
                     killButton.SetCoolDown(0.00000001f, 0.00000001f);
                     killButton.SetFillUp(0.00000001f, 0.00000001f);
@@ -125,14 +129,14 @@ namespace TheOtherRoles.Patches {
                     Kataomoi.gaugeRenderer[0].transform.localPosition = new Vector3(-3.354069f, -2.429999f, -8f);
                     Kataomoi.gaugeRenderer[0].transform.localScale = Vector3.one;
 
-                    Kataomoi.gaugeRenderer[1] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], HudManager.Instance.transform);
+                    Kataomoi.gaugeRenderer[1] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], FastDestroyableSingleton<HudManager>.Instance.transform);
                     Kataomoi.gaugeRenderer[1].sprite = Kataomoi.getLoveGaugeSprite(1);
                     Kataomoi.gaugeRenderer[1].size = new Vector2(261f, 7f);
                     Kataomoi.gaugeRenderer[1].color = Kataomoi.color;
                     Kataomoi.gaugeRenderer[1].transform.localPosition = new Vector3(-3.482069f, -2.626999f, -8.1f);
                     Kataomoi.gaugeRenderer[1].transform.localScale = Vector3.one;
 
-                    Kataomoi.gaugeRenderer[2] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], HudManager.Instance.transform);
+                    Kataomoi.gaugeRenderer[2] = UnityEngine.Object.Instantiate(Kataomoi.gaugeRenderer[0], FastDestroyableSingleton<HudManager>.Instance.transform);
                     Kataomoi.gaugeRenderer[2].sprite = Kataomoi.getLoveGaugeSprite(2);
                     Kataomoi.gaugeRenderer[2].color = Kataomoi.gaugeRenderer[0].color;
                     Kataomoi.gaugeRenderer[2].size = new Vector2(300f, 64f);
@@ -145,11 +149,11 @@ namespace TheOtherRoles.Patches {
 
             // Task Vs Mode
             if (TaskRacer.isValid()) {
-                TaskRacer.startText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                TaskRacer.startText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
                 TaskRacer.startText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y);
                 TaskRacer.startText.name = "TaskVsMode_Start";
 
-                TaskRacer.timerText = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.transform);
+                TaskRacer.timerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
                 TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
                 TaskRacer.timerText.transform.localPosition = new Vector3(0.89f, 2.76f, TaskRacer.timerText.transform.localPosition.z);
                 TaskRacer.timerText.transform.localScale *= 0.4f;
@@ -158,13 +162,13 @@ namespace TheOtherRoles.Patches {
 
                 if (PlayerControl.GameOptions.MapId != (byte)MapId.Airship) {
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                        PlayerControl.LocalPlayer.NetId,
+                        CachedPlayer.LocalPlayer.PlayerControl.NetId,
                         (byte)CustomRPC.TaskVsMode_Ready,
                         Hazel.SendOption.Reliable,
                         -1);
-                    writer.Write(PlayerControl.LocalPlayer.PlayerId);
+                    writer.Write(CachedPlayer.LocalPlayer.PlayerControl.PlayerId);
                     AmongUsClient.Instance.FinishRpcImmediately(writer);
-                    RPCProcedure.taskVsModeReady(PlayerControl.LocalPlayer.PlayerId);
+                    RPCProcedure.taskVsModeReady(CachedPlayer.LocalPlayer.PlayerControl.PlayerId);
                 }
 
                 // Task Vs Mode
@@ -190,9 +194,9 @@ namespace TheOtherRoles.Patches {
     class IntroPatch {
         public static void setupIntroTeamIcons(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
             // Intro solo teams
-            if (PlayerControl.LocalPlayer == Jester.jester || PlayerControl.LocalPlayer == Jackal.jackal || PlayerControl.LocalPlayer == Arsonist.arsonist || PlayerControl.LocalPlayer == Vulture.vulture || PlayerControl.LocalPlayer == Lawyer.lawyer || PlayerControl.LocalPlayer == Kataomoi.kataomoi) {
+            if (CachedPlayer.LocalPlayer.PlayerControl == Jester.jester || CachedPlayer.LocalPlayer.PlayerControl == Jackal.jackal || CachedPlayer.LocalPlayer.PlayerControl == Arsonist.arsonist || CachedPlayer.LocalPlayer.PlayerControl == Vulture.vulture || CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer || CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi) {
                 var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
-                soloTeam.Add(PlayerControl.LocalPlayer);
+                soloTeam.Add(CachedPlayer.LocalPlayer.PlayerControl);
                 yourTeam = soloTeam;
             }
 
@@ -201,19 +205,19 @@ namespace TheOtherRoles.Patches {
              * This code is redundant, but this part should be decoupled from the original code
              * to merge future changes
              */
-            if (PlayerControl.LocalPlayer == Madmate.madmate) {
+            if (CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate) {
                 var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
-                soloTeam.Add(PlayerControl.LocalPlayer);
+                soloTeam.Add(CachedPlayer.LocalPlayer.PlayerControl);
                 yourTeam = soloTeam;
             }
 
             // Add the Spy to the Impostor team (for the Impostors)
-            if (Spy.spy != null && PlayerControl.LocalPlayer.Data.Role.IsImpostor) {
+            if (Spy.spy != null && CachedPlayer.LocalPlayer.Data.Role.IsImpostor) {
                 List<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray().ToList().OrderBy(x => Guid.NewGuid()).ToList();
                 var fakeImpostorTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>(); // The local player always has to be the first one in the list (to be displayed in the center)
-                fakeImpostorTeam.Add(PlayerControl.LocalPlayer);
+                fakeImpostorTeam.Add(CachedPlayer.LocalPlayer.PlayerControl);
                 foreach (PlayerControl p in players) {
-                    if (PlayerControl.LocalPlayer != p && (p == Spy.spy || p.Data.Role.IsImpostor))
+                    if (CachedPlayer.LocalPlayer.PlayerControl != p && (p == Spy.spy || p.Data.Role.IsImpostor))
                         fakeImpostorTeam.Add(p);
                 }
                 yourTeam = fakeImpostorTeam;
@@ -221,7 +225,7 @@ namespace TheOtherRoles.Patches {
         }
 
         public static void setupIntroTeam(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
-            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
+            List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(CachedPlayer.LocalPlayer.PlayerControl);
             RoleInfo roleInfo = infos.Where(info => !info.isModifier).FirstOrDefault();
             if (roleInfo == null) return;
             if (roleInfo.roleId == RoleId.TaskRacer) {
@@ -268,7 +272,7 @@ namespace TheOtherRoles.Patches {
             static void UpdateRoleText() {
                 if (introCutscene == null) return;
 
-                List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
+                List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(CachedPlayer.LocalPlayer.PlayerControl);
                 RoleInfo roleInfo = infos.Where(info => !info.isModifier).FirstOrDefault();
                 RoleInfo modifierInfo = infos.Where(info => info.isModifier).FirstOrDefault();
                 introCutscene.RoleBlurbText.text = "";
@@ -285,7 +289,7 @@ namespace TheOtherRoles.Patches {
                     if (modifierInfo.roleId != RoleId.Lover)
                         introCutscene.RoleBlurbText.text += Helpers.cs(modifierInfo.color, $"\n{modifierInfo.introDescription}");
                     else {
-                        PlayerControl otherLover = PlayerControl.LocalPlayer == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
+                        PlayerControl otherLover = CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
                         introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
                     }
                 }
@@ -322,7 +326,7 @@ namespace TheOtherRoles.Patches {
                  * This should be done before a game starting and after tasks assinged
                  * If you have an idea, please send me a pull request!
                  */
-                if (Madmate.madmate != null && PlayerControl.LocalPlayer == Madmate.madmate
+                if (Madmate.madmate != null && CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate
                     && Madmate.noticeImpostors) {
                     MadmateTaskHelper.SetMadmateTasks();
                 }
@@ -357,11 +361,11 @@ namespace TheOtherRoles.Patches {
 
                     // Init host's tasks.
                     List<byte> taskTypeIdList = new List<byte>();
-                    for (int i = 0; i < PlayerControl.LocalPlayer.Data.Tasks.Count; ++i)
-                        taskTypeIdList.Add(PlayerControl.LocalPlayer.Data.Tasks[i].TypeId);
+                    for (int i = 0; i < CachedPlayer.LocalPlayer.PlayerControl.Data.Tasks.Count; ++i)
+                        taskTypeIdList.Add(CachedPlayer.LocalPlayer.PlayerControl.Data.Tasks[i].TypeId);
 
                     var taskIdDataTable = new Dictionary<uint, byte[]>();
-                    var playerData = PlayerControl.LocalPlayer.Data;
+                    var playerData = CachedPlayer.LocalPlayer.PlayerControl.Data;
                     playerData.Object.clearAllTasks();
                     playerData.Tasks = new Il2CppSystem.Collections.Generic.List<GameData.TaskInfo>(taskTypeIdList.Count);
                     for (int j = 0; j < taskTypeIdList.Count; j++) {
@@ -380,7 +384,7 @@ namespace TheOtherRoles.Patches {
                     }
                     foreach (var pair in taskIdDataTable) {
                         MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                            PlayerControl.LocalPlayer.NetId,
+                            CachedPlayer.LocalPlayer.PlayerControl.NetId,
                             (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHostDetail,
                             Hazel.SendOption.Reliable,
                             -1);
@@ -391,7 +395,7 @@ namespace TheOtherRoles.Patches {
                     }
 
                     MessageWriter writer2 = AmongUsClient.Instance.StartRpcImmediately(
-                        PlayerControl.LocalPlayer.NetId,
+                        CachedPlayer.LocalPlayer.PlayerControl.NetId,
                         (byte)CustomRPC.TaskVsMode_MakeItTheSameTaskAsTheHost,
                         Hazel.SendOption.Reliable,
                         -1);

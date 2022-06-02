@@ -1,18 +1,14 @@
-using System.Net;
 using System.Linq;
-using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.IL2CPP;
 using HarmonyLib;
-using Hazel;
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.IO;
 using UnityEngine;
 using TheOtherRoles.Objects;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 using UnhollowerBaseLib;
 using TheOtherRoles;
+using Hazel;
 
 namespace TheOtherRoles
 {
@@ -128,7 +124,7 @@ namespace TheOtherRoles
 
             public static Sprite getLogSprite() {
                 if (logSprite) return logSprite;
-                logSprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
+                logSprite = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
                 return logSprite;
             }
 
@@ -148,6 +144,7 @@ namespace TheOtherRoles
             public static Color color = new Color32(32, 77, 66, byte.MaxValue);
             public static Minigame emergency = null;
             public static Sprite emergencySprite = null;
+            public static int remoteMeetingsLeft = 1;
 
             public static bool canSeeVoteColors = false;
             public static int tasksNeededToSeeVoteColors;
@@ -164,7 +161,7 @@ namespace TheOtherRoles
                 mayor = null;
                 emergency = null;
                 emergencySprite = null;
-
+		        remoteMeetingsLeft = Mathf.RoundToInt(CustomOptionHolder.mayorMaxRemoteMeetings.getFloat()); 
                 canSeeVoteColors = CustomOptionHolder.mayorCanSeeVoteColors.getBool();
                 tasksNeededToSeeVoteColors = (int)CustomOptionHolder.mayorTasksNeededToSeeVoteColors.getFloat();
                 meetingButton = CustomOptionHolder.mayorMeetingButton.getBool();
@@ -308,7 +305,7 @@ namespace TheOtherRoles
             // Can be used to enable / disable the handcuff effect on the target's buttons
             public static void setHandcuffedKnows(bool active = true) {
                 if (active) {
-                    byte localPlayerId = PlayerControl.LocalPlayer.PlayerId;
+                    byte localPlayerId = CachedPlayer.LocalPlayer.PlayerId;
                     handcuffedKnows.Add(localPlayerId, handcuffDuration);
                     handcuffedPlayers.RemoveAll(x => x == localPlayerId);
                 }
@@ -652,7 +649,7 @@ namespace TheOtherRoles
 
         public static void resetCamouflage() {
             camouflageTimer = 0f;
-            foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+            foreach (PlayerControl p in CachedPlayer.AllPlayers)
                 p.setDefaultLook();
         }
 
@@ -680,10 +677,10 @@ namespace TheOtherRoles
             if (buttonSprite) return buttonSprite;
 #if true
             byte mapId = PlayerControl.GameOptions.MapId;
-            UseButtonSettings button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton]; // Polus
-            if (mapId == 0 || mapId == 3) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton]; // Skeld || Dleks
-            else if (mapId == 1) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton]; // Mira HQ
-            else if (mapId == 4) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton]; // Airship
+            UseButtonSettings button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton]; // Polus
+            if (mapId == 0 || mapId == 3) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton]; // Skeld || Dleks
+            else if (mapId == 1) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton]; // Mira HQ
+            else if (mapId == 4) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton]; // Airship
             buttonSprite = button.Image;
 #else
             buttonSprite = DestroyableSingleton<TranslationController>.Instance.GetImage(ImageNames.AirshipAdminButton);
@@ -735,22 +732,22 @@ namespace TheOtherRoles
 
         public static Sprite getVitalsSprite() {
             if (vitalsSprite) return vitalsSprite;
-            vitalsSprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
+            vitalsSprite = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image;
             return vitalsSprite;
         }
 
         public static Sprite getLogSprite() {
             if (logSprite) return logSprite;
-            logSprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
+            logSprite = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
             return logSprite;
         }
 
         public static Sprite getAdminSprite() {
             byte mapId = PlayerControl.GameOptions.MapId;
-            UseButtonSettings button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton]; // Polus
-            if (mapId == 0 || mapId == 3) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton]; // Skeld || Dleks
-            else if (mapId == 1) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton]; // Mira HQ
-            else if (mapId == 4) button = HudManager.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton]; // Airship
+            UseButtonSettings button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton]; // Polus
+            if (mapId == 0 || mapId == 3) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton]; // Skeld || Dleks
+            else if (mapId == 1) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton]; // Mira HQ
+            else if (mapId == 4) button = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton]; // Airship
             adminSprite = button.Image;
             return adminSprite;
         }
@@ -1172,7 +1169,7 @@ namespace TheOtherRoles
         private static float lastPPU;
         public static Sprite getAnimatedVentSealedSprite() {
             float ppu = 185f;
-            if (SubmergedCompatibility.isSubmerged()) ppu = 120f;
+            if (SubmergedCompatibility.IsSubmerged) ppu = 120f;
             if (lastPPU != ppu) {
                 animatedVentSealedSprite = null;
                 lastPPU = ppu;
@@ -1206,14 +1203,14 @@ namespace TheOtherRoles
         private static Sprite camSprite;
         public static Sprite getCamSprite() {
             if (camSprite) return camSprite;
-            camSprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.CamsButton].Image;
+            camSprite = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.CamsButton].Image;
             return camSprite;
         }
 
         private static Sprite logSprite;
         public static Sprite getLogSprite() {
             if (logSprite) return logSprite;
-            logSprite = HudManager.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
+            logSprite = FastDestroyableSingleton<HudManager>.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image;
             return logSprite;
         }
 
@@ -1263,7 +1260,7 @@ namespace TheOtherRoles
         }
 
         public static bool dousedEveryoneAlive() {
-            return PlayerControl.AllPlayerControls.ToArray().All(x => { return x == Arsonist.arsonist || x.Data.IsDead || x.Data.Disconnected || Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); });
+            return CachedPlayer.AllPlayers.All(x => { return x.PlayerControl == Arsonist.arsonist || x.Data.IsDead || x.Data.Disconnected || Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); });
         }
 
         public static void clearAndReload() {
@@ -1496,6 +1493,7 @@ namespace TheOtherRoles
         public static float vision = 1f;
         public static bool lawyerKnowsRole = false;
         public static bool targetCanBeJester = false;
+        public static bool targetWasGuessed = false;
 
         public static Sprite getTargetSprite() {
             if (targetSprite) return targetSprite;
@@ -1505,7 +1503,10 @@ namespace TheOtherRoles
 
         public static void clearAndReload(bool clearTarget = true) {
             lawyer = null;
-            if (clearTarget) target = null;
+            if (clearTarget) {
+                target = null;
+                targetWasGuessed = false;
+            }
             triggerLawyerWin = false;
 
             vision = CustomOptionHolder.lawyerVision.getFloat();
@@ -1599,7 +1600,10 @@ namespace TheOtherRoles
         public static float cooldown = 30f;
         public static float traceTime = 1f;
         public static bool knowsTargetLocation = false;
+        public static float invisibleDuration = 5f;
 
+        public static float invisibleTimer = 0f;
+        public static bool isInvisble = false;
         private static Sprite markButtonSprite;
         private static Sprite killButtonSprite;
         public static Arrow arrow = new Arrow(Color.black);
@@ -1621,7 +1625,9 @@ namespace TheOtherRoles
             cooldown = CustomOptionHolder.ninjaCooldown.getFloat();
             knowsTargetLocation = CustomOptionHolder.ninjaKnowsTargetLocation.getBool();
             traceTime = CustomOptionHolder.ninjaTraceTime.getFloat();
-
+            invisibleDuration = CustomOptionHolder.ninjaInvisibleDuration.getFloat();
+            invisibleTimer = 0f;
+            isInvisble = false;
             if (arrow?.arrow != null) UnityEngine.Object.Destroy(arrow.arrow);
             arrow = new Arrow(Color.black);
             if (arrow.arrow != null) arrow.arrow.SetActive(false);
@@ -1712,7 +1718,7 @@ namespace TheOtherRoles
             if (doorHacker == null || doorHacker.PlayerId != playerId) return;
             if (remainingUses == 0) return;
 
-            if (playerId == PlayerControl.LocalPlayer.PlayerId) {
+            if (playerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId) {
                 doors = GameObject.FindObjectsOfType<PlainDoor>();
                 if (doors != null && doors.Count > 0) {
                     doorHackerTimer = duration;
@@ -1932,8 +1938,8 @@ namespace TheOtherRoles
         public static class PlayerPhysicsFixedUpdatePatch
         {
             public static void Postfix(PlayerPhysics __instance) {
-                if (kataomoi != __instance.myPlayer) return;
                 if (kataomoi == null) return;
+                if (kataomoi != __instance.myPlayer) return;
 
                 if (gaugeRenderer[1] != null && gaugeTimer > 0.0f) {
                     gaugeTimer = Mathf.Max(gaugeTimer - Time.fixedDeltaTime, 0.0f);
@@ -1950,10 +1956,10 @@ namespace TheOtherRoles
                     if (stalkingFadeTime > 0) {
                         float elapsedTime = stalkingDuration - stalkingTimer;
                         float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
-                        alpha = Mathf.Clamp(1f - alpha, PlayerControl.LocalPlayer == kataomoi || PlayerControl.LocalPlayer.isDead() ? 0.1f : 0f, 1f);
+                        alpha = Mathf.Clamp(1f - alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
                         setAlpha(alpha);
                     } else {
-                        setAlpha(PlayerControl.LocalPlayer == kataomoi ? 0.1f : 0f);
+                        setAlpha(CachedPlayer.LocalPlayer.PlayerControl == kataomoi ? 0.1f : 0f);
                     }
 
                     if (stalkingTimer <= 0f) {
@@ -1965,7 +1971,7 @@ namespace TheOtherRoles
                     if (stalkingFadeTime > 0) {
                         float elapsedTime = stalkingFadeTime - stalkingEffectTimer;
                         float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
-                        alpha = Mathf.Clamp(alpha, PlayerControl.LocalPlayer == kataomoi || PlayerControl.LocalPlayer.isDead() ? 0.1f : 0f, 1f);
+                        alpha = Mathf.Clamp(alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
                         setAlpha(alpha);
                     } else {
                         setAlpha(1.0f);
@@ -2022,7 +2028,7 @@ namespace TheOtherRoles
 
             public Info(PlayerControl player) {
                 this.player = player;
-                if (PlayerControl.LocalPlayer == player)
+                if (CachedPlayer.LocalPlayer.PlayerControl == player)
                     self = this;
             }
 
@@ -2132,7 +2138,7 @@ namespace TheOtherRoles
                 timerText.color = color;
                 ulong completeTime = (ulong)(selfEndDateTime - selfStartDateTime).TotalMilliseconds;
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                    PlayerControl.LocalPlayer.NetId,
+                    CachedPlayer.LocalPlayer.PlayerControl.NetId,
                     (byte)CustomRPC.TaskVsMode_AllTaskCompleted,
                     Hazel.SendOption.Reliable,
                     -1);
@@ -2307,7 +2313,7 @@ namespace TheOtherRoles
 
             if (AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost && isReadyAll()) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                    PlayerControl.LocalPlayer.NetId,
+                    CachedPlayer.LocalPlayer.PlayerControl.NetId,
                     (byte)CustomRPC.TaskVsMode_Start,
                     Hazel.SendOption.Reliable,
                     -1);
@@ -2495,7 +2501,17 @@ namespace TheOtherRoles
 
         public static void clearAndReload() {
             antiTeleport = new List<PlayerControl>();
-            position = new Vector3();
+            position = Vector3.zero;
+        }
+
+        public static void setPosition() {
+            if (position == Vector3.zero) return;  // Check if this has been set, otherwise first spawn on submerged will fail
+            if (antiTeleport.FindAll(x => x.PlayerId == CachedPlayer.LocalPlayer.PlayerId).Count > 0) {
+                CachedPlayer.LocalPlayer.NetTransform.RpcSnapTo(position);
+                if (SubmergedCompatibility.IsSubmerged) {
+                    SubmergedCompatibility.ChangeFloor(position.y > -7);
+                }
+            }
         }
     }
 
