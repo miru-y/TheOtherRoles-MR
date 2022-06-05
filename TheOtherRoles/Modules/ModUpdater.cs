@@ -46,7 +46,9 @@ namespace TheOtherRoles.Modules
 
             public UpdateData(JObject data)
             {
-                Tag = data["tag_name"]?.ToString().TrimStart('v');
+                var t = data["tag_name"]?.ToString();
+                int p = t.IndexOf('v');
+                Tag = t.Substring(p != -1 ? p + 1 : 0);
                 if (!SemanticVersioning.Version.TryParse(Tag, out ver))
                     ver = null;
                 Request = data;
@@ -78,7 +80,7 @@ namespace TheOtherRoles.Modules
             public bool IsNewer(Version version)
             {
                 if (ver == null) return false;
-                return ver.BaseVersion() > version.BaseVersion();
+                return ver > version;
             }
         }
 
