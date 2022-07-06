@@ -1914,23 +1914,23 @@ namespace TheOtherRoles
             if (kataomoi == null) return;
             var color = Color.Lerp(Palette.ClearWhite, Palette.White, alpha);
             try {
-                if (kataomoi.MyPhysics?.rend != null)
-                    kataomoi.MyPhysics.rend.color = color;
+                if (kataomoi.cosmetics?.currentBodySprite?.BodySprite != null)
+                    kataomoi.cosmetics.currentBodySprite.BodySprite.color = color;
 
-                if (kataomoi.MyPhysics?.Skin?.layer != null)
-                    kataomoi.MyPhysics.Skin.layer.color = color;
+                if (kataomoi.cosmetics?.skin?.layer != null)
+                    kataomoi.cosmetics.skin.layer.color = color;
 
-                if (kataomoi.HatRenderer != null)
-                    kataomoi.HatRenderer.color = color;
+                if (kataomoi.cosmetics.hat != null)
+                    kataomoi.cosmetics.hat.SetMaterialColor(color.ToInteger(true));
 
-                if (kataomoi.CurrentPet?.rend != null)
-                    kataomoi.CurrentPet.rend.color = color;
+                if (kataomoi.cosmetics.currentPet?.rend != null)
+                    kataomoi.cosmetics.currentPet.rend.color = color;
 
-                if (kataomoi.CurrentPet?.shadowRend != null)
-                    kataomoi.CurrentPet.shadowRend.color = color;
+                if (kataomoi.cosmetics.currentPet?.shadowRend != null)
+                    kataomoi.cosmetics.currentPet.shadowRend.color = color;
 
-                if (kataomoi.VisorSlot != null)
-                    kataomoi.VisorSlot.color = color;
+                if (kataomoi.cosmetics.visor != null)
+                    kataomoi.cosmetics.visor.Alpha = alpha;
             } catch { }
         }
 
@@ -1951,7 +1951,7 @@ namespace TheOtherRoles
 
                 if (kataomoi.isDead()) return;
                 if (_isStalking && stalkingTimer > 0) {
-                    kataomoi.MyRend.material.SetFloat("_Outline", 0f);
+                    kataomoi.cosmetics.currentBodySprite.BodySprite.material.SetFloat("_Outline", 0f);
                     stalkingTimer = Mathf.Max(0f, stalkingTimer - Time.fixedDeltaTime);
                     if (stalkingFadeTime > 0) {
                         float elapsedTime = stalkingDuration - stalkingTimer;

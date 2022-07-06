@@ -500,7 +500,6 @@ namespace TheOtherRoles
             lock (dispatcher) {
                 AmongUsClient.Instance.Dispatcher.Add(new Action(() => {
                     ShipStatus.Instance.enabled = false;
-                    ShipStatus.Instance.BeginCalled = false;
                     AmongUsClient.Instance.OnGameEnd(new EndGameResult((GameOverReason)reason, false));
                 }));
             }
@@ -772,7 +771,7 @@ namespace TheOtherRoles
                 FastDestroyableSingleton<RoleManager>.Instance.SetRole(player, RoleTypes.Crewmate);
                 if (player == Lawyer.lawyer && Lawyer.target != null)
                 {
-                    Transform playerInfoTransform = Lawyer.target.nameText.transform.parent.FindChild("Info");
+                    Transform playerInfoTransform = Lawyer.target.cosmetics.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo != null) playerInfo.text = "";
                 }
@@ -912,8 +911,8 @@ namespace TheOtherRoles
             if (target == null) return;
             if (flag == byte.MaxValue)
             {
-                target.MyRend.color = Color.white;
-                target.setDefaultLook();
+                target.cosmetics.currentBodySprite.BodySprite.color = Color.white;
+                if (Camouflager.camouflageTimer <= 0) target.setDefaultLook();
                 Ninja.isInvisble = false;
                 return;
             }
@@ -921,7 +920,7 @@ namespace TheOtherRoles
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;           
             if (CachedPlayer.LocalPlayer.Data.Role.IsImpostor || CachedPlayer.LocalPlayer.Data.IsDead) color.a = 0.1f;
-            target.MyRend.color = color;
+            target.cosmetics.currentBodySprite.BodySprite.color = color;
             Ninja.invisibleTimer = Ninja.invisibleDuration;
             Ninja.isInvisble = true;
         }
@@ -1033,7 +1032,7 @@ namespace TheOtherRoles
             Pursuer.pursuer = player;
 
             if (player.PlayerId == CachedPlayer.LocalPlayer.PlayerId && client != null) {
-                    Transform playerInfoTransform = client.nameText.transform.parent.FindChild("Info");
+                    Transform playerInfoTransform = client.cosmetics.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo != null) playerInfo.text = "";
             }

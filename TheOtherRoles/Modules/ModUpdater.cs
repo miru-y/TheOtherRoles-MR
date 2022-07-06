@@ -113,7 +113,7 @@ namespace TheOtherRoles.Modules
             }
 
             if (selectSfx == null)
-                selectSfx = AccountManager.Instance.accountTab.signIntoAccountButton.GetComponent<PassiveButton>().ClickSound;
+                selectSfx = AccountManager.Instance.accountTab.resendEmailButton.GetComponent<PassiveButton>().ClickSound;
 
             var template = GameObject.Find("ExitGameButton");
             if (!template) return;
