@@ -90,6 +90,9 @@ namespace TheOtherRoles.Patches {
                 }
             }
 
+            // Force Reload of SoundEffectHolder
+            SoundEffectsManager.Load();
+
             // First kill
             if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "") {
                 PlayerControl target = PlayerControl.AllPlayerControls.ToArray().ToList().FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
@@ -258,7 +261,13 @@ namespace TheOtherRoles.Patches {
                     IntroCutsceneShowRoleUpdatePatch.introCutscene = __instance;
             }
         }
- 
+
+        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CreatePlayer))]
+        class CreatePlayerPatch {
+            public static void Postfix(IntroCutscene __instance, bool impostorPositioning, ref PoolablePlayer __result) {
+                if (impostorPositioning) __result.SetNameColor(Palette.ImpostorRed);
+            }
+        }
 
         [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
         public static class IntroCutsceneShowRoleUpdatePatch

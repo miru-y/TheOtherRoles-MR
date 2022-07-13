@@ -24,6 +24,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v2.1.3](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.3) | 2022.6.21s | [TheOtherRoles v4.1.6](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.6)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.3/TheOtherRolesMR.zip)
 | [v2.1.2](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.2) | 2022.6.21s | [TheOtherRoles v4.1.5](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.5)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.2/TheOtherRolesMR.zip)
 | [v2.1.1](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.1) | 2022.3.29s | [TheOtherRoles v4.1.4](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.4)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.1/TheOtherRolesMR.zip)
 | [v2.1.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.1.0) | 2022.3.29s | [TheOtherRoles v4.1.1](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.1)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.1.0/TheOtherRolesMR.zip)
@@ -88,6 +89,24 @@ The [Role Assignment](#role-assignment) sections explains how the roles are bein
 <details>
   <summary>Click to show the Changelog</summary>
   
+**Version 4.1.6**  
+- Added Sound Effects: Most buttons / role funcionalities now have a sound!
+- Added a mod option: Enable Sound Effects  
+- Added an option: Hide After Death Modifiers: Modifiers which will have an effect after your death will be hidden while the player is alive so they cant be claimed / called
+- Added lobby timer sync, so that each player can see when the lobby will close on Vanilla Servers
+- Added a credits screen to the main menu
+- Re-Added the player's last position to the map in meetings
+- Changed the custom region ui   
+- Fixed a bug where the Spy's Name appearing in white to the impostors in the intro cutscene
+- Fixed a bug where the zoom function for ghosts would zoom in too far
+- Fixed a bug where custom color names did not work (TOR is now compatible with colorblind mode)
+- Fixed a bug where the ninjas color name did not become invisible in colorblind mode
+- Fixed a bug where Morphling & Camouflager did not work correctly for skins with adaptive color
+- Fixed a bug where the first kill shield was given to the wrong lover
+- Fixed a bug where Pursuer appeared in the GuesserUI even when Lawyer was disabled
+- Fixed a bug where a guessed Guesser could still guess if they had the guesser ui open
+- Fixed a bug where the role assignment did not work properly (fingers crossed)
+
 **Version 4.1.5**
 - Updated to Among Us version 2022.6.21
 - Added Custom servers (Modded EU & Modded NA). Thanks to [miniduikboot](https://github.com/miniduikboot) & GD
@@ -1215,12 +1234,12 @@ Because of the vents the Engineer might not be able to start some tasks using th
 
 ## Sheriff
 ### **Team: Crewmates**
-The Sheriff has the ability to kill Impostors.\
+The Sheriff has the ability to kill Impostors or Neutral roles if enabled.\
 If they try to kill a Crewmate, they die instead.\
 \
 **NOTE:**
 - If the Sheriff shoots the person the Medic shielded, the Sheriff and the shielded person **both remain unharmed**.
-- If the Sheriff shoots a Mini Impostor, the Sheriff dies if the Mini is still growing up. If it's 18, the Mini Impostor dies.
+- If the Sheriff shoots a Mini Impostor while growing up, nothing happens. If it's fully grown, the Mini Impostor dies.
 
 ### Game Options
 | Name | Description |

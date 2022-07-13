@@ -21,6 +21,7 @@ namespace TheOtherRoles.Patches {
         private static int crewValues;
         private static int impValues;
         private static bool isEvilGuesser;
+        private static List<Tuple<byte, byte>> playerRoleMap = new List<Tuple<byte, byte>>();
         public static void Postfix() {
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ResetVaribles, Hazel.SendOption.Reliable, -1);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
@@ -45,6 +46,7 @@ namespace TheOtherRoles.Patches {
                 assignRoleTargets(data);
                 assignModifiers();
             }
+            setRolesAgain();
         }
 
         public static RoleAssignmentData getRoleAssignmentData() {
@@ -465,6 +467,8 @@ namespace TheOtherRoles.Patches {
         }
 
         private static void setRole(byte roleId, byte playerId) {
+            playerRoleMap.Add(new Tuple<byte, byte>(playerId, roleId));
+
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SetRole, Hazel.SendOption.Reliable, -1);
             writer.Write(roleId);
             writer.Write(playerId);
@@ -552,6 +556,26 @@ namespace TheOtherRoles.Patches {
                  
             return selection;
         }
+
+        private static void setRolesAgain()
+        {
+
+            while (playerRoleMap.Any())
+            {
+                byte amount = (byte)Math.Min(playerRoleMap.Count, 20);
+                var writer = AmongUsClient.Instance!.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.WorkaroundSetRoles, SendOption.Reliable, -1);
+                writer.Write(amount);
+                for (int i = 0; i < amount; i++)
+                {
+                    var option = playerRoleMap[0];
+                    playerRoleMap.RemoveAt(0);
+                    writer.WritePacked((uint)option.Item1);
+                    writer.WritePacked((uint)option.Item2);
+                }
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+            }
+        }
+
 
         public class RoleAssignmentData {
             public List<PlayerControl> crewmates {get;set;}
