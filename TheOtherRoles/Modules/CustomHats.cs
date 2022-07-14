@@ -386,6 +386,7 @@ namespace TheOtherRoles.Modules {
                 var orderedKeys = packages.Keys.OrderBy((string x) => {
                     if (x == innerslothPackageName) return 1000;
                     if (x == "Developer Hats") return 900;
+                    if (x == "MR Edition Hats") return 100;
                     return 500;
                 });
                 foreach (string key in orderedKeys) {
@@ -402,9 +403,10 @@ namespace TheOtherRoles.Modules {
     public class CustomHatLoader {
         public static bool running = false;
         private static readonly string[] Repos = new string[] {
+            "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
+            "https://raw.githubusercontent.com/haoming37/TheOtherHats-GM-Haoming/master",
             "https://raw.githubusercontent.com/yukinogatari/TheOtherHats-GM/master",
             "https://raw.githubusercontent.com/Eisbison/TheOtherHats/master",
-            "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
         };
 
         public static List<CustomHatOnline> hatdetails = new List<CustomHatOnline>();
