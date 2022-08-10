@@ -27,6 +27,19 @@ namespace TheOtherRoles.Patches {
             AmongUsClient.Instance.FinishRpcImmediately(writer);
             RPCProcedure.resetVariables();
 
+            if (CustomOptionHolder.enabledHappyBirthdayMode.getBool() && CustomOptionHolder.happyBirthdayMode_EnabledTargetImpostor.getBool()) {
+                var p = Helpers.playerById((byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat());
+                if (p != null && !p.Data.Role.IsImpostor) {
+                    var p2 = Helpers.firstImpostorById();
+                    if (p2 != null) {
+                        var type = p.Data.RoleType;
+                        var type2 = p2.Data.RoleType;
+                        p2.Data.Object.RpcSetRole(type);
+                        p.Data.Object.RpcSetRole(type2);
+                    }
+                }
+            }
+
             if (CustomOptionHolder.activateRoles.getBool()) // Don't assign Roles in Tutorial or if deactivated
                 assignRoles();
         }

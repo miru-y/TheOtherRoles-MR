@@ -24,6 +24,13 @@ namespace TheOtherRoles {
         public static CustomOption taskVsModeEnabledMakeItTheSameTaskAsTheHost;
         public static CustomOption taskVsModeVision;
 
+        public static CustomOption enabledHappyBirthdayMode;
+        public static CustomOption happyBirthdayMode_Target;
+        public static CustomOption happyBirthdayMode_EnabledTargetImpostor;
+        public static CustomOption happyBirthdayMode_CakeType;
+        public static CustomOption happyBirthdayMode_TargetBirthMonth;
+        public static CustomOption happyBirthdayMode_TargetBirthDay;
+
         public static CustomOption adminTimer;
         public static CustomOption enabledAdminTimer;
         public static CustomOption heliSabotageSystemTimeLimit;
@@ -374,6 +381,13 @@ namespace TheOtherRoles {
             enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false);
             taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
             taskVsModeVision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
+
+            enabledHappyBirthdayMode = CustomOption.Create(900020000, Types.General, cs(Color.green, "Enable Seacret Mode"), false);
+            happyBirthdayMode_Target = CustomOption.Create(900020001, Types.General, cs(Color.green, "Target"), 0f, 0f, byte.MaxValue, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_EnabledTargetImpostor = CustomOption.Create(900020002, Types.General, cs(Color.green, "Enabled Target Impostor"), false, enabledHappyBirthdayMode);
+            happyBirthdayMode_CakeType = CustomOption.Create(900020003, Types.General, cs(Color.green, "Cake Type"), 0f, 0f, (int)Objects.BirthdayCake.CakeType.sizeof_CakeType - 1, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_TargetBirthMonth = CustomOption.Create(900020004, Types.General, cs(Color.green, "Target Birth Month"), 0f, 0f, 12f, 1f, enabledHappyBirthdayMode);
+            happyBirthdayMode_TargetBirthDay = CustomOption.Create(900020005, Types.General, cs(Color.green, "Target Birth Day"), 0f, 0f, 31f, 1f, enabledHappyBirthdayMode);
 
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
             enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);

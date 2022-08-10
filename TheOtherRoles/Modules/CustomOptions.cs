@@ -137,6 +137,12 @@ namespace TheOtherRoles {
             if (optionBehaviour != null && optionBehaviour is StringOption stringOption) {
                 stringOption.oldValue = stringOption.Value = selection;
                 stringOption.ValueText.text = selections[selection].ToString();
+                if (id == 900020001)
+                {
+                    var p = Helpers.playerById((byte)getFloat());
+                    if (p != null)
+                        stringOption.ValueText.text += "(" + p.Data.PlayerName + ")";
+                }
             }
             if (AmongUsClient.Instance?.AmHost == true && CachedPlayer.LocalPlayer.PlayerControl) {
                 if (id == 0) switchPreset(selection); // Switch presets
@@ -314,6 +320,14 @@ namespace TheOtherRoles {
                     stringOption.Value = stringOption.oldValue = option.selection;
                     stringOption.ValueText.text = option.selections[option.selection].ToString();
 
+                    if (option.id == 900020001)
+					{
+                        byte id = (byte)option.getFloat();
+                        var p = Helpers.playerById(id);
+                        if (p != null)
+                            stringOption.ValueText.text += "(" + p.Data.PlayerName + ")";
+                    }
+
                     option.optionBehaviour = stringOption;
                 }
                 option.optionBehaviour.gameObject.SetActive(true);
@@ -357,7 +371,13 @@ namespace TheOtherRoles {
             __instance.TitleText.text = option.name;
             __instance.Value = __instance.oldValue = option.selection;
             __instance.ValueText.text = option.selections[option.selection].ToString();
-            
+            if (option.id == 900020001)
+            {
+                byte id = (byte)option.getFloat();
+                var p = Helpers.playerById(id);
+                if (p != null)
+                    __instance.ValueText.text += "(" + p.Data.PlayerName + ")";
+            }
             return false;
         }
     }
@@ -482,9 +502,11 @@ namespace TheOtherRoles {
             var options = CustomOption.options.Where(o => o.type == type);
             foreach (CustomOption option in options) {
                 if (option.parent != null) {
-                    bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
-                    if (isIrrelevant) continue;
-                    sb.AppendLine($"  {option.name}: {option.selections[option.selection].ToString()}");
+                    if (option.parent != CustomOptionHolder.enabledHappyBirthdayMode) {
+                        bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
+                        if (isIrrelevant) continue;
+                        sb.AppendLine($"  {option.name}: {option.selections[option.selection].ToString()}");
+                    }
                 } else {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Crewmate Roles");
@@ -514,7 +536,7 @@ namespace TheOtherRoles {
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
                         sb.AppendLine($"{optionName}: {optionValue}");
-                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax) {
+                    } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax || option == CustomOptionHolder.enabledHappyBirthdayMode) {
                         continue;
                     } else {
                         bool isIrrelevant = type != CustomOption.CustomOptionType.General && option.getSelection() == 0;

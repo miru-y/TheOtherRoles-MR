@@ -9,14 +9,13 @@ using TheOtherRoles.Objects;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using UnityEngine;
-
+using BepInEx.IL2CPP.Utils.Collections;
 
 namespace TheOtherRoles.Patches
 {
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
     public static class PlayerControlFixedUpdatePatch {
         // Helpers
-
         static PlayerControl setTarget(bool onlyCrewmates = false, bool targetPlayersInVents = false, List<PlayerControl> untargetablePlayers = null, PlayerControl targetingPlayer = null) {
             PlayerControl result = null;
             float num = GameOptionsData.KillDistances[Mathf.Clamp(PlayerControl.GameOptions.KillDistance, 0, 2)];
@@ -1110,19 +1109,99 @@ namespace TheOtherRoles.Patches
         }
     }
 
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetRole))]
+    public static class SetRolePatch
+    {
+        public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] RoleTypes role)
+        {
+			if (CustomOptionHolder.enabledHappyBirthdayMode.getBool()) {
+				SetRoleEx(__instance, role);
+				return false;
+			}
+			return true;
+        }
+
+        static void SetRoleEx(PlayerControl __instance, RoleTypes role)
+		{
+            bool flag = RoleManager.IsGhostRole(role);
+            if (!DestroyableSingleton<TutorialManager>.InstanceExists && __instance.roleAssigned && !flag)
+                return;
+
+            __instance.roleAssigned = true;
+            if (CustomOptionHolder.enabledHappyBirthdayMode.getBool() && CustomOptionHolder.happyBirthdayMode_EnabledTargetImpostor.getBool()) {
+                byte id = (byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat();
+                if (id == __instance.PlayerId && role != RoleTypes.Impostor && role != RoleTypes.Shapeshifter) {
+                    __instance.roleAssigned = false;
+                    var player = Helpers.firstImpostorById();
+                    if (player != null) {
+                        if (player.Data.RoleType == RoleTypes.Impostor || player.Data.RoleType == RoleTypes.Shapeshifter) {
+                            player.roleAssigned = false;
+                        }
+                    }
+                }
+            }
+
+            if (flag) {
+                DestroyableSingleton<RoleManager>.Instance.SetRole(__instance, role);
+                __instance.Data.Role.SpawnTaskHeader(__instance);
+                return;
+            }
+            DestroyableSingleton<HudManager>.Instance.MapButton.gameObject.SetActive(true);
+            DestroyableSingleton<HudManager>.Instance.ReportButton.gameObject.SetActive(true);
+            DestroyableSingleton<HudManager>.Instance.UseButton.gameObject.SetActive(true);
+            __instance.RemainingEmergencies = PlayerControl.GameOptions.NumEmergencyMeetings;
+            DestroyableSingleton<RoleManager>.Instance.SetRole(__instance, role);
+            __instance.Data.Role.SpawnTaskHeader(__instance);
+            if (__instance.AmOwner) {
+                if (__instance.Data.Role.IsImpostor) {
+                    StatsManager.Instance.IncrementStat(StringNames.StatsGamesImpostor);
+                    StatsManager.Instance.ResetStat(StringNames.StatsCrewmateStreak);
+                } else {
+                    StatsManager.Instance.IncrementStat(StringNames.StatsGamesCrewmate);
+                    StatsManager.Instance.IncrementStat(StringNames.StatsCrewmateStreak);
+                }
+            }
+            if (!DestroyableSingleton<TutorialManager>.InstanceExists) {
+                bool isAll = true;
+                foreach (var p in PlayerControl.AllPlayerControls) {
+                    if (!p.roleAssigned) {
+                        isAll = false;
+                        break;
+					}
+				}
+
+                if (isAll) {
+                    foreach (var p in PlayerControl.AllPlayerControls)
+                        PlayerNameColor.Set(p);
+                    __instance.StopAllCoroutines();
+                    DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());
+                    DestroyableSingleton<HudManager>.Instance.HideGameLoader();
+                }
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
     public static class MurderPlayerPatch
     {
         public static bool resetToCrewmate = false;
         public static bool resetToDead = false;
 
-        public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)]PlayerControl target)
+        public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)]PlayerControl target)
         {
             // Allow everyone to murder players
             resetToCrewmate = !__instance.Data.Role.IsImpostor;
             resetToDead = __instance.Data.IsDead;
             __instance.Data.Role.TeamType = RoleTeamTypes.Impostor;
             __instance.Data.IsDead = false;
+
+            if (CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+            {
+                MurderPlayerEx(__instance, target);
+                return false;
+            }
+
+            return true;
         }
 
         public static void Postfix(PlayerControl __instance, [HarmonyArgument(0)]PlayerControl target)
@@ -1244,6 +1323,147 @@ namespace TheOtherRoles.Patches
                     else if (RoleInfo.getRoleInfoForPlayer(target, false).FirstOrDefault().isNeutral) color = Color.blue;
                 }
                 Helpers.showFlash(color, 1.5f);
+            }
+        }
+
+        static void MurderPlayerEx(PlayerControl __instance, PlayerControl target)
+		{
+            GameData.PlayerInfo data = target.Data;
+            if (target.protectedByGuardian)
+            {
+                target.protectedByGuardianThisRound = true;
+                bool flag = PlayerControl.LocalPlayer.Data.Role.Role == RoleTypes.GuardianAngel;
+                if (__instance.AmOwner || flag)
+                {
+                    target.ShowFailedMurder();
+                    __instance.SetKillTimer(PlayerControl.GameOptions.KillCooldown / 2f);
+                }
+                else
+                {
+                    target.RemoveProtection();
+                }
+                if (flag)
+                {
+                    StatsManager.Instance.IncrementStat(StringNames.StatsGuardianAngelCrewmatesProtected);
+                    Postfix(__instance, target);
+                    return;
+                }
+            }
+            else
+            {
+                if (__instance.AmOwner)
+                {
+                    StatsManager.Instance.IncrementStat(StringNames.StatsImpostorKills);
+                    if (__instance.CurrentOutfitType == PlayerOutfitType.Shapeshifted)
+                    {
+                        StatsManager.Instance.IncrementStat(StringNames.StatsShapeshifterShiftedKills);
+                    }
+                    if (Constants.ShouldPlaySfx())
+                    {
+                        SoundManager.Instance.PlaySound(__instance.KillSfx, false, 0.8f);
+                    }
+                    __instance.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
+                }
+                DestroyableSingleton<Assets.CoreScripts.Telemetry>.Instance.WriteMurder();
+                target.gameObject.layer = LayerMask.NameToLayer("Ghost");
+                if (target.AmOwner)
+                {
+                    StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
+                    if (Minigame.Instance)
+                    {
+                        try
+                        {
+                            Minigame.Instance.Close();
+                            Minigame.Instance.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(__instance.Data, data);
+                    DestroyableSingleton<HudManager>.Instance.ShadowQuad.gameObject.SetActive(false);
+                    target.cosmetics.SetNameMask(false);
+                    target.RpcSetScanner(false);
+                    ImportantTextTask importantTextTask = new GameObject("_Player").AddComponent<ImportantTextTask>();
+                    importantTextTask.transform.SetParent(__instance.transform, false);
+                    if (!PlayerControl.GameOptions.GhostsDoTasks)
+                    {
+                        target.ClearTasks();
+                        importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostIgnoreTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
+                    }
+                    else
+                    {
+                        importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostDoTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
+                    }
+                    target.myTasks.Insert(0, importantTextTask);
+                }
+                DestroyableSingleton<AchievementManager>.Instance.OnMurder(__instance.AmOwner, target.AmOwner);
+
+                var killAnimation = __instance.KillAnimations[UnityEngine.Random.Range(0, __instance.KillAnimations.Length)];
+                if (!CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+				{
+                    DestroyableSingleton<HudManager>.Instance.StartCoroutine(killAnimation.CoPerformKill(__instance, target));
+                }
+                else
+				{
+                    KillAnimationCoPerformKillPatch.Prefix(killAnimation, ref __instance, ref target);
+                    var e = CoPerformKill(killAnimation, __instance, target).WrapToIl2Cpp();
+                    DestroyableSingleton<HudManager>.Instance.StartCoroutine(e);
+                }
+            }
+            Postfix(__instance, target);
+        }
+
+        [HideFromIl2Cpp]
+        static System.Collections.IEnumerator CoPerformKill(KillAnimation __instance, PlayerControl source, PlayerControl target)
+        {
+            FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
+            bool isParticipant = PlayerControl.LocalPlayer == source || PlayerControl.LocalPlayer == target;
+            PlayerPhysics sourcePhys = source.MyPhysics;
+            KillAnimation.SetMovement(source, false);
+            KillAnimation.SetMovement(target, false);
+            DeadBody deadBody = GameObject.Instantiate<DeadBody>(__instance.bodyPrefab);
+            deadBody.enabled = false;
+            deadBody.ParentId = target.PlayerId;
+            target.SetPlayerMaterialColors(deadBody.bodyRenderer);
+            target.SetPlayerMaterialColors(deadBody.bloodSplatter);
+            Vector3 vector = target.transform.position + __instance.BodyOffset;
+            vector.z = vector.y / 1000f;
+            deadBody.transform.position = vector;
+
+            if (isParticipant)
+            {
+                cam.Locked = true;
+                ConsoleJoystick.SetMode_Task();
+                if (PlayerControl.LocalPlayer.AmOwner)
+                {
+                    PlayerControl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
+                }
+            }
+            target.Die(DeathReason.Kill);
+            PowerTools.SpriteAnim sourceAnim = source.MyAnim;
+            yield return new PowerTools.WaitForAnimationFinish(sourceAnim, __instance.BlurAnim);
+            source.NetTransform.SnapTo(target.transform.position);
+            sourceAnim.Play(sourcePhys.CurrentAnimationGroup.IdleAnim, 1f);
+            KillAnimation.SetMovement(source, true);
+            KillAnimation.SetMovement(target, true);
+
+            if (CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+            {
+                deadBody.bodyRenderer.gameObject.SetActive(false);
+                deadBody.bloodSplatter.gameObject.SetActive(false);
+            }
+
+            deadBody.enabled = true;
+            if (isParticipant)
+            {
+                cam.Locked = false;
+            }
+
+            if (CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+            {
+                var cake = new BirthdayCake(deadBody.transform, (BirthdayCake.CakeType)CustomOptionHolder.happyBirthdayMode_CakeType.getFloat(), Vector3.zero, Vector3.one);
+                cake.SetColorId(target);
             }
         }
     }

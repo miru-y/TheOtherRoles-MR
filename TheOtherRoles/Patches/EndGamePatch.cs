@@ -26,6 +26,8 @@ namespace TheOtherRoles.Patches
 
         // Task Vs Mode
         TaskVsModeEnd = 130,
+        // Happy Birthay Mode
+        HappyBirthdayModeEnd = 131,
 
         Unused = byte.MaxValue,
     }
@@ -48,6 +50,8 @@ namespace TheOtherRoles.Patches
 
         // Task Vs Mode
         TaskVsModeEnd,
+        // Happy Birthday Mode
+        HappyBirthdayModeEnd,
     }
 
     static class AdditionalTempData
@@ -102,6 +106,7 @@ namespace TheOtherRoles.Patches
                 {
                     case CustomGameOverReason.TaskMasterWin:
                     case CustomGameOverReason.TaskVsModeEnd:
+                    case CustomGameOverReason.HappyBirthdayModeEnd:
                         endGameResult.GameOverReason = GameOverReason.HumansByTask;
                         break;
                 }
@@ -185,11 +190,27 @@ namespace TheOtherRoles.Patches
             bool taskMasterTeamWin = TaskMaster.taskMaster != null && gameOverReason == (GameOverReason)CustomGameOverReason.TaskMasterWin;
             bool kataomoiWin = Kataomoi.kataomoi != null && gameOverReason == (GameOverReason)CustomGameOverReason.KataomoiWin;
             bool taskVsModeEnd = TaskRacer.isValid() && gameOverReason == (GameOverReason)CustomGameOverReason.TaskVsModeEnd;
+            bool happyBirthdayModeEnd = CustomOptionHolder.enabledHappyBirthdayMode.getBool() && gameOverReason == (GameOverReason)CustomGameOverReason.HappyBirthdayModeEnd;
+            if (happyBirthdayModeEnd)
+			{
+                var p = Helpers.playerById((byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat());
+                if (p == null)
+                    happyBirthdayModeEnd = false;
+            }
 
             bool isPursurerLose = jesterWin || arsonistWin || miniLose || vultureWin || teamJackalWin;
 
+            // Happy Birthday Mode
+            if (happyBirthdayModeEnd)
+			{
+                var p = Helpers.playerById((byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat());
+                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+                WinningPlayerData wpd = new WinningPlayerData(p.Data);
+                TempData.winners.Add(wpd);
+                AdditionalTempData.winCondition = WinCondition.HappyBirthdayModeEnd;
+            }
             // Mini lose
-            if (miniLose)
+            else if (miniLose)
             {
                 TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
                 WinningPlayerData wpd = new WinningPlayerData(Mini.mini.Data);
@@ -340,29 +361,32 @@ namespace TheOtherRoles.Patches
                 }
             }
 
-            // Possible Additional winner: Lawyer
-            if (!lawyerSoloWin && Lawyer.lawyer != null && Lawyer.target != null && (!Lawyer.target.Data.IsDead || Lawyer.target == Jester.jester) && !Pursuer.notAckedExiled)
-            {
-                WinningPlayerData winningClient = null;
-                foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
+            if (!happyBirthdayModeEnd)
+			{
+                // Possible Additional winner: Lawyer
+                if (!lawyerSoloWin && Lawyer.lawyer != null && Lawyer.target != null && (!Lawyer.target.Data.IsDead || Lawyer.target == Jester.jester) && !Pursuer.notAckedExiled)
                 {
-                    if (winner.PlayerName == Lawyer.target.Data.PlayerName)
-                        winningClient = winner;
+                    WinningPlayerData winningClient = null;
+                    foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
+                    {
+                        if (winner.PlayerName == Lawyer.target.Data.PlayerName)
+                            winningClient = winner;
+                    }
+                    if (winningClient != null)
+                    { // The Lawyer wins if the client is winning (and alive, but if he wasn't the Lawyer shouldn't exist anymore)
+                        if (!TempData.winners.ToArray().Any(x => x.PlayerName == Lawyer.lawyer.Data.PlayerName))
+                            TempData.winners.Add(new WinningPlayerData(Lawyer.lawyer.Data));
+                        AdditionalTempData.additionalWinConditions.Add(WinCondition.AdditionalLawyerBonusWin); // The Lawyer wins together with the client
+                    }
                 }
-                if (winningClient != null)
-                { // The Lawyer wins if the client is winning (and alive, but if he wasn't the Lawyer shouldn't exist anymore)
-                    if (!TempData.winners.ToArray().Any(x => x.PlayerName == Lawyer.lawyer.Data.PlayerName))
-                        TempData.winners.Add(new WinningPlayerData(Lawyer.lawyer.Data));
-                    AdditionalTempData.additionalWinConditions.Add(WinCondition.AdditionalLawyerBonusWin); // The Lawyer wins together with the client
-                }
-            }
 
-            // Possible Additional winner: Pursuer
-            if (Pursuer.pursuer != null && !Pursuer.pursuer.Data.IsDead && !Pursuer.notAckedExiled && !isPursurerLose && !TempData.winners.ToArray().Any(x => x.IsImpostor))
-            {
-                if (!TempData.winners.ToArray().Any(x => x.PlayerName == Pursuer.pursuer.Data.PlayerName))
-                    TempData.winners.Add(new WinningPlayerData(Pursuer.pursuer.Data));
-                AdditionalTempData.additionalWinConditions.Add(WinCondition.AdditionalAlivePursuerWin);
+                // Possible Additional winner: Pursuer
+                if (Pursuer.pursuer != null && !Pursuer.pursuer.Data.IsDead && !Pursuer.notAckedExiled && !isPursurerLose && !TempData.winners.ToArray().Any(x => x.IsImpostor))
+                {
+                    if (!TempData.winners.ToArray().Any(x => x.PlayerName == Pursuer.pursuer.Data.PlayerName))
+                        TempData.winners.Add(new WinningPlayerData(Pursuer.pursuer.Data));
+                    AdditionalTempData.additionalWinConditions.Add(WinCondition.AdditionalAlivePursuerWin);
+                }
             }
 
             // Reset Settings
@@ -390,6 +414,8 @@ namespace TheOtherRoles.Patches
 
                 // Task Vs Mode
                 bool isTaskVsMode = AdditionalTempData.winCondition == WinCondition.TaskVsModeEnd;
+                // Happy Birthday Mode
+                bool isHappyBirthdayMode = AdditionalTempData.winCondition == WinCondition.HappyBirthdayModeEnd;
                 List<WinningPlayerData> list = isTaskVsMode ? TempData.winners.ToArray().ToList() : TempData.winners.ToArray().ToList().OrderBy(delegate (WinningPlayerData b)
                 {
                     if (!b.IsYou)
@@ -404,14 +430,18 @@ namespace TheOtherRoles.Patches
                     int num2 = (i % 2 == 0) ? -1 : 1;
                     int num3 = (i + 1) / 2;
                     float offsetX = isTaskVsMode ? 2f : 1f;
+                    float offsetX2 = 0;
+                    if (isHappyBirthdayMode) offsetX2 = 0.75f;
                     float num4 = (float)num3 / (float)num;
                     float num5 = Mathf.Lerp(1f, 0.75f, num4);
                     float num6 = (float)((i == 0) ? -8 : -1);
                     PoolablePlayer poolablePlayer = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, __instance.transform);
-                    poolablePlayer.transform.localPosition = new Vector3(offsetX * (float)num2 * (float)num3 * num5, FloatRange.SpreadToEdges(-1.125f, 0f, num3, num), num6 + (float)num3 * 0.01f) * 0.9f;
+                    poolablePlayer.transform.localPosition = new Vector3(offsetX2 + offsetX * (float)num2 * (float)num3 * num5, FloatRange.SpreadToEdges(-1.125f, 0f, num3, num), num6 + (float)num3 * 0.01f) * 0.9f;
                     float num7 = Mathf.Lerp(1f, 0.65f, num4) * 0.9f;
                     Vector3 vector = new Vector3(num7, num7, 1f);
                     poolablePlayer.transform.localScale = vector;
+                    if (isHappyBirthdayMode)
+                        winningPlayerData2.IsDead = false;
                     poolablePlayer.UpdateFromPlayerOutfit((GameData.PlayerOutfit)winningPlayerData2, PlayerMaterial.MaskType.ComplexUI, winningPlayerData2.IsDead, true);
                     if (winningPlayerData2.IsDead)
                     {
@@ -423,26 +453,55 @@ namespace TheOtherRoles.Patches
                         poolablePlayer.SetFlipX(i % 2 == 0);
                     }
 
-                    poolablePlayer.cosmetics.nameText.color = isTaskVsMode ? TaskRacer.getRankTextColor(i + 1) : Color.white;
-                    poolablePlayer.cosmetics.nameText.transform.localScale = new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z);
-                    poolablePlayer.cosmetics.nameText.transform.localPosition = new Vector3(poolablePlayer.cosmetics.nameText.transform.localPosition.x, poolablePlayer.cosmetics.nameText.transform.localPosition.y, -15f);
-                    poolablePlayer.cosmetics.nameText.text = winningPlayerData2.PlayerName;
-                    if (isTaskVsMode)
-                    {
-                        poolablePlayer.cosmetics.nameText.text += $"\n{TaskRacer.getRankText(i + 1, true)}";
-                    }
+                    if (!isHappyBirthdayMode)
+					{
+                        poolablePlayer.cosmetics.nameText.color = isTaskVsMode ? TaskRacer.getRankTextColor(i + 1) : Color.white;
+                        poolablePlayer.cosmetics.nameText.transform.localScale = new Vector3(1f / vector.x, 1f / vector.y, 1f / vector.z);
+                        poolablePlayer.cosmetics.nameText.transform.localPosition = new Vector3(poolablePlayer.cosmetics.nameText.transform.localPosition.x, poolablePlayer.cosmetics.nameText.transform.localPosition.y, -15f);
+                        poolablePlayer.cosmetics.nameText.text = winningPlayerData2.PlayerName;
+                        if (isTaskVsMode)
+                        {
+                            poolablePlayer.cosmetics.nameText.text += $"\n{TaskRacer.getRankText(i + 1, true)}";
+                        }
 
-                    foreach (var data in AdditionalTempData.playerRoles)
-                    {
-                        if (data.PlayerName != winningPlayerData2.PlayerName) continue;
-                        var roles =
-                        poolablePlayer.cosmetics.nameText.text += $"\n{string.Join("\n", data.Roles.Select(x => Helpers.cs(x.color, x.name)))}";
+                        foreach (var data in AdditionalTempData.playerRoles)
+                        {
+                            if (data.PlayerName != winningPlayerData2.PlayerName) continue;
+                            var roles =
+                            poolablePlayer.cosmetics.nameText.text += $"\n{string.Join("\n", data.Roles.Select(x => Helpers.cs(x.color, x.name)))}";
+                        }
+                    }
+					else
+					{
+						poolablePlayer.cosmetics.nameText.text = "";
+						{
+                            var cake = new Objects.BirthdayCake(poolablePlayer.transform, (Objects.BirthdayCake.CakeType)CustomOptionHolder.happyBirthdayMode_CakeType.getFloat(), new Vector3(-1.4f, 0f, 0f), Vector3.one * 1.75f);
+                            cake.SetColorId(winningPlayerData2.ColorId);
+                        }
+						{
+                            var cakeEmoObj = new GameObject("cake_emo");
+                            cakeEmoObj.transform.SetParent(poolablePlayer.transform);
+                            cakeEmoObj.transform.localPosition = new Vector3(0.6f, 1.2f, -2f);
+                            cakeEmoObj.transform.localScale = Vector3.one;
+
+                            var spriteRenderer = cakeEmoObj.AddComponent<SpriteRenderer>();
+                            spriteRenderer.sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.BirthdayCake_Emo.png", 200f);
+                        }
                     }
                 }
 
                 if (isTaskVsMode)
                 {
                     __instance.WinText.text = "Result";
+                }
+                else if (isHappyBirthdayMode)
+				{
+                    int birthMonth = (int)CustomOptionHolder.happyBirthdayMode_TargetBirthMonth.getFloat();
+                    int birthDay = (int)CustomOptionHolder.happyBirthdayMode_TargetBirthDay.getFloat();
+                    if (birthMonth > 0 && birthDay > 0)
+                        __instance.WinText.text = string.Format("{0}/{1}", birthMonth, birthDay);
+                    else
+                        __instance.WinText.text = "";
                 }
 
                 // Additional code
@@ -518,6 +577,12 @@ namespace TheOtherRoles.Patches
                     textRenderer.text = "Congratulations!";
                     textRenderer.color = TaskMaster.color;
                     __instance.BackgroundBar.material.SetColor("_Color", TaskRacer.color);
+                }
+                else if (AdditionalTempData.winCondition == WinCondition.HappyBirthdayModeEnd)
+				{
+                    textRenderer.text = string.Format("HAPPY BIRTHDAY {0}!!", list[0].PlayerName);
+                    textRenderer.color = Color.green;
+                    __instance.BackgroundBar.material.SetColor("_Color", Color.green);
                 }
 
                 foreach (WinCondition cond in AdditionalTempData.additionalWinConditions)
@@ -634,7 +699,7 @@ namespace TheOtherRoles.Patches
                 {
                     __instance.enabled = false;
                     //ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.TaskVsModeEnd, false);
-                    UncheckedEndGame((GameOverReason)CustomGameOverReason.TaskVsModeEnd, false);
+                    UncheckedEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.TaskVsModeEnd), false);
                     return true;
                 }
                 return false;
@@ -645,7 +710,7 @@ namespace TheOtherRoles.Patches
                 if (TaskMaster.triggerTaskMasterWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.TaskMasterWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.TaskMasterWin), false);
                     return true;
                 }
                 return false;
@@ -656,7 +721,7 @@ namespace TheOtherRoles.Patches
                 if (Mini.triggerMiniLose)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.MiniLose, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.MiniLose), false);
                     return true;
                 }
                 return false;
@@ -667,7 +732,7 @@ namespace TheOtherRoles.Patches
                 if (Jester.triggerJesterWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.JesterWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.JesterWin), false);
                     return true;
                 }
                 return false;
@@ -678,7 +743,7 @@ namespace TheOtherRoles.Patches
                 if (Kataomoi.triggerKataomoiWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.KataomoiWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.KataomoiWin), false);
                     return true;
                 }
                 return false;
@@ -689,7 +754,7 @@ namespace TheOtherRoles.Patches
                 if (Arsonist.triggerArsonistWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.ArsonistWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.ArsonistWin), false);
                     return true;
                 }
                 return false;
@@ -700,7 +765,7 @@ namespace TheOtherRoles.Patches
                 if (Vulture.triggerVultureWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.VultureWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.VultureWin), false);
                     return true;
                 }
                 return false;
@@ -711,7 +776,7 @@ namespace TheOtherRoles.Patches
                 if (Lawyer.triggerLawyerWin)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.LawyerSoloWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.LawyerSoloWin), false);
                     return true;
                 }
                 return false;
@@ -754,7 +819,7 @@ namespace TheOtherRoles.Patches
                 if (GameData.Instance.TotalTasks > 0 && GameData.Instance.TotalTasks <= GameData.Instance.CompletedTasks)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame(GameOverReason.HumansByTask, false);
+                    ShipStatus.RpcEndGame(CheckGameOverReason(GameOverReason.HumansByTask), false);
                     return true;
                 }
                 return false;
@@ -765,7 +830,7 @@ namespace TheOtherRoles.Patches
                 if (statistics.TeamLoversAlive == 2 && statistics.TotalAlive <= 3)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.LoversWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.LoversWin), false);
                     return true;
                 }
                 return false;
@@ -776,7 +841,7 @@ namespace TheOtherRoles.Patches
                 if (statistics.TeamJackalAlive >= statistics.TotalAlive - statistics.TeamJackalAlive && statistics.TeamImpostorsAlive == 0 && !(statistics.TeamJackalHasAliveLover && statistics.TeamLoversAlive == 2))
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.TeamJackalWin, false);
+                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.TeamJackalWin), false);
                     return true;
                 }
                 return false;
@@ -800,7 +865,7 @@ namespace TheOtherRoles.Patches
                             endReason = GameOverReason.ImpostorByVote;
                             break;
                     }
-                    ShipStatus.RpcEndGame(endReason, false);
+                    ShipStatus.RpcEndGame(CheckGameOverReason(endReason), false);
                     return true;
                 }
                 return false;
@@ -811,7 +876,7 @@ namespace TheOtherRoles.Patches
                 if (statistics.TeamImpostorsAlive == 0 && statistics.TeamJackalAlive == 0)
                 {
                     __instance.enabled = false;
-                    ShipStatus.RpcEndGame(GameOverReason.HumansByVote, false);
+                    ShipStatus.RpcEndGame(CheckGameOverReason(GameOverReason.HumansByVote), false);
                     return true;
                 }
                 return false;
@@ -820,7 +885,7 @@ namespace TheOtherRoles.Patches
             private static void EndGameForSabotage(ShipStatus __instance)
             {
                 __instance.enabled = false;
-                ShipStatus.RpcEndGame(GameOverReason.ImpostorBySabotage, false);
+                ShipStatus.RpcEndGame(CheckGameOverReason(GameOverReason.ImpostorBySabotage), false);
                 return;
             }
 
@@ -835,7 +900,31 @@ namespace TheOtherRoles.Patches
 
             private static void UncheckedEndGame(CustomGameOverReason reason)
             {
-                UncheckedEndGame((GameOverReason)reason, false);
+                UncheckedEndGame((GameOverReason)CheckCustomGameOverReason(reason), false);
+            }
+
+            private static CustomGameOverReason CheckCustomGameOverReason(CustomGameOverReason reason)
+			{
+                // Happy Birthday Mode
+				if (CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+				{
+                    var p = Helpers.playerById((byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat());
+                    if (p != null)
+                        return CustomGameOverReason.HappyBirthdayModeEnd;
+				}
+                return reason;
+			}
+
+            private static GameOverReason CheckGameOverReason(GameOverReason reason)
+            {
+                // Happy Birthday Mode
+                if (CustomOptionHolder.enabledHappyBirthdayMode.getBool())
+                {
+                    var p = Helpers.playerById((byte)CustomOptionHolder.happyBirthdayMode_Target.getFloat());
+                    if (p != null)
+                        return (GameOverReason)CustomGameOverReason.HappyBirthdayModeEnd;
+                }
+                return reason;
             }
         }
 

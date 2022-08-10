@@ -132,6 +132,16 @@ namespace TheOtherRoles {
             return -1;
         }
 
+        public static PlayerControl firstImpostorById()
+        {
+            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            {
+                if (player.Data.Role.IsImpostor)
+                    return player;
+            }
+            return null;
+        }
+
         public static PlayerControl playerById(byte id)
         {
             foreach (PlayerControl player in CachedPlayer.AllPlayers)
