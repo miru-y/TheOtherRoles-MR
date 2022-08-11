@@ -25,14 +25,14 @@ namespace TheOtherRoles{
         public static List<SurvCamera> camerasToAdd = new List<SurvCamera>();
         public static List<Vent> ventsToSeal = new List<Vent>();
         public static Dictionary<byte, PoolablePlayer> playerIcons = new Dictionary<byte, PoolablePlayer>();
-        public static float AdminTimer = 0f;
-        public static float VitalsTimer = 0f;
-        public static float SecurityCameraTimer = 0f;
-        public static TMPro.TextMeshPro AdminTimerText = null;
+        public static float adminTimer = 0f;
+        public static float vitalsTimer = 0f;
+        public static float securityCameraTimer = 0f;
+        public static TMPro.TextMeshPro adminTimerText = null;
         public static string firstKillName;
         public static PlayerControl firstKillPlayer;
-        public static TMPro.TextMeshPro VitalsTimerText = null;
-        public static TMPro.TextMeshPro SecurityCameraTimerText = null;
+        public static TMPro.TextMeshPro vitalsTimerText = null;
+        public static TMPro.TextMeshPro securityCameraTimerText = null;
 
         const float TimerUIBaseX = -3.5f;
         const float TimerUIMoveX = 2.5f;
@@ -43,9 +43,9 @@ namespace TheOtherRoles{
             ventsToSeal = new List<Vent>();
             playerIcons = new Dictionary<byte, PoolablePlayer>(); ;
 
-            AdminTimer = CustomOptionHolder.adminTimer.getFloat();
-            VitalsTimer = CustomOptionHolder.vitalsTimer.getFloat();
-            SecurityCameraTimer = CustomOptionHolder.securityCameraTimer.getFloat();
+            adminTimer = CustomOptionHolder.adminTimer.getFloat();
+            vitalsTimer = CustomOptionHolder.vitalsTimer.getFloat();
+            securityCameraTimer = CustomOptionHolder.securityCameraTimer.getFloat();
 
             UpdateTimer();
 
@@ -77,76 +77,76 @@ namespace TheOtherRoles{
 
         public static int UpdateAdminTimerText(int viewIndex)
         {
-            if (!CustomOptionHolder.enabledAdminTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
+            if (!CustomOptionHolder.enabledAdminTimer.getBool() || !CustomOptionHolder.viewAdminTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            AdminTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
-            AdminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
-            if (AdminTimer > 0)
-                AdminTimerText.text = $"Admin: {AdminTimer.ToString("#0.0")} sec remaining";
+            adminTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            adminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (adminTimer > 0)
+                adminTimerText.text = $"Admin: {adminTimer.ToString("#0.0")} sec remaining";
             else
-                AdminTimerText.text = "Admin: ran out of time";
-            AdminTimerText.gameObject.SetActive(true);
+                adminTimerText.text = "Admin: ran out of time";
+            adminTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;
         }
 
         private static void ClearAdminTimerText()
         {
-            if (AdminTimerText == null)
+            if (adminTimerText == null)
                 return;
-            UnityEngine.Object.Destroy(AdminTimerText);
-            AdminTimerText = null;
+            UnityEngine.Object.Destroy(adminTimerText);
+            adminTimerText = null;
         }
 
         public static int UpdateVitalsTimerText(int viewIndex) {
-            if (!CustomOptionHolder.enabledVitalsTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
+            if (!CustomOptionHolder.enabledVitalsTimer.getBool() || !CustomOptionHolder.viewVitalsTimer.getBool() ||  CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            VitalsTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
-            VitalsTimerText.color = Color.green;
-            VitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
-            if (VitalsTimer > 0)
-                VitalsTimerText.text = $"Vitals: {VitalsTimer.ToString("#0.0")} sec remaining";
+            vitalsTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            vitalsTimerText.color = Color.green;
+            vitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (vitalsTimer > 0)
+                vitalsTimerText.text = $"Vitals: {vitalsTimer.ToString("#0.0")} sec remaining";
             else
-                VitalsTimerText.text = "Vitals: ran out of time";
-            VitalsTimerText.gameObject.SetActive(true);
+                vitalsTimerText.text = "Vitals: ran out of time";
+            vitalsTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;
         }
 
         private static void ClearVitalsTimerText() {
-            if (VitalsTimerText == null)
+            if (vitalsTimerText == null)
                 return;
-            UnityEngine.Object.Destroy(VitalsTimerText);
-            VitalsTimerText = null;
+            UnityEngine.Object.Destroy(vitalsTimerText);
+            vitalsTimerText = null;
         }
 
 
         public static int UpdateSecurityCameraTimerText(int viewIndex) {
-            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool() || CustomOptionHolder.enabledTaskVsMode.getBool())
+            if (!CustomOptionHolder.enabledSecurityCameraTimer.getBool() || !CustomOptionHolder.viewSecurityCameraTimer.getBool() ||  CustomOptionHolder.enabledTaskVsMode.getBool())
                 return viewIndex;
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
-            SecurityCameraTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
-            SecurityCameraTimerText.color = Color.red;
-            SecurityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
-            if (SecurityCameraTimer > 0)
-                SecurityCameraTimerText.text = $"Camera: {SecurityCameraTimer.ToString("#0.0")} sec remaining";
+            securityCameraTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            securityCameraTimerText.color = Color.red;
+            securityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
+            if (securityCameraTimer > 0)
+                securityCameraTimerText.text = $"Camera: {securityCameraTimer.ToString("#0.0")} sec remaining";
             else
-                SecurityCameraTimerText.text = "Camera: ran out of time";
-            SecurityCameraTimerText.gameObject.SetActive(true);
+                securityCameraTimerText.text = "Camera: ran out of time";
+            securityCameraTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;
         }
 
         private static void ClearSecurityCameraTimerText() {
-            if (SecurityCameraTimerText == null)
+            if (securityCameraTimerText == null)
                 return;
-            UnityEngine.Object.Destroy(SecurityCameraTimerText);
-            SecurityCameraTimerText = null;
+            UnityEngine.Object.Destroy(securityCameraTimerText);
+            securityCameraTimerText = null;
         }
 
 

@@ -453,15 +453,15 @@ namespace TheOtherRoles
         }
 
         public static void consumeAdminTime(float delta) {
-            MapOptions.AdminTimer -= delta;
+            MapOptions.adminTimer -= delta;
         }
 
         public static void consumeVitalTime(float delta) {
-            VitalsTimer -= delta;
+            vitalsTimer -= delta;
         }
 
         public static void consumeSecurityCameraTime(float delta) {
-            SecurityCameraTimer -= delta;
+            securityCameraTimer -= delta;
         }
 
         // Task Vs Mode

@@ -377,7 +377,7 @@ namespace TheOtherRoles.Patches
                 // Consume time to see vital if the player is alive
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                     if (CustomOptionHolder.enabledVitalsTimer.getBool()) {
-                        if (MapOptions.VitalsTimer <= 0) {
+                        if (MapOptions.vitalsTimer <= 0) {
                             __instance.SabText.gameObject.SetActive(true);
                             __instance.SabText.text = "[VITALS DESTROYED]";
                             for (int k = 0; k < __instance.vitals.Length; k++) {
@@ -446,10 +446,10 @@ namespace TheOtherRoles.Patches
 
             // Vitals
             if (CustomOptionHolder.enabledVitalsTimer.getBool() && __instance.gameObject.name.Contains("panel_vitals"))
-                return MapOptions.VitalsTimer > 0;
+                return MapOptions.vitalsTimer > 0;
             // Camera
             if (CustomOptionHolder.enabledSecurityCameraTimer.getBool() && (__instance.gameObject.name.Contains("task_cams") || __instance.gameObject.name.Contains("SurvConsole") || __instance.gameObject.name.Contains("Surv_Panel")))
-                return MapOptions.SecurityCameraTimer > 0;
+                return MapOptions.securityCameraTimer > 0;
 
             return true;
         }
@@ -479,7 +479,7 @@ namespace TheOtherRoles.Patches
                     return true;
 
                 if (CustomOptionHolder.enabledAdminTimer.getBool())
-                    return MapOptions.AdminTimer > 0;
+                    return MapOptions.adminTimer > 0;
 
                 return true;
             }
@@ -500,7 +500,7 @@ namespace TheOtherRoles.Patches
                     !(EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl) &&
                     CustomOptionHolder.enabledAdminTimer.getBool()) {
                     // Show the grey map if players ran out of admin time.
-                    if (MapOptions.AdminTimer <= 0) {
+                    if (MapOptions.adminTimer <= 0) {
                         __instance.isSab = true;
                         __instance.BackgroundColor.SetColor(Palette.DisabledGrey);
                         return false;
@@ -662,7 +662,7 @@ namespace TheOtherRoles.Patches
                 // Consume time to see security camera if the player is alive
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                     if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
-                        if (MapOptions.SecurityCameraTimer <= 0) {
+                        if (MapOptions.securityCameraTimer <= 0) {
                             for (int i = 0; i < __instance.SabText.Length; i++) {
                                 __instance.SabText[i].text = "[SECURITY CAMERA DESTROYED]";
                                 __instance.SabText[i].gameObject.SetActive(true);
@@ -732,7 +732,7 @@ namespace TheOtherRoles.Patches
         {
             public static bool Prefix(PlanetSurveillanceMinigame __instance, [HarmonyArgument(0)] int direction) {
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
-                    if (MapOptions.SecurityCameraTimer <= 0)
+                    if (MapOptions.securityCameraTimer <= 0)
                         return false;
                 }
                 return true;
@@ -754,7 +754,7 @@ namespace TheOtherRoles.Patches
                 // Consume time to see security camera if the player is alive
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                     if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
-                        if (!commsActive && MapOptions.SecurityCameraTimer <= 0) {
+                        if (!commsActive && MapOptions.securityCameraTimer <= 0) {
                             __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
                             __instance.SabText.gameObject.SetActive(true);
                             __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;

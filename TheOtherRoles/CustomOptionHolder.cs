@@ -33,14 +33,18 @@ namespace TheOtherRoles {
 
         public static CustomOption adminTimer;
         public static CustomOption enabledAdminTimer;
+        public static CustomOption viewAdminTimer;
+
         public static CustomOption heliSabotageSystemTimeLimit;
         public static CustomOption hideTaskOverlayOnSabMap;
 
         public static CustomOption vitalsTimer;
         public static CustomOption enabledVitalsTimer;
+        public static CustomOption viewVitalsTimer;
 
         public static CustomOption securityCameraTimer;
         public static CustomOption enabledSecurityCameraTimer;
+        public static CustomOption viewSecurityCameraTimer;
 
         public static CustomOption mafiaSpawnRate;
         public static CustomOption janitorCooldown;
@@ -374,10 +378,23 @@ namespace TheOtherRoles {
             modifiersCountMax = CustomOption.Create(307, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Modifiers"), 15f, 0f, 15f, 1f);
 
             // custom options
-            adminTimer = CustomOption.Create(999, Types.General, "Admin Map Available Duration", 10f, 0f, 120f, 1f);
             enabledAdminTimer = CustomOption.Create(998, Types.General, "Enable Admin Map Available Duration", true);
+            adminTimer = CustomOption.Create(999, Types.General, "Admin Map Available Duration", 10f, 0f, 120f, 1f, enabledAdminTimer);
+            viewAdminTimer = CustomOption.Create(10000, Types.General, "View Admin Timer", true, enabledAdminTimer);
+
+            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(Color.green, "Enable Vitals Available Duration"), false);
+            vitalsTimer = CustomOption.Create(900000000, Types.General, cs(Color.green, "Vitals Available Duration"), 10f, 0f, 120f, 1f, enabledVitalsTimer);
+            viewVitalsTimer = CustomOption.Create(900000004, Types.General, cs(Color.green, "View Vitals Timer"), true, enabledVitalsTimer);
+
+            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(Color.red, "Enable Security Camera Available Duration"), false);
+            securityCameraTimer = CustomOption.Create(900000002, Types.General, cs(Color.red, "Security Camera Available Duration"), 10f, 0f, 120f, 1f, enabledSecurityCameraTimer);
+            viewSecurityCameraTimer = CustomOption.Create(900000005, Types.General, cs(Color.red, "View Security Camera Timer"), true, enabledSecurityCameraTimer);
+
             heliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time", 90f, 5f, 120f, 5f);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false);
+            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
+            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
+
             enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false);
             taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
             taskVsModeVision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
@@ -388,14 +405,6 @@ namespace TheOtherRoles {
             happyBirthdayMode_CakeType = CustomOption.Create(900020003, Types.General, cs(Color.green, "Cake Type"), 0f, 0f, (int)Objects.BirthdayCake.CakeType.sizeof_CakeType - 1, 1f, enabledHappyBirthdayMode);
             happyBirthdayMode_TargetBirthMonth = CustomOption.Create(900020004, Types.General, cs(Color.green, "Target Birth Month"), 0f, 0f, 12f, 1f, enabledHappyBirthdayMode);
             happyBirthdayMode_TargetBirthDay = CustomOption.Create(900020005, Types.General, cs(Color.green, "Target Birth Day"), 0f, 0f, 31f, 1f, enabledHappyBirthdayMode);
-
-            enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
-            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
-
-            vitalsTimer = CustomOption.Create(900000000, Types.General, cs(Color.green, "Vitals Available Duration"), 10f, 0f, 120f, 1f);
-            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(Color.green, "Enable Vitals Available Duration"), false);
-            securityCameraTimer = CustomOption.Create(900000002, Types.General, cs(Color.red, "Security Camera Available Duration"), 10f, 0f, 120f, 1f);
-            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(Color.red, "Enable Security Camera Available Duration"), false);
 
             mafiaSpawnRate = CustomOption.Create(10, Types.Impostor, cs(Janitor.color, "Mafia"), rates, null, true);
             janitorCooldown = CustomOption.Create(11, Types.Impostor, "Janitor Cooldown", 30f, 10f, 60f, 2.5f, mafiaSpawnRate);
