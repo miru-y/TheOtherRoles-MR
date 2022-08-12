@@ -69,7 +69,7 @@ namespace TheOtherRoles {
         }
 
         public static CustomOption Create(int id, CustomOptionType type, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false) {
-            return new CustomOption(id, type, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader);
+            return new CustomOption(id, type, name, new string[]{ "<color=#CCCCCCFF>Off</color>", "<color=#FFFF00FF>On</color>" }, defaultValue ? "<color=#FFFF00FF>On</color>" : "<color=#CCCCCCFF>Off</color>", parent, isHeader);
         }
 
         // Static behaviour
