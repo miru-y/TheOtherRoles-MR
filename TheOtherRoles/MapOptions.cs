@@ -9,6 +9,7 @@ namespace TheOtherRoles{
         public static bool blockSkippingInEmergencyMeetings = false;
         public static bool noVoteIsSelfVote = false;
         public static bool hidePlayerNames = false;
+        public static bool hideOutOfSightNametags = false;
         public static bool ghostsSeeRoles = true;
         public static bool ghostsSeeModifier = true;
         public static bool ghostsSeeTasks = true;
@@ -53,6 +54,7 @@ namespace TheOtherRoles{
             blockSkippingInEmergencyMeetings = CustomOptionHolder.blockSkippingInEmergencyMeetings.getBool();
             noVoteIsSelfVote = CustomOptionHolder.noVoteIsSelfVote.getBool();
             hidePlayerNames = CustomOptionHolder.hidePlayerNames.getBool();
+            hideOutOfSightNametags = CustomOptionHolder.hideOutOfSightNametags.getBool();
             allowParallelMedBayScans = CustomOptionHolder.allowParallelMedBayScans.getBool();
             shieldFirstKill = CustomOptionHolder.shieldFirstKill.getBool();
             firstKillPlayer = null;

@@ -31,6 +31,14 @@ namespace TheOtherRoles {
 
         public static Dictionary<string, Sprite> CachedSprites = new();
 
+        public static bool gameStarted
+        {
+            get
+            {
+                return AmongUsClient.Instance?.GameState == InnerNet.InnerNetClient.GameStates.Started;
+            }
+        }
+
         public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit) {
             try
             {
@@ -296,15 +304,23 @@ namespace TheOtherRoles {
 
         public static bool hidePlayerName(PlayerControl source, PlayerControl target) {
             if (source != target && Kataomoi.isStalking(target)) return true; // Hide kataomoi nametags
-            else if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
-            else if (Ninja.isInvisble && Ninja.ninja == target) return true; 
-            else if (!MapOptions.hidePlayerNames) return false; // All names are visible
-            else if (source == null || target == null) return true;
-            else if (source == target) return false; // Player sees his own name
-            else if (source.Data.Role.IsImpostor && (target.Data.Role.IsImpostor || target == Spy.spy || target == Sidekick.sidekick && Sidekick.wasTeamRed || target == Jackal.jackal && Jackal.wasTeamRed)) return false; // Members of team Impostors see the names of Impostors/Spies
-            else if ((source == Lovers.lover1 || source == Lovers.lover2) && (target == Lovers.lover1 || target == Lovers.lover2)) return false; // Members of team Lovers see the names of each other
-            else if ((source == Jackal.jackal || source == Sidekick.sidekick) && (target == Jackal.jackal || target == Sidekick.sidekick || target == Jackal.fakeSidekick)) return false; // Members of team Jackal see the names of each other
-            else if (Deputy.knowsSheriff && (source == Sheriff.sheriff || source == Deputy.deputy) && (target == Sheriff.sheriff || target == Deputy.deputy)) return false; // Sheriff & Deputy see the names of each other
+            if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
+            if (Ninja.isInvisble && Ninja.ninja == target) return true;
+            if (MapOptions.hideOutOfSightNametags && gameStarted && ShipStatus.Instance != null && source.transform != null && target.transform != null)
+            {
+                float distMod = 1.025f;
+                float distance = Vector3.Distance(source.transform.position, target.transform.position);
+                bool anythingBetween = PhysicsHelpers.AnythingBetween(source.GetTruePosition(), target.GetTruePosition(), Constants.ShadowMask, false);
+
+                if (distance > ShipStatus.Instance.CalculateLightRadius(source.Data) * distMod || anythingBetween) return true;
+            }
+            if (!MapOptions.hidePlayerNames) return false; // All names are visible
+            if (source == null || target == null) return true;
+            if (source == target) return false; // Player sees his own name
+            if (source.Data.Role.IsImpostor && (target.Data.Role.IsImpostor || target == Spy.spy || target == Sidekick.sidekick && Sidekick.wasTeamRed || target == Jackal.jackal && Jackal.wasTeamRed)) return false; // Members of team Impostors see the names of Impostors/Spies
+            if ((source == Lovers.lover1 || source == Lovers.lover2) && (target == Lovers.lover1 || target == Lovers.lover2)) return false; // Members of team Lovers see the names of each other
+            if ((source == Jackal.jackal || source == Sidekick.sidekick) && (target == Jackal.jackal || target == Sidekick.sidekick || target == Jackal.fakeSidekick)) return false; // Members of team Jackal see the names of each other
+            if (Deputy.knowsSheriff && (source == Sheriff.sheriff || source == Deputy.deputy) && (target == Sheriff.sheriff || target == Deputy.deputy)) return false; // Sheriff & Deputy see the names of each other
 
             return true;
         }
