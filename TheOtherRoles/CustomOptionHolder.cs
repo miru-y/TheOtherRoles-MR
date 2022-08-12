@@ -37,6 +37,7 @@ namespace TheOtherRoles {
 
         public static CustomOption heliSabotageSystemTimeLimit;
         public static CustomOption hideTaskOverlayOnSabMap;
+        public static CustomOption delayBeforeMeeting;
 
         public static CustomOption vitalsTimer;
         public static CustomOption enabledVitalsTimer;
@@ -392,6 +393,8 @@ namespace TheOtherRoles {
 
             heliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time", 90f, 5f, 120f, 5f);
             hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false);
+            delayBeforeMeeting = CustomOption.Create(9921, Types.General, "Delay Time Before Meeting.", 2f, 0f, 10f, 0.25f);
+
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
             enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
 

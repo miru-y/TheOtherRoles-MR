@@ -9,6 +9,9 @@ using System;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using UnityEngine;
+using Assets.CoreScripts;
+using System.Collections;
+using BepInEx.IL2CPP.Utils.Collections;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]
@@ -594,7 +597,7 @@ namespace TheOtherRoles.Patches {
         class MeetingServerStartPatch {
             static void Postfix(MeetingHud __instance)
             {
-                populateButtonsPostfix(__instance);
+                //populateButtonsPostfix(__instance);
             }
         }
 
@@ -602,51 +605,199 @@ namespace TheOtherRoles.Patches {
         class MeetingDeserializePatch {
             static void Postfix(MeetingHud __instance, [HarmonyArgument(0)]MessageReader reader, [HarmonyArgument(1)]bool initialState)
             {
-                // Add swapper buttons
-                if (initialState) {
-                    populateButtonsPostfix(__instance);
-                }
-            }
+				// Add swapper buttons
+				//if (initialState) {
+				//	populateButtonsPostfix(__instance);
+				//}
+			}
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
         class StartMeetingPatch {
-            public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)]GameData.PlayerInfo meetingTarget) {
-                // Resett Bait list
-                Bait.active = new Dictionary<DeadPlayer, float>();
-                // Save AntiTeleport position, if the player is able to move (i.e. not on a ladder or a gap thingy)
-                if (CachedPlayer.LocalPlayer.PlayerPhysics.enabled && CachedPlayer.LocalPlayer.PlayerControl.moveable || CachedPlayer.LocalPlayer.PlayerControl.inVent
-                    || HudManagerStartPatch.hackerVitalsButton.isEffectActive || HudManagerStartPatch.hackerAdminTableButton.isEffectActive || HudManagerStartPatch.securityGuardCamButton.isEffectActive
-                    || Portal.isTeleporting && Portal.teleportedPlayers.Last().playerId == CachedPlayer.LocalPlayer.PlayerId) {
-                    AntiTeleport.position = CachedPlayer.LocalPlayer.transform.position;
+            public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)]GameData.PlayerInfo target) {
+                // MOD追加処理
+                {
+                    // Reset Bait list
+                    Bait.active = new Dictionary<DeadPlayer, float>();
+                    // Save AntiTeleport position, if the player is able to move (i.e. not on a ladder or a gap thingy)
+                    if (CachedPlayer.LocalPlayer.PlayerPhysics.enabled && CachedPlayer.LocalPlayer.PlayerControl.moveable || CachedPlayer.LocalPlayer.PlayerControl.inVent
+                        || HudManagerStartPatch.hackerVitalsButton.isEffectActive || HudManagerStartPatch.hackerAdminTableButton.isEffectActive || HudManagerStartPatch.securityGuardCamButton.isEffectActive
+                        || Portal.isTeleporting && Portal.teleportedPlayers.Last().playerId == CachedPlayer.LocalPlayer.PlayerId)
+                    {
+                        AntiTeleport.position = CachedPlayer.LocalPlayer.transform.position;
+                    }
+
+                    // Medium meeting start time
+                    Medium.meetingStartTime = DateTime.UtcNow;
+                    // Reset vampire bitten
+                    Vampire.bitten = null;
+                    // Count meetings
+                    if (target == null) meetingsCount++;
+                    // Save the meeting target
+                    MeetingHudPatch.target = target;
+
+
+                    // Add Portal info into Portalmaker Chat:
+                    if (Portalmaker.portalmaker != null && CachedPlayer.LocalPlayer.PlayerControl == Portalmaker.portalmaker && !CachedPlayer.LocalPlayer.Data.IsDead)
+                    {
+                        foreach (var entry in Portal.teleportedPlayers)
+                        {
+                            float timeBeforeMeeting = ((float)(DateTime.UtcNow - entry.time).TotalMilliseconds) / 1000;
+                            string msg = Portalmaker.logShowsTime ? $"{(int)timeBeforeMeeting}s ago: " : "";
+                            msg = msg + $"{entry.name} used the teleporter";
+                            FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"{msg}");
+                        }
+                    }
+
+                    // Reset zoomed out ghosts
+                    Helpers.toggleZoom(reset: true);
+
+                    // Stop all playing sounds
+                    SoundEffectsManager.stopAll();
                 }
 
-                // Medium meeting start time
-                Medium.meetingStartTime = DateTime.UtcNow;
-                // Reset vampire bitten
-                Vampire.bitten = null;
-                // Count meetings
-                if (meetingTarget == null) meetingsCount++;
-                // Save the meeting target
-                target = meetingTarget;
-
-
-                // Add Portal info into Portalmaker Chat:
-                if (Portalmaker.portalmaker != null && CachedPlayer.LocalPlayer.PlayerControl == Portalmaker.portalmaker && !CachedPlayer.LocalPlayer.Data.IsDead) {
-                    foreach (var entry in Portal.teleportedPlayers) {
-                        float timeBeforeMeeting = ((float)(DateTime.UtcNow - entry.time).TotalMilliseconds) / 1000;
-                        string msg = Portalmaker.logShowsTime ? $"{(int)timeBeforeMeeting}s ago: " : "";
-                        msg = msg + $"{entry.name} used the teleporter";
-                        FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"{msg}");
+                // 既存処理の移植
+                {
+                    bool flag = target == null;
+                    DestroyableSingleton<Telemetry>.Instance.WriteMeetingStarted(flag);
+                    StartMeeting(__instance, target); // 変更部分
+                    if (__instance.AmOwner)
+                    {
+                        if (flag)
+                        {
+                            __instance.RemainingEmergencies--;
+                            StatsManager.Instance.IncrementStat(StringNames.StatsEmergenciesCalled);
+                            return false;
+                        }
+                        StatsManager.Instance.IncrementStat(StringNames.StatsBodiesReported);
                     }
                 }
-                
-                // Reset zoomed out ghosts
-                Helpers.toggleZoom(reset: true);
 
-                // Stop all playing sounds
-                SoundEffectsManager.stopAll();
+                return false;
             }
+
+            static void StartMeeting(PlayerControl reporter, GameData.PlayerInfo target)
+            {
+                ShipStatus.Instance.StartCoroutine(CoStartMeeting(reporter, target).WrapToIl2Cpp());
+            }
+
+            static IEnumerator CoStartMeeting(PlayerControl reporter, GameData.PlayerInfo target)
+            {
+                // 既存処理の移植
+                {
+                    while (!MeetingHud.Instance)
+                    {
+                        yield return null;
+                    }
+                    MeetingRoomManager.Instance.RemoveSelf();
+                    for (int i = 0; i < PlayerControl.AllPlayerControls.Count; i++)
+                    {
+                        PlayerControl playerControl = PlayerControl.AllPlayerControls[i];
+                        if (playerControl != null)
+                        {
+                            playerControl.ResetForMeeting();
+                        }
+                    }
+                    if (MapBehaviour.Instance)
+                    {
+                        MapBehaviour.Instance.Close();
+                    }
+                    if (Minigame.Instance)
+                    {
+                        Minigame.Instance.ForceClose();
+                    }
+                    ShipStatus.Instance.OnMeetingCalled();
+                    KillAnimation.SetMovement(reporter, true);
+                }
+
+                // 遅延処理追加そのままyield returnで待ちを入れるとロックしたのでHudManagerのコルーチンとして実行させる
+                DestroyableSingleton<HudManager>._instance.StartCoroutine(CoStartMeeting2(reporter, target).WrapToIl2Cpp());
+                yield break;
+            }
+
+            static IEnumerator CoStartMeeting2(PlayerControl reporter, GameData.PlayerInfo target)
+            {
+                // Modで追加する遅延処理
+                {
+                    // ボタンと同時に通報が入った場合のバグ対応、他のクライアントからキルイベントが飛んでくるのを待つ
+                    // 見えては行けないものが見えるので暗転させる
+                    MeetingHud.Instance.state = MeetingHud.VoteStates.Animating; //ゲッサーのキル用meetingupdateが呼ばれないようにするおまじない（呼ばれるとバグる）
+                    HudManager hudManager = DestroyableSingleton<HudManager>.Instance;
+                    var blackscreen = UnityEngine.Object.Instantiate(hudManager.FullScreen, hudManager.transform);
+                    var greyscreen = UnityEngine.Object.Instantiate(hudManager.FullScreen, hudManager.transform);
+                    blackscreen.color = Palette.Black;
+                    blackscreen.transform.position = Vector3.zero;
+                    blackscreen.transform.localPosition = new Vector3(0f, 0f, -910f);
+                    blackscreen.transform.localScale = new Vector3(10f, 10f, 1f);
+                    blackscreen.gameObject.SetActive(true);
+                    blackscreen.enabled = true;
+                    greyscreen.color = Palette.Black;
+                    greyscreen.transform.position = Vector3.zero;
+                    greyscreen.transform.localPosition = new Vector3(0f, 0f, -920f);
+                    greyscreen.transform.localScale = new Vector3(10f, 10f, 1f);
+                    greyscreen.gameObject.SetActive(true);
+                    greyscreen.enabled = true;
+                    TMPro.TMP_Text text;
+                    RoomTracker roomTracker = HudManager.Instance?.roomTracker;
+                    GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
+                    UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
+                    gameObject.transform.SetParent(HudManager.Instance.transform);
+                    gameObject.transform.localPosition = new Vector3(0, 0, -930f);
+                    gameObject.transform.localScale = Vector3.one * 5f;
+                    text = gameObject.GetComponent<TMPro.TMP_Text>();
+                    yield return Effects.Lerp(delay, new Action<float>((p) =>
+                    { // Delayed action
+                        greyscreen.color = new Color(1.0f, 1.0f, 1.0f, 0.5f - p / 2);
+                        string message = (delay - (p * delay)).ToString("0.00");
+                        if (message == "0") return;
+                        string prefix = "<color=#FFFF00FF>";
+                        text.text = "Please wait a moment.\n" + prefix + message + "</color>";
+                        if (text != null) text.color = Color.white;
+                    }));
+                    // yield return new WaitForSeconds(2f);
+                    UnityEngine.Object.Destroy(text.gameObject);
+                    UnityEngine.Object.Destroy(blackscreen);
+                    UnityEngine.Object.Destroy(greyscreen);
+
+                    // ミーティング画面の並び替えを直す
+                    populateButtons(MeetingHud.Instance, reporter.Data.PlayerId);
+                    populateButtonsPostfix(MeetingHud.Instance);
+                }
+
+                // 既存処理の移植
+                {
+                    DeadBody[] array = UnityEngine.Object.FindObjectsOfType<DeadBody>();
+                    GameData.PlayerInfo[] deadBodies = (from b in array
+                                                        select GameData.Instance.GetPlayerById(b.ParentId)).ToArray<GameData.PlayerInfo>();
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        if (array[j] != null && array[j].gameObject != null)
+                        {
+                            UnityEngine.Object.Destroy(array[j].gameObject);
+                        }
+                        else
+                        {
+                            Debug.LogError("Encountered a null Dead Body while destroying.");
+                        }
+                    }
+                    ShapeshifterEvidence[] array2 = UnityEngine.Object.FindObjectsOfType<ShapeshifterEvidence>();
+                    for (int k = 0; k < array2.Length; k++)
+                    {
+                        if (array2[k] != null && array2[k].gameObject != null)
+                        {
+                            UnityEngine.Object.Destroy(array2[k].gameObject);
+                        }
+                        else
+                        {
+                            Debug.LogError("Encountered a null Evidence while destroying.");
+                        }
+                    }
+                    MeetingHud.Instance.StartCoroutine(MeetingHud.Instance.CoIntro(reporter.Data, target, deadBodies));
+                }
+                yield break;
+            }
+
+            static float delay { get { return CustomOptionHolder.delayBeforeMeeting.getFloat(); } }
         }
 
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
@@ -662,6 +813,37 @@ namespace TheOtherRoles.Patches {
                     MapOptions.firstKillPlayer = null;
                 }
             }
+        }
+
+        public static void populateButtons(MeetingHud __instance, byte reporter)
+        {
+            // 会議に参加しないPlayerControlを持つRoleが増えたらこのListに追加
+            // 特殊なplayerInfo.Role.Roleを設定することで自動的に無視できないか？もしくはフラグをplayerInfoのどこかに追加
+            var playerControlesToBeIgnored = new List<PlayerControl>() {};
+            playerControlesToBeIgnored.RemoveAll(x => x == null);
+            var playerIdsToBeIgnored = playerControlesToBeIgnored.Select(x => x.PlayerId);
+            // Generate PlayerVoteAreas
+            __instance.playerStates = new PlayerVoteArea[GameData.Instance.PlayerCount - playerIdsToBeIgnored.Count()];
+            int playerStatesCounter = 0;
+            for (int i = 0; i < __instance.playerStates.Length + playerIdsToBeIgnored.Count(); i++)
+            {
+                if (playerIdsToBeIgnored.Contains(GameData.Instance.AllPlayers[i].PlayerId))
+                {
+                    continue;
+                }
+                GameData.PlayerInfo playerInfo = GameData.Instance.AllPlayers[i];
+                PlayerVoteArea playerVoteArea = __instance.playerStates[playerStatesCounter] = __instance.CreateButton(playerInfo);
+                playerVoteArea.Parent = __instance;
+                playerVoteArea.SetTargetPlayerId(playerInfo.PlayerId);
+                playerVoteArea.SetDead(reporter == playerInfo.PlayerId, playerInfo.Disconnected || playerInfo.IsDead, playerInfo.Role.Role == RoleTypes.GuardianAngel);
+                playerVoteArea.UpdateOverlay();
+                playerStatesCounter++;
+            }
+            foreach (PlayerVoteArea playerVoteArea2 in __instance.playerStates)
+            {
+                ControllerManager.Instance.AddSelectableUiElement(playerVoteArea2.PlayerButton, false);
+            }
+            __instance.SortButtons();
         }
     }
 }
