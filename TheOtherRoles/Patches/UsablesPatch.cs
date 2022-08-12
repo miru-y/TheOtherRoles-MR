@@ -497,7 +497,7 @@ namespace TheOtherRoles.Patches
 
                 // Consume time to see admin map if the player is alive
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead &&
-                    !(EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl) &&
+                    !(EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl && EvilHacker.isMobile) &&
                     CustomOptionHolder.enabledAdminTimer.getBool()) {
                     // Show the grey map if players ran out of admin time.
                     if (MapOptions.adminTimer <= 0) {

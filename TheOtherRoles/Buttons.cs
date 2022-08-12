@@ -545,7 +545,12 @@ namespace TheOtherRoles
             evilHackerButton = new CustomButton(
                 () => {
                     CachedPlayer.LocalPlayer.PlayerControl.NetTransform.Halt();
-                    Action<MapBehaviour> tmpAction = (MapBehaviour m) => { m.ShowCountOverlay(); };
+                    Action<MapBehaviour> tmpAction = (MapBehaviour m) => 
+                    {
+                        if (EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl)
+                            EvilHacker.isMobile = true;
+                        m.ShowCountOverlay(); 
+                    };
                     DestroyableSingleton<HudManager>.Instance.ShowMap(tmpAction);
                     if (CachedPlayer.LocalPlayer.PlayerControl.AmOwner) {
                         CachedPlayer.LocalPlayer.PlayerControl.MyPhysics.inputHandler.enabled = true;

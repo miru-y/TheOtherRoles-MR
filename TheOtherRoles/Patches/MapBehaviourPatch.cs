@@ -25,4 +25,14 @@ namespace TheOtherRoles.Patches {
 			return false;
 		}
 	}
+
+	[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Close))]
+	class MapBehaviourClosePatch
+	{
+		static void Postfix(MapBehaviour __instance)
+		{
+			if (EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl)
+				EvilHacker.isMobile = false;
+		}
+	}
 }

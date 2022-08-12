@@ -669,6 +669,7 @@ namespace TheOtherRoles
         public static Color color = Palette.ImpostorRed;
 
         public static bool canCreateMadmate = false;
+        public static bool isMobile = false;
         public static PlayerControl currentTarget;
 
         private static Sprite buttonSprite;
@@ -698,6 +699,7 @@ namespace TheOtherRoles
         public static void clearAndReload() {
             evilHacker = null;
             currentTarget = null;
+            isMobile = false;
             canCreateMadmate = CustomOptionHolder.evilHackerCanCreateMadmate.getBool();
         }
     }
