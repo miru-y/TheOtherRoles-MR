@@ -197,8 +197,20 @@ namespace TheOtherRoles.Objects {
             }
         
             if (Timer >= 0) {
+                bool always = CustomOptionHolder.alwaysConsumeKillCooldown.getBool();
+                // オプションがONの場合はベント内はクールダウン減少を止める
+                bool exceptInVent = CustomOptionHolder.stopConsumeKillCooldownInVent.getBool() && PlayerControl.LocalPlayer.inVent;
+                // オプションがONの場合は配電盤タスク中はクールダウン減少を止める
+                bool exceptOnTask = CustomOptionHolder.stopConsumeKillCooldownOnSwitchingTask.getBool() && Patches.ElectricPatch.onTask;
                 if (HasEffect && isEffectActive)
                     Timer -= Time.deltaTime;
+                else if (always)
+                {
+                    if (!exceptInVent && !exceptOnTask)
+                    {
+                        Timer -= Time.deltaTime;
+                    }
+                }
                 else if (!localPlayer.PlayerControl.inVent && moveable)
                     Timer -= Time.deltaTime;
             }

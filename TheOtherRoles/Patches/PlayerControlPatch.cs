@@ -922,8 +922,22 @@ namespace TheOtherRoles.Patches
             }
         }
 
+        static void reduceKillCooldown(PlayerControl __instance)
+        {
+            if (CustomOptionHolder.alwaysConsumeKillCooldown.getBool())
+            {
+                // オプションがONの場合はベント内はクールダウン減少を止める
+                bool exceptInVent = CustomOptionHolder.stopConsumeKillCooldownInVent.getBool() && __instance.inVent;
+                // 配電盤タスク中はクールダウン減少を止める
+                bool exceptOnTask = CustomOptionHolder.stopConsumeKillCooldownOnSwitchingTask.getBool() && ElectricPatch.onTask;
 
-    public static void Postfix(PlayerControl __instance) {
+                if (!__instance.Data.IsDead && !__instance.CanMove && !exceptInVent && !exceptOnTask)
+                    __instance.SetKillTimer(__instance.killTimer - Time.fixedDeltaTime);
+            }
+
+        }
+
+        public static void Postfix(PlayerControl __instance) {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
 
             // Mini and Morphling shrink
@@ -1019,6 +1033,9 @@ namespace TheOtherRoles.Patches
 
                 // Hacker
                 hackerUpdate();
+
+                // always reduce kill cooldown if setting is on
+                reduceKillCooldown(__instance);
 
                 // --MODIFIER--
                 // Bait

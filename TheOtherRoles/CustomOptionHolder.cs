@@ -40,6 +40,10 @@ namespace TheOtherRoles {
         public static CustomOption delayBeforeMeeting;
         public static CustomOption hideOutOfSightNametags;
 
+        public static CustomOption alwaysConsumeKillCooldown;
+        public static CustomOption stopConsumeKillCooldownInVent;
+        public static CustomOption stopConsumeKillCooldownOnSwitchingTask;
+
         public static CustomOption vitalsTimer;
         public static CustomOption enabledVitalsTimer;
         public static CustomOption viewVitalsTimer;
@@ -396,6 +400,10 @@ namespace TheOtherRoles {
             hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false);
             delayBeforeMeeting = CustomOption.Create(9921, Types.General, "Delay Time Before Meeting.", 2f, 0f, 10f, 0.25f);
             hideOutOfSightNametags = CustomOption.Create(550, Types.General, "Hide the names of out of sight players", false);
+
+            alwaysConsumeKillCooldown = CustomOption.Create(9911, Types.General, "Always Consume Kill Cooldown", false);
+            stopConsumeKillCooldownInVent = CustomOption.Create(9912, Types.General, "Stop Consume Kill Cooldown In Vent", false, alwaysConsumeKillCooldown);
+            stopConsumeKillCooldownOnSwitchingTask = CustomOption.Create(9931, Types.General, "Stop Consume Kill Cooldown On \"Switching Task\"", false, alwaysConsumeKillCooldown);
 
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
             enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
