@@ -184,6 +184,7 @@ namespace TheOtherRoles
             Helpers.toggleZoom(reset : true);
             MapBehaviourPatch2.ResetIcons();
             SpawnInMinigamePatch.reset();
+            ElectricPatch.reset();
         }
 
         public static void HandleShareOptions(byte numberOfOptions, MessageReader reader) {            
