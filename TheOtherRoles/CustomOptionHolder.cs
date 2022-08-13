@@ -345,6 +345,7 @@ namespace TheOtherRoles {
         public static CustomOption allowParallelMedBayScans;
         public static CustomOption shieldFirstKill;
         public static CustomOption enableRandomizationInFixWiringTask;
+        public static CustomOption impostorCanKillCustomRolesInTheVent;
         public static CustomOption airshipWallCheckOnTasks;
         public static CustomOption airshipRandomSpawn;
         public static CustomOption airshipAdditionalSpawn;
@@ -412,6 +413,7 @@ namespace TheOtherRoles {
             stopConsumeKillCooldownInVent = CustomOption.Create(9912, Types.General, "Stop Consume Kill Cooldown In Vent", false, alwaysConsumeKillCooldown);
             stopConsumeKillCooldownOnSwitchingTask = CustomOption.Create(9931, Types.General, "Stop Consume Kill Cooldown On \"Switching Task\"", false, alwaysConsumeKillCooldown);
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
+            impostorCanKillCustomRolesInTheVent = CustomOption.Create(920000003, Types.General, "Impostor Can Kill CustomRoles In The Vent", false);
 
             airshipHeliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time (AirShip)", 90f, 5f, 120f, 5f, null, true);
             airshipWallCheckOnTasks = CustomOption.Create(920000001, Types.General, "Enable Wall Check On Tasks (Airship)", false);

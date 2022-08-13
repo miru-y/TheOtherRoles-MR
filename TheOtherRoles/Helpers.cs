@@ -386,6 +386,8 @@ namespace TheOtherRoles {
         }
 
         public static bool roleCanUseVents(this PlayerControl player) {
+            if (player == null) return false;
+
             bool roleCouldUse = false;
             if (Engineer.engineer != null && Engineer.engineer == player)
                 roleCouldUse = true;

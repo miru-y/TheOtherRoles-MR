@@ -181,6 +181,16 @@ namespace TheOtherRoles.Patches
         }
     }
 
+    [HarmonyPatch(typeof(KillButton), nameof(KillButton.SetTarget))]
+    public static class KillButtonSetTargetPatch
+    {
+        public static void Postfix(KillButton __instance, [HarmonyArgument(0)] PlayerControl target)
+        {
+            if (!CustomOptionHolder.impostorCanKillCustomRolesInTheVent.getBool() && target.roleCanUseVents() && target.inVent)
+                __instance.SetTarget(null);
+        }
+    }
+
     [HarmonyPatch(typeof(KillButton), nameof(KillButton.DoClick))]
     class KillButtonDoClickPatch
     {
