@@ -353,6 +353,8 @@ namespace TheOtherRoles {
         public static CustomOption airshipInitialDoorCooldown;
         public static CustomOption airshipInitialSabotageCooldown;
 
+        public static CustomOption skeldPreventPlayerFromMovingDuringCleanO2FilterTask;
+
 
         public static CustomOption dynamicMap;
         public static CustomOption dynamicMapEnableSkeld;
@@ -419,6 +421,8 @@ namespace TheOtherRoles {
             airshipSetOriginalCooldown = CustomOption.Create(9919, Types.General, "Set Original Cooldown On First Spawn (AirShip)", false);
             airshipInitialDoorCooldown = CustomOption.Create(9923, Types.General, "Initial Door Sabotage Cooldown (AirShip)", 0f, 0f, 60f, 1f);
             airshipInitialSabotageCooldown = CustomOption.Create(9924, Types.General, "Initial Sabotage Cooldown (AirShip)", 15f, 0f, 60f, 1f);
+
+            skeldPreventPlayerFromMovingDuringCleanO2FilterTask = CustomOption.Create(920000002, Types.General, "Prevent Player From Moving During \"CleanO2FilterTask\" (Skeld)", false, null, true);
 
             enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false, null, true);
             taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);

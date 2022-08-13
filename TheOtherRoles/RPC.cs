@@ -185,6 +185,7 @@ namespace TheOtherRoles
             MapBehaviourPatch2.ResetIcons();
             SpawnInMinigamePatch.reset();
             ElectricPatch.reset();
+            LeafMinigameBeginPatch.reset();
         }
 
         public static void HandleShareOptions(byte numberOfOptions, MessageReader reader) {            

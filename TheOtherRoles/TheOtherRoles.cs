@@ -1913,6 +1913,63 @@ namespace TheOtherRoles
             baseGauge = 0.0f;
         }
 
+        public static void fixedUpdate(PlayerPhysics __instance) {
+            if (kataomoi == null) return;
+            if (kataomoi != __instance.myPlayer) return;
+
+            if (gaugeRenderer[1] != null && gaugeTimer > 0.0f)
+            {
+                gaugeTimer = Mathf.Max(gaugeTimer - Time.fixedDeltaTime, 0.0f);
+                float gauge = getLoveGauge();
+                float nowGauge = Mathf.Lerp(baseGauge, gauge, 1.0f - gaugeTimer);
+                gaugeRenderer[1].transform.localPosition = new Vector3(Mathf.Lerp(-3.470784f - 1.121919f, -3.470784f, nowGauge), -2.626999f, -8.1f);
+                gaugeRenderer[1].transform.localScale = new Vector3(nowGauge, 1, 1);
+            }
+
+            if (kataomoi.isDead()) return;
+            if (_isStalking && stalkingTimer > 0)
+            {
+                kataomoi.cosmetics.currentBodySprite.BodySprite.material.SetFloat("_Outline", 0f);
+                stalkingTimer = Mathf.Max(0f, stalkingTimer - Time.fixedDeltaTime);
+                if (stalkingFadeTime > 0)
+                {
+                    float elapsedTime = stalkingDuration - stalkingTimer;
+                    float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
+                    alpha = Mathf.Clamp(1f - alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
+                    setAlpha(alpha);
+                }
+                else
+                {
+                    setAlpha(CachedPlayer.LocalPlayer.PlayerControl == kataomoi ? 0.1f : 0f);
+                }
+
+                if (stalkingTimer <= 0f)
+                {
+                    _isStalking = false;
+                    stalkingEffectTimer = stalkingFadeTime;
+                }
+            }
+            else if (!_isStalking && stalkingEffectTimer > 0)
+            {
+                stalkingEffectTimer = Mathf.Max(0f, stalkingEffectTimer - Time.fixedDeltaTime);
+                if (stalkingFadeTime > 0)
+                {
+                    float elapsedTime = stalkingFadeTime - stalkingEffectTimer;
+                    float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
+                    alpha = Mathf.Clamp(alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
+                    setAlpha(alpha);
+                }
+                else
+                {
+                    setAlpha(1.0f);
+                }
+            }
+            else
+            {
+                setAlpha(1.0f);
+            }
+        }
+
         static void setAlpha(float alpha) {
             if (kataomoi == null) return;
             var color = Color.Lerp(Palette.ClearWhite, Palette.White, alpha);
@@ -1935,54 +1992,6 @@ namespace TheOtherRoles
                 if (kataomoi.cosmetics.visor != null)
                     kataomoi.cosmetics.visor.Alpha = alpha;
             } catch { }
-        }
-
-        [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.FixedUpdate))]
-        public static class PlayerPhysicsFixedUpdatePatch
-        {
-            public static void Postfix(PlayerPhysics __instance) {
-                if (kataomoi == null) return;
-                if (kataomoi != __instance.myPlayer) return;
-
-                if (gaugeRenderer[1] != null && gaugeTimer > 0.0f) {
-                    gaugeTimer = Mathf.Max(gaugeTimer - Time.fixedDeltaTime, 0.0f);
-                    float gauge = getLoveGauge();
-                    float nowGauge = Mathf.Lerp(baseGauge, gauge, 1.0f - gaugeTimer);
-                    gaugeRenderer[1].transform.localPosition = new Vector3(Mathf.Lerp(-3.470784f - 1.121919f, -3.470784f, nowGauge), -2.626999f, -8.1f);
-                    gaugeRenderer[1].transform.localScale = new Vector3(nowGauge, 1, 1);
-                }
-
-                if (kataomoi.isDead()) return;
-                if (_isStalking && stalkingTimer > 0) {
-                    kataomoi.cosmetics.currentBodySprite.BodySprite.material.SetFloat("_Outline", 0f);
-                    stalkingTimer = Mathf.Max(0f, stalkingTimer - Time.fixedDeltaTime);
-                    if (stalkingFadeTime > 0) {
-                        float elapsedTime = stalkingDuration - stalkingTimer;
-                        float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
-                        alpha = Mathf.Clamp(1f - alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
-                        setAlpha(alpha);
-                    } else {
-                        setAlpha(CachedPlayer.LocalPlayer.PlayerControl == kataomoi ? 0.1f : 0f);
-                    }
-
-                    if (stalkingTimer <= 0f) {
-                        _isStalking = false;
-                        stalkingEffectTimer = stalkingFadeTime;
-                    }
-                } else if (!_isStalking && stalkingEffectTimer > 0) {
-                    stalkingEffectTimer = Mathf.Max(0f, stalkingEffectTimer - Time.fixedDeltaTime);
-                    if (stalkingFadeTime > 0) {
-                        float elapsedTime = stalkingFadeTime - stalkingEffectTimer;
-                        float alpha = Mathf.Min(elapsedTime, stalkingFadeTime) / stalkingFadeTime;
-                        alpha = Mathf.Clamp(alpha, CachedPlayer.LocalPlayer.PlayerControl == kataomoi || CachedPlayer.LocalPlayer.PlayerControl.isDead() ? 0.1f : 0f, 1f);
-                        setAlpha(alpha);
-                    } else {
-                        setAlpha(1.0f);
-                    }
-                } else {
-                    setAlpha(1.0f);
-                }
-            }
         }
     }
 

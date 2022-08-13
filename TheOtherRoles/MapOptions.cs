@@ -20,6 +20,7 @@ namespace TheOtherRoles{
         public static bool enableSoundEffects = true;
         public static bool enableHorseMode = false;
         public static bool shieldFirstKill = false;
+        public static bool skeldPreventPlayerFromMovingDuringCleanO2FilterTask = false;
 
         // Updating values
         public static int meetingsCount = 0;
@@ -58,6 +59,7 @@ namespace TheOtherRoles{
             allowParallelMedBayScans = CustomOptionHolder.allowParallelMedBayScans.getBool();
             shieldFirstKill = CustomOptionHolder.shieldFirstKill.getBool();
             firstKillPlayer = null;
+            skeldPreventPlayerFromMovingDuringCleanO2FilterTask = CustomOptionHolder.skeldPreventPlayerFromMovingDuringCleanO2FilterTask.getBool();
         }
 
         public static void reloadPluginOptions() {
