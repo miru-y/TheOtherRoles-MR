@@ -37,6 +37,9 @@ namespace TheOtherRoles.Objects {
         public bool isHandcuffed = false;
         private static readonly int Desat = Shader.PropertyToID("_Desat");
 
+        public static bool stopCountdown = true;
+
+
         public CustomButton(Action OnClick, Func<bool> HasButton, Func<bool> CouldUse, Action OnMeetingEnds, Sprite Sprite, Vector3 PositionOffset, HudManager hudManager, KeyCode? hotkey, bool HasEffect, float EffectDuration, Action OnEffectEnds, bool mirror = false, string buttonText = "")
         {
             this.hudManager = hudManager;
@@ -196,7 +199,7 @@ namespace TheOtherRoles.Objects {
                 actionButtonMat.SetFloat(Desat, 1f);
             }
         
-            if (Timer >= 0) {
+            if (Timer >= 0 && !stopCountdown) {
                 bool always = CustomOptionHolder.alwaysConsumeKillCooldown.getBool();
                 // オプションがONの場合はベント内はクールダウン減少を止める
                 bool exceptInVent = CustomOptionHolder.stopConsumeKillCooldownInVent.getBool() && PlayerControl.LocalPlayer.inVent;

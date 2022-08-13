@@ -119,5 +119,12 @@ namespace TheOtherRoles.Patches {
             PlayerControl.GameOptions.NumShortTasks = originalNumShortTasksOption;
             PlayerControl.GameOptions.NumLongTasks = originalNumLongTasksOption;
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.SpawnPlayer))]
+        public static void Postfix(ShipStatus __instance, PlayerControl player, int numPlayers, bool initialSpawn)
+        {
+			Objects.CustomButton.stopCountdown = false;
+        }
     }
 }

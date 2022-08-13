@@ -876,46 +876,6 @@ namespace TheOtherRoles.Patches
         }
     }
 
-    [HarmonyPatch(typeof(SpawnInMinigame), nameof(SpawnInMinigame.Begin))]
-    class SpawnInMinigameBeginPatch
-    {
-        static void Prefix(SpawnInMinigame __instance) {
-            if (TaskRacer.isValid() && PlayerControl.GameOptions.MapId == (byte)MapId.Airship) {
-                var locationButtonList = new List<PassiveButton>();
-                locationButtonList.AddRange(__instance.LocationButtons);
-                for (int i = 0, n = __instance.Locations.Length - __instance.LocationButtons.Length; i < n; ++i) {
-                    var button = UnityEngine.Object.Instantiate(locationButtonList[i], locationButtonList[i].transform.parent);
-                    button.transform.localPosition = new Vector3(button.transform.localPosition.x, button.transform.localPosition.y + 1.8f, button.transform.localPosition.z);
-                    locationButtonList.Add(button);
-                }
-                foreach (var button in locationButtonList) {
-                    button.transform.localScale *= 0.8f;
-                }
-                __instance.LocationButtons = locationButtonList.ToArray();
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(SpawnInMinigame), nameof(SpawnInMinigame.Close))]
-    class SpawnInMinigameClosePatch
-    {
-        static void Postfix(SpawnInMinigame __instance) {
-            // Task Vs Mode
-            if (!TaskRacer.isValid()) return;
-
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
-                CachedPlayer.LocalPlayer.PlayerControl.NetId,
-                (byte)CustomRPC.TaskVsMode_Ready,
-                Hazel.SendOption.Reliable,
-                -1);
-            writer.Write(CachedPlayer.LocalPlayer.PlayerControl.PlayerId);
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
-            RPCProcedure.taskVsModeReady(CachedPlayer.LocalPlayer.PlayerControl.PlayerId);
-        }
-    }
-
-
-
     [HarmonyPatch(typeof(ProgressTracker), nameof(ProgressTracker.FixedUpdate))]
     class ProgressTrackerFixedUpdatePatch
     {

@@ -178,7 +178,7 @@ namespace TheOtherRoles.Patches {
                 IntroPatch.IntroPatchHelper.CheckTaskRacer();
             }
 
-            if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip.getBool()) {
+            if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.airshipWallCheckOnTasks.getBool()) {
                 var objList = GameObject.FindObjectsOfType<Console>().ToList();
                 objList.Find(x => x.name == "task_garbage1").checkWalls = true;
                 objList.Find(x => x.name == "task_garbage2").checkWalls = true;

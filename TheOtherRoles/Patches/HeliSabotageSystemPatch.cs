@@ -16,8 +16,8 @@ namespace TheOtherRoles.Patches {
             if (AirshipStatus.Instance == null)
                 return;
 
-            if (__instance.Countdown > CustomOptionHolder.heliSabotageSystemTimeLimit.getFloat())
-                __instance.Countdown = CustomOptionHolder.heliSabotageSystemTimeLimit.getFloat();
+            if (__instance.Countdown > CustomOptionHolder.airshipHeliSabotageSystemTimeLimit.getFloat())
+                __instance.Countdown = CustomOptionHolder.airshipHeliSabotageSystemTimeLimit.getFloat();
         }
     }
 }

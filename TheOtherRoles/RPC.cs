@@ -162,6 +162,7 @@ namespace TheOtherRoles
         KataomoiSetTarget,
         KataomoiWin,
         KataomoiStalking,
+        Synchronize,
     }
 
     public static class RPCProcedure {
@@ -182,6 +183,7 @@ namespace TheOtherRoles
             setCustomButtonCooldowns();
             Helpers.toggleZoom(reset : true);
             MapBehaviourPatch2.ResetIcons();
+            SpawnInMinigamePatch.reset();
         }
 
         public static void HandleShareOptions(byte numberOfOptions, MessageReader reader) {            
@@ -1218,6 +1220,10 @@ namespace TheOtherRoles
 
             Kataomoi.doStalking();
         }
+
+        public static void synchronize(byte playerId, int tag) {
+            SpawnInMinigamePatch.SynchronizeData((SpawnInMinigamePatch.SynchronizeTag)tag, playerId);
+        }
     }
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
@@ -1522,6 +1528,9 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.KataomoiStalking:
                     playerId = reader.ReadByte();
                     RPCProcedure.kataomoiStalking(playerId);
+                    break;
+                case (byte)CustomRPC.Synchronize:
+                    RPCProcedure.synchronize(reader.ReadByte(), reader.ReadInt32());
                     break;
             }
         }

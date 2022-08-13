@@ -1486,7 +1486,7 @@ namespace TheOtherRoles.Patches
     }
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetKillTimer))]
-    class PlayerControlSetCoolDownPatch {
+    static class PlayerControlSetCoolDownPatch {
         public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)]float time) {
             if (PlayerControl.GameOptions.KillCooldown <= 0f) return false;
             float multiplier = 1f;
@@ -1494,9 +1494,21 @@ namespace TheOtherRoles.Patches
             if (Mini.mini != null && CachedPlayer.LocalPlayer.PlayerControl == Mini.mini) multiplier = Mini.isGrownUp() ? 0.66f : 2f;
             if (BountyHunter.bountyHunter != null && CachedPlayer.LocalPlayer.PlayerControl == BountyHunter.bountyHunter) addition = BountyHunter.punishmentTime;
 
+#if true
+            float max = Mathf.Max(PlayerControl.GameOptions.KillCooldown * multiplier + addition, __instance.killTimer);
+            __instance.SetKillTimerUnchecked(Mathf.Clamp(time, 0f, max), max);
+#else
             __instance.killTimer = Mathf.Clamp(time, 0f, PlayerControl.GameOptions.KillCooldown * multiplier + addition);
             FastDestroyableSingleton<HudManager>.Instance.KillButton.SetCoolDown(__instance.killTimer, PlayerControl.GameOptions.KillCooldown * multiplier + addition);
+#endif
             return false;
+        }
+
+        public static void SetKillTimerUnchecked(this PlayerControl player, float time, float max = float.NegativeInfinity) {
+            if (max == float.NegativeInfinity) max = time;
+
+            player.killTimer = time;
+            DestroyableSingleton<HudManager>.Instance.KillButton.SetCoolDown(time, max);
         }
     }
 

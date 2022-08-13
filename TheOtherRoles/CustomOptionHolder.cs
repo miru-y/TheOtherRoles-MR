@@ -35,7 +35,7 @@ namespace TheOtherRoles {
         public static CustomOption enabledAdminTimer;
         public static CustomOption viewAdminTimer;
 
-        public static CustomOption heliSabotageSystemTimeLimit;
+        public static CustomOption airshipHeliSabotageSystemTimeLimit;
         public static CustomOption hideTaskOverlayOnSabMap;
         public static CustomOption delayBeforeMeeting;
         public static CustomOption hideOutOfSightNametags;
@@ -345,7 +345,14 @@ namespace TheOtherRoles {
         public static CustomOption allowParallelMedBayScans;
         public static CustomOption shieldFirstKill;
         public static CustomOption enableRandomizationInFixWiringTask;
-        public static CustomOption enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip;
+        public static CustomOption airshipWallCheckOnTasks;
+        public static CustomOption airshipRandomSpawn;
+        public static CustomOption airshipAdditionalSpawn;
+        public static CustomOption airshipSynchronizedSpawning;
+        public static CustomOption airshipSetOriginalCooldown;
+        public static CustomOption airshipInitialDoorCooldown;
+        public static CustomOption airshipInitialSabotageCooldown;
+
 
         public static CustomOption dynamicMap;
         public static CustomOption dynamicMapEnableSkeld;
@@ -384,35 +391,40 @@ namespace TheOtherRoles {
             modifiersCountMax = CustomOption.Create(307, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Modifiers"), 15f, 0f, 15f, 1f);
 
             // custom options
-            enabledAdminTimer = CustomOption.Create(998, Types.General, "Enable Admin Map Available Duration", true);
+            enabledAdminTimer = CustomOption.Create(998, Types.General, "Enable Admin Map Available Duration", true, null, true);
             adminTimer = CustomOption.Create(999, Types.General, "Admin Map Available Duration", 10f, 0f, 120f, 1f, enabledAdminTimer);
             viewAdminTimer = CustomOption.Create(10000, Types.General, "View Admin Timer", true, enabledAdminTimer);
 
-            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(Color.green, "Enable Vitals Available Duration"), false);
+            enabledVitalsTimer = CustomOption.Create(900000001, Types.General, cs(Color.green, "Enable Vitals Available Duration"), false, null, true);
             vitalsTimer = CustomOption.Create(900000000, Types.General, cs(Color.green, "Vitals Available Duration"), 10f, 0f, 120f, 1f, enabledVitalsTimer);
             viewVitalsTimer = CustomOption.Create(900000004, Types.General, cs(Color.green, "View Vitals Timer"), true, enabledVitalsTimer);
 
-            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(Color.red, "Enable Security Camera Available Duration"), false);
+            enabledSecurityCameraTimer = CustomOption.Create(900000003, Types.General, cs(Color.red, "Enable Security Camera Available Duration"), false, null, true);
             securityCameraTimer = CustomOption.Create(900000002, Types.General, cs(Color.red, "Security Camera Available Duration"), 10f, 0f, 120f, 1f, enabledSecurityCameraTimer);
             viewSecurityCameraTimer = CustomOption.Create(900000005, Types.General, cs(Color.red, "View Security Camera Timer"), true, enabledSecurityCameraTimer);
 
-            heliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time", 90f, 5f, 120f, 5f);
-            hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false);
+            hideTaskOverlayOnSabMap = CustomOption.Create(997, Types.General, "Hide Fake Tasks On Sabotage Map", false, null, true);
             delayBeforeMeeting = CustomOption.Create(9921, Types.General, "Delay Time Before Meeting.", 2f, 0f, 10f, 0.25f);
             hideOutOfSightNametags = CustomOption.Create(550, Types.General, "Hide the names of out of sight players", false);
-
             alwaysConsumeKillCooldown = CustomOption.Create(9911, Types.General, "Always Consume Kill Cooldown", false);
             stopConsumeKillCooldownInVent = CustomOption.Create(9912, Types.General, "Stop Consume Kill Cooldown In Vent", false, alwaysConsumeKillCooldown);
             stopConsumeKillCooldownOnSwitchingTask = CustomOption.Create(9931, Types.General, "Stop Consume Kill Cooldown On \"Switching Task\"", false, alwaysConsumeKillCooldown);
-
             enableRandomizationInFixWiringTask = CustomOption.Create(920000000, Types.General, "Enable Randomization In FixWiring Task", false);
-            enablePreventTasksFromBeingPerformedFromOverTheWall_AirShip = CustomOption.Create(920000001, Types.General, "Enable Prevent Tasks From Being Performed From Over The Wall (AirShip only)", false);
 
-            enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false);
+            airshipHeliSabotageSystemTimeLimit = CustomOption.Create(996, Types.General, "Time Limit of Avert Crash Time (AirShip)", 90f, 5f, 120f, 5f, null, true);
+            airshipWallCheckOnTasks = CustomOption.Create(920000001, Types.General, "Enable Wall Check On Tasks (Airship)", false);
+            airshipRandomSpawn = CustomOption.Create(9916, Types.General, "Random Spawn (AirShip)", false);
+            airshipAdditionalSpawn = CustomOption.Create(9917, Types.General, "Additional Spawn (AirShip)", false);
+            airshipSynchronizedSpawning = CustomOption.Create(9918, Types.General, "Synchronized Spawn (AirShip)", false);
+            airshipSetOriginalCooldown = CustomOption.Create(9919, Types.General, "Set Original Cooldown On First Spawn (AirShip)", false);
+            airshipInitialDoorCooldown = CustomOption.Create(9923, Types.General, "Initial Door Sabotage Cooldown (AirShip)", 0f, 0f, 60f, 1f);
+            airshipInitialSabotageCooldown = CustomOption.Create(9924, Types.General, "Initial Sabotage Cooldown (AirShip)", 15f, 0f, 60f, 1f);
+
+            enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false, null, true);
             taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
             taskVsModeVision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
 
-            enabledHappyBirthdayMode = CustomOption.Create(900020000, Types.General, cs(Color.green, "Enable Seacret Mode"), false);
+            enabledHappyBirthdayMode = CustomOption.Create(900020000, Types.General, cs(Color.green, "Enable Seacret Mode"), false, null, true);
             happyBirthdayMode_Target = CustomOption.Create(900020001, Types.General, cs(Color.green, "Target"), 0f, 0f, byte.MaxValue, 1f, enabledHappyBirthdayMode);
             happyBirthdayMode_EnabledTargetImpostor = CustomOption.Create(900020002, Types.General, cs(Color.green, "Enabled Target Impostor"), false, enabledHappyBirthdayMode);
             happyBirthdayMode_CakeType = CustomOption.Create(900020003, Types.General, cs(Color.green, "Cake Type"), 0f, 0f, (int)Objects.BirthdayCake.CakeType.sizeof_CakeType - 1, 1f, enabledHappyBirthdayMode);
