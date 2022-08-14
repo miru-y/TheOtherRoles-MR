@@ -35,4 +35,18 @@ namespace TheOtherRoles.Patches {
 				EvilHacker.isMobile = false;
 		}
 	}
+
+	[HarmonyPatch(typeof(MapBehaviour), "get_IsOpenStopped")]
+	class MapBehaviorGetIsOpenStoppedPatch
+	{
+		static bool Prefix(MapBehaviour __instance, ref bool __result)
+		{
+			if (EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl && CustomOptionHolder.evilHackerCanMoveEvenIfUsesAdmin.getBool())
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+	}
 }

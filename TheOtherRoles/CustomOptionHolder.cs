@@ -64,6 +64,7 @@ namespace TheOtherRoles {
         public static CustomOption camouflagerDuration;
 
         public static CustomOption evilHackerSpawnRate;
+        public static CustomOption evilHackerCanMoveEvenIfUsesAdmin;
         public static CustomOption evilHackerCanCreateMadmate;
         public static CustomOption createdMadmateCanDieToSheriff;
         public static CustomOption createdMadmateCanEnterVents;
@@ -450,6 +451,8 @@ namespace TheOtherRoles {
 
             // custom options for evilHacker
             evilHackerSpawnRate = CustomOption.Create(900, Types.Impostor, cs(EvilHacker.color, "EvilHacker"), rates, null, true);
+            evilHackerCanMoveEvenIfUsesAdmin = CustomOption.Create(1913, Types.Impostor, "EvilHacker Can Move Even If Uses Admin", true, evilHackerSpawnRate);
+
             evilHackerCanCreateMadmate = CustomOption.Create(901, Types.Impostor, "EvilHacker Can Create Madmate", false, evilHackerSpawnRate);
             createdMadmateCanDieToSheriff = CustomOption.Create(902, Types.Impostor, "Madmate Can Die To Sheriff", false, evilHackerCanCreateMadmate);
             createdMadmateCanEnterVents = CustomOption.Create(903, Types.Impostor, "Madmate Can Enter Vents", false, evilHackerCanCreateMadmate);
