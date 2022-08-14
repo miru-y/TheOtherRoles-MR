@@ -137,7 +137,7 @@ namespace TheOtherRoles {
             if (optionBehaviour != null && optionBehaviour is StringOption stringOption) {
                 stringOption.oldValue = stringOption.Value = selection;
                 stringOption.ValueText.text = selections[selection].ToString();
-                if (id == 900020001)
+                if (this == CustomOptionHolder.happyBirthdayMode_Target)
                 {
                     var p = Helpers.playerById((byte)getFloat());
                     if (p != null)
@@ -312,6 +312,9 @@ namespace TheOtherRoles {
 
             for (int i = 0; i < CustomOption.options.Count; i++) {
                 CustomOption option = CustomOption.options[i];
+                if (option.IsSeacretModeOption() && !TheOtherRolesPlugin.ViewSeacretMode.Value)
+                    continue;
+
                 if (option.optionBehaviour == null) {
                     StringOption stringOption = UnityEngine.Object.Instantiate(template, menus[(int)option.type]);
                     optionBehaviours[(int)option.type].Add(stringOption);
@@ -320,7 +323,7 @@ namespace TheOtherRoles {
                     stringOption.Value = stringOption.oldValue = option.selection;
                     stringOption.ValueText.text = option.selections[option.selection].ToString();
 
-                    if (option.id == 900020001)
+                    if (option == CustomOptionHolder.happyBirthdayMode_Target)
 					{
                         byte id = (byte)option.getFloat();
                         var p = Helpers.playerById(id);
@@ -361,6 +364,16 @@ namespace TheOtherRoles {
         }
     }
 
+    public static class CustomOptionExtentions
+	{
+        public static bool IsSeacretModeOption(this CustomOption option)
+        {
+            if (option == CustomOptionHolder.enabledHappyBirthdayMode || option.parent == CustomOptionHolder.enabledHappyBirthdayMode)
+                return true;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(StringOption), nameof(StringOption.OnEnable))]
     public class StringOptionEnablePatch {
         public static bool Prefix(StringOption __instance) {
@@ -371,7 +384,7 @@ namespace TheOtherRoles {
             __instance.TitleText.text = option.name;
             __instance.Value = __instance.oldValue = option.selection;
             __instance.ValueText.text = option.selections[option.selection].ToString();
-            if (option.id == 900020001)
+            if (option == CustomOptionHolder.happyBirthdayMode_Target)
             {
                 byte id = (byte)option.getFloat();
                 var p = Helpers.playerById(id);
@@ -497,6 +510,7 @@ namespace TheOtherRoles {
             return typeof(GameOptionsData).GetMethods().Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(int));
         }
 
+        private static string HEADER_STR = "===========================================";
         private static string buildOptionsOfType(CustomOption.CustomOptionType type) {
             StringBuilder sb = new StringBuilder("\n");
             var options = CustomOption.options.Where(o => o.type == type);
@@ -505,6 +519,8 @@ namespace TheOtherRoles {
                     if (option.parent != CustomOptionHolder.enabledHappyBirthdayMode) {
                         bool isIrrelevant = option.parent.getSelection() == 0 || (option.parent.parent != null && option.parent.parent.getSelection() == 0);
                         if (isIrrelevant) continue;
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"  {option.name}: {option.selections[option.selection].ToString()}");
                     }
                 } else {
@@ -514,6 +530,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.crewmateRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.neutralRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Neutral Roles");
@@ -521,6 +539,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.neutralRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.impostorRolesCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Impostor Roles");
@@ -528,6 +548,8 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.impostorRolesCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if (option == CustomOptionHolder.modifiersCountMin) {
                         var optionName = CustomOptionHolder.cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Modifiers");
@@ -535,12 +557,16 @@ namespace TheOtherRoles {
                         var max = CustomOptionHolder.modifiersCountMax.getSelection();
                         if (min > max) min = max;
                         var optionValue = (min == max) ? $"{max}" : $"{min} - {max}";
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{optionName}: {optionValue}");
                     } else if ((option == CustomOptionHolder.crewmateRolesCountMax) || (option == CustomOptionHolder.neutralRolesCountMax) || (option == CustomOptionHolder.impostorRolesCountMax) || option == CustomOptionHolder.modifiersCountMax || option == CustomOptionHolder.enabledHappyBirthdayMode) {
                         continue;
                     } else {
                         bool isIrrelevant = type != CustomOption.CustomOptionType.General && option.getSelection() == 0;
                         if (isIrrelevant) continue;
+                        if (option.isHeader)
+                            sb.AppendLine(HEADER_STR);
                         sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }
                 }

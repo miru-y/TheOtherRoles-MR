@@ -14,6 +14,7 @@ using UnityEngine;
 using TheOtherRoles.Modules;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
+using TheOtherRoles.Objects;
 
 namespace TheOtherRoles
 {
@@ -36,6 +37,7 @@ namespace TheOtherRoles
         public static int optionsPageMax = optionsPage + 1;
 
         public static ConfigEntry<bool> DebugMode { get; private set; }
+        public static ConfigEntry<bool> ViewSeacretMode { get; private set; }
         public static ConfigEntry<bool> GhostsSeeTasks { get; set; }
         public static ConfigEntry<bool> GhostsSeeRoles { get; set; }
         public static ConfigEntry<bool> GhostsSeeModifier { get; set; }
@@ -87,6 +89,7 @@ namespace TheOtherRoles
             Instance = this;
 
             DebugMode = Config.Bind("Custom", "Enable Debug Mode", false);
+            ViewSeacretMode = Config.Bind("Custom", "View Seacret Mode", false);
             GhostsSeeTasks = Config.Bind("Custom", "Ghosts See Remaining Tasks", true);
             GhostsSeeRoles = Config.Bind("Custom", "Ghosts See Roles", true);
             GhostsSeeModifier = Config.Bind("Custom", "Ghosts See Modifier", true);
@@ -172,8 +175,15 @@ namespace TheOtherRoles
                 AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
                 
                 playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
+#if true
                 playerControl.GetComponent<DummyBehaviour>().enabled = true;
                 playerControl.NetTransform.enabled = false;
+#else
+                playerControl.GetComponent<DummyBehaviour>().enabled = false;
+                playerControl.isDummy = false;
+                playerControl.notRealPlayer = true;
+                playerControl.NetTransform.enabled = true;
+#endif
                 playerControl.SetName(RandomString(10));
                 playerControl.SetColor((byte) random.Next(Palette.PlayerColors.Length));
                 GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
@@ -185,7 +195,51 @@ namespace TheOtherRoles
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.forceEnd();
             }
+
+#if false
+            // Debug
+            if (Input.GetKey(KeyCode.Alpha0))
+			{
+                if (debugText == null)
+				{
+                    RoomTracker roomTracker = HudManager.Instance?.roomTracker;
+                    GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
+                    UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
+                    GameObject.DontDestroyOnLoad(gameObject);
+                    gameObject.transform.SetParent(HudManager.Instance.transform);
+                    gameObject.transform.localPosition = new Vector3(0, 0, -930f);
+                    gameObject.transform.localScale = Vector3.one * 1f;
+                    debugText = gameObject.GetComponent<TMPro.TMP_Text>();
+                }
+
+                var builder = new System.Text.StringBuilder();
+                {
+                }
+
+                debugText.text = builder.ToString();
+                debugText.gameObject.SetActive(true);
+            }
+            else if (debugText != null)
+			{
+                debugText.gameObject.SetActive(false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                for (int i = 0; i < bots.Count; ++i)
+                {
+                    int index = random.Next(bots.Count);
+                    while (bots[index].Data.IsDead)
+                        index = random.Next(bots.Count);
+                    MeetingHud.Instance.CmdCastVote(bots[i].PlayerId, bots[index].PlayerId);
+                }
+            }
+#endif
         }
+
+#if false
+        static TMPro.TMP_Text debugText;
+#endif
 
         public static string RandomString(int length)
         {
