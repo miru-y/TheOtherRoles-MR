@@ -127,6 +127,7 @@ namespace TheOtherRoles {
         }
 
         public bool isRoleHeader() {
+            if (this == CustomOptionHolder.modifiersAreHidden) return false;
             return type != CustomOptionType.General && parent == null;
         }
 
