@@ -106,20 +106,18 @@ namespace TheOtherRoles.Patches
 
             PlayerControl.LocalPlayer.gameObject.SetActive(false);
             PlayerControl.LocalPlayer.NetTransform.RpcSnapTo(new Vector2(-25f, 40f));
-            if (CustomOptionHolder.airshipRandomSpawn.getBool())
-            {
-                if (__instance.LocationButtons.Count > 0)
-                {
-                    __instance.LocationButtons[UnityEngine.Random.Range(0, __instance.LocationButtons.Count)].ReceiveClickUp();
-                }
-            }
-            else
+            if (!CustomOptionHolder.airshipRandomSpawn.getBool())
             {
                 __instance.StartCoroutine(__instance.RunTimer());
             }
             ControllerManager.Instance.OpenOverlayMenu(__instance.name, null, __instance.DefaultButtonSelected, __instance.ControllerSelectable, false);
             PlayerControl.HideCursorTemporarily();
             ConsoleJoystick.SetMode_Menu();
+            if (CustomOptionHolder.airshipRandomSpawn.getBool())
+            {
+                if (__instance.LocationButtons.Count > 0)
+                    __instance.LocationButtons[UnityEngine.Random.Range(0, __instance.LocationButtons.Count)].ReceiveClickUp();
+            }
             return false;
         }
 
