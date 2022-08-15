@@ -200,7 +200,7 @@ namespace TheOtherRoles
             // Debug
             if (Input.GetKey(KeyCode.Alpha0))
 			{
-                if (debugText == null)
+                if (debugText == null || debugText.gameObject == null)
 				{
                     RoomTracker roomTracker = HudManager.Instance?.roomTracker;
                     GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
