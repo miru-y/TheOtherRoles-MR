@@ -760,7 +760,7 @@ namespace TheOtherRoles.Patches {
                     UnityEngine.Object.Destroy(greyscreen);
 
                     // ミーティング画面の並び替えを直す
-                    populateButtons(MeetingHud.Instance, reporter.Data.PlayerId);
+                    //populateButtons(MeetingHud.Instance, reporter.Data.PlayerId);
                     populateButtonsPostfix(MeetingHud.Instance);
                 }
 
