@@ -2014,6 +2014,7 @@ namespace TheOtherRoles
         public static List<Info> taskRacers = new List<Info>();
         public static SpriteRenderer[] rankGameSpriteRenderer = new SpriteRenderer[3];
         public static GameObject[] rankMarkObjects = new GameObject[3];
+        public static float coolTime = 0;
         public static float effectDuration = 3.0f;
         public static float vision = 2.0f;
 
@@ -2280,6 +2281,7 @@ namespace TheOtherRoles
         }
 
         public static void addTaskRacer(PlayerControl p) {
+            if (getTaskRacer(p.PlayerId) != null) return;
             taskRacers.Add(new Info(p));
         }
 

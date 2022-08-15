@@ -158,7 +158,7 @@ namespace TheOtherRoles.Patches {
 
                 TaskRacer.timerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
                 TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
-                TaskRacer.timerText.transform.localPosition = new Vector3(0.89f, 2.76f, TaskRacer.timerText.transform.localPosition.z);
+                TaskRacer.timerText.transform.localPosition = new Vector3(-4.0f, 2.76f, TaskRacer.timerText.transform.localPosition.z);
                 TaskRacer.timerText.transform.localScale *= 0.4f;
                 TaskRacer.timerText.name = "TaskVsMode_Timer";
                 TaskRacer.timerText.gameObject.SetActive(false);

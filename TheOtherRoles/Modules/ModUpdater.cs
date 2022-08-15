@@ -107,13 +107,13 @@ namespace TheOtherRoles.Modules
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (updateInProgress || scene.name != "MainMenu") return;
+            if (selectSfx == null)
+                selectSfx = AccountManager.Instance.accountTab.resendEmailButton.GetComponent<PassiveButton>().ClickSound;
+
             if (RequiredUpdateData is null) {
                 showPopUp = false;
                 return;
             }
-
-            if (selectSfx == null)
-                selectSfx = AccountManager.Instance.accountTab.resendEmailButton.GetComponent<PassiveButton>().ClickSound;
 
             var template = GameObject.Find("ExitGameButton");
             if (!template) return;

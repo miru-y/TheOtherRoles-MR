@@ -49,6 +49,7 @@ namespace TheOtherRoles.Patches
                     button.transform.localScale *= 0.8f;
                 }
                 __instance.LocationButtons = locationButtonList.ToArray();
+                CustomButton.stopCountdown = false;
                 return true;
             }
 

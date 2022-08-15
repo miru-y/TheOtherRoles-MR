@@ -699,7 +699,7 @@ namespace TheOtherRoles.Patches
                 {
                     __instance.enabled = false;
                     //ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.TaskVsModeEnd, false);
-                    UncheckedEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.TaskVsModeEnd), false);
+                    UncheckedEndGame((GameOverReason)CustomGameOverReason.TaskVsModeEnd, false);
                     return true;
                 }
                 return false;

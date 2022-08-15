@@ -113,7 +113,7 @@ namespace TheOtherRoles
             mayorMeetingButton.MaxTimer = PlayerControl.GameOptions.EmergencyCooldown;
 
             doorHackerButton.MaxTimer = DoorHacker.cooldown;
-            taskVsModeRetireButton.MaxTimer = 0f;
+            taskVsModeRetireButton.MaxTimer = TaskRacer.coolTime;
 
             timeMasterShieldButton.EffectDuration = TimeMaster.shieldDuration;
             hackerButton.EffectDuration = Hacker.duration;
