@@ -210,6 +210,7 @@ namespace TheOtherRoles
                     gameObject.transform.localPosition = new Vector3(0, 0, -930f);
                     gameObject.transform.localScale = Vector3.one * 1f;
                     debugText = gameObject.GetComponent<TMPro.TMP_Text>();
+                    debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
                 }
 
                 var builder = new System.Text.StringBuilder();
