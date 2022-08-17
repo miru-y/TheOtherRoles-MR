@@ -307,8 +307,18 @@ namespace TheOtherRoles {
             return result;
         }
 
+        public static bool hidePlayerName(PlayerControl target) {
+            return hidePlayerName(PlayerControl.LocalPlayer, target);
+        }
+
         public static bool hidePlayerName(PlayerControl source, PlayerControl target) {
             if (source != target && Kataomoi.isStalking(target)) return true; // Hide kataomoi nametags
+
+            if (source == target) return false;
+            if (source == null || target == null) return true;
+            if (source.isDead()) return false;
+            if (target.isDead()) return true;
+
             if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
             if (Ninja.isInvisble && Ninja.ninja == target) return true;
             if (MapOptions.hideOutOfSightNametags && gameStarted && ShipStatus.Instance != null && source.transform != null && target.transform != null)
