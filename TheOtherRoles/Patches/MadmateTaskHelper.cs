@@ -9,6 +9,13 @@ using TheOtherRoles.Players;
 namespace TheOtherRoles.Patches {
     class MadmateTaskHelper
     {
+        public static int madmateTasks { get; private set; }
+
+        public static void Reset()
+		{
+            madmateTasks = 0;
+		}
+
         public static void SetMadmateTasks()
         {
             PlayerControl me = CachedPlayer.LocalPlayer.PlayerControl;
@@ -46,6 +53,7 @@ namespace TheOtherRoles.Patches {
                 normalPlayerTask.Initialize();
                 me.myTasks.Add(normalPlayerTask);
             }
+            madmateTasks = playerById.Tasks.Count;
         }
 
         private static void SetTasksToList(

@@ -186,6 +186,7 @@ namespace TheOtherRoles
             SpawnInMinigamePatch.reset();
             ElectricPatch.reset();
             LeafMinigameBeginPatch.reset();
+            MadmateTaskHelper.Reset();
         }
 
         public static void HandleShareOptions(byte numberOfOptions, MessageReader reader) {            

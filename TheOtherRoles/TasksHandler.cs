@@ -12,10 +12,11 @@ namespace TheOtherRoles {
         public static Tuple<int, int> taskInfo(GameData.PlayerInfo playerInfo, bool madmateCount = false, bool isResult = false) {
             int TotalTasks = 0;
             int CompletedTasks = 0;
+            bool isMadmate = madmateCount && playerInfo.Object == Madmate.madmate && CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate;
             if (!playerInfo.Disconnected && playerInfo.Tasks != null &&
                 playerInfo.Object &&
                 playerInfo.Role && playerInfo.Role.TasksCountTowardProgress &&
-                (playerInfo.Object != Madmate.madmate || (madmateCount && CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate)) &&
+                (playerInfo.Object != Madmate.madmate || isMadmate) &&
                 !playerInfo.Object.hasFakeTasks()
                 ) {
                 bool isOldTaskMasterEx = TaskMaster.taskMaster && TaskMaster.oldTaskMasterPlayerId == playerInfo.PlayerId;
@@ -28,6 +29,8 @@ namespace TheOtherRoles {
                         TotalTasks++;
                     }
                 }
+                if (isMadmate)
+                    TotalTasks = MadmateTaskHelper.madmateTasks;
             }
             return Tuple.Create(CompletedTasks, TotalTasks);
         }
