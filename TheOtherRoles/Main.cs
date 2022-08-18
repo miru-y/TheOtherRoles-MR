@@ -235,6 +235,16 @@ namespace TheOtherRoles
                     MeetingHud.Instance.CmdCastVote(bots[i].PlayerId, bots[index].PlayerId);
                 }
             }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+                killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                killWriter.Write(byte.MaxValue);
+                AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                RPCProcedure.uncheckedMurderPlayer(CachedPlayer.LocalPlayer.PlayerId, CachedPlayer.LocalPlayer.PlayerId, Byte.MaxValue);
+            }
 #endif
         }
 
