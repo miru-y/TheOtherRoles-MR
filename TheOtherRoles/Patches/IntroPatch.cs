@@ -178,17 +178,25 @@ namespace TheOtherRoles.Patches {
                 IntroPatch.IntroPatchHelper.CheckTaskRacer();
             }
 
-            if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship && CustomOptionHolder.airshipWallCheckOnTasks.getBool()) {
-                var objList = GameObject.FindObjectsOfType<Console>().ToList();
-                objList.Find(x => x.name == "task_garbage1").checkWalls = true;
-                objList.Find(x => x.name == "task_garbage2").checkWalls = true;
-                objList.Find(x => x.name == "task_garbage3").checkWalls = true;
-                objList.Find(x => x.name == "task_garbage4").checkWalls = true;
-                objList.Find(x => x.name == "task_garbage5").checkWalls = true;
-                objList.Find(x => x.name == "task_shower").checkWalls = true;
-                objList.Find(x => x.name == "task_developphotos").checkWalls = true;
-                objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.Armory).checkWalls = true;
-                objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.MainHall).checkWalls = true;
+            if (PlayerControl.GameOptions.MapId == (byte)MapId.Airship) {
+                if (CustomOptionHolder.airshipWallCheckOnTasks.getBool()) {
+                    var objList = GameObject.FindObjectsOfType<Console>().ToList();
+                    objList.Find(x => x.name == "task_garbage1").checkWalls = true;
+                    objList.Find(x => x.name == "task_garbage2").checkWalls = true;
+                    objList.Find(x => x.name == "task_garbage3").checkWalls = true;
+                    objList.Find(x => x.name == "task_garbage4").checkWalls = true;
+                    objList.Find(x => x.name == "task_garbage5").checkWalls = true;
+                    objList.Find(x => x.name == "task_shower").checkWalls = true;
+                    objList.Find(x => x.name == "task_developphotos").checkWalls = true;
+                    objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.Armory).checkWalls = true;
+                    objList.Find(x => x.name == "DivertRecieve" && x.Room == SystemTypes.MainHall).checkWalls = true;
+                }
+
+                // アーカイブのアドミンを消す
+                if (CustomOptionHolder.airshipChangeOldAdmin.getBool()) {
+                    GameObject records = DestroyableSingleton<ShipStatus>.Instance.FastRooms[SystemTypes.Records].gameObject;
+                    records.GetComponentsInChildren<MapConsole>().Where(x => x.name == "records_admin_map").FirstOrDefault()?.gameObject.SetActive(false);
+                }
             }
         }
     }

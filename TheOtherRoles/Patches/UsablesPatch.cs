@@ -557,6 +557,11 @@ namespace TheOtherRoles.Patches
                         if (plainShipRoom != null && plainShipRoom.roomArea) {
                             int num = plainShipRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
                             int num2 = num;
+
+                            // ロミジュリと絵画の部屋をアドミンの対象から外す
+                            if (CustomOptionHolder.airshipChangeOldAdmin.getBool() && (counterArea.RoomType == SystemTypes.Ventilation || counterArea.RoomType == SystemTypes.HallOfPortraits))
+                                num2 = 0;
+
                             for (int j = 0; j < num; j++) {
                                 Collider2D collider2D = __instance.buffer[j];
                                 if (!(collider2D.tag == "DeadBody")) {
@@ -584,6 +589,7 @@ namespace TheOtherRoles.Patches
                                     }
                                 }
                             }
+                            if (num2 < 0) num2 = 0;
                             counterArea.UpdateCount(num2);
                         } else {
                             Debug.LogWarning("Couldn't find counter for:" + counterArea.RoomType);

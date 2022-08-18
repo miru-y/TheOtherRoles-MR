@@ -354,6 +354,7 @@ namespace TheOtherRoles {
         public static CustomOption airshipSetOriginalCooldown;
         public static CustomOption airshipInitialDoorCooldown;
         public static CustomOption airshipInitialSabotageCooldown;
+        public static CustomOption airshipChangeOldAdmin;
 
         public static CustomOption skeldPreventPlayerFromMovingDuringCleanO2FilterTask;
 
@@ -424,6 +425,8 @@ namespace TheOtherRoles {
             airshipSetOriginalCooldown = CustomOption.Create(9919, Types.General, "Set Original Cooldown On First Spawn (AirShip)", false);
             airshipInitialDoorCooldown = CustomOption.Create(9923, Types.General, "Initial Door Sabotage Cooldown (AirShip)", 0f, 0f, 60f, 1f);
             airshipInitialSabotageCooldown = CustomOption.Create(9924, Types.General, "Initial Sabotage Cooldown (AirShip)", 15f, 0f, 60f, 1f);
+            airshipChangeOldAdmin = CustomOption.Create(9925, Types.General, "Change Old Admin (AirShip)", false);
+
 
             skeldPreventPlayerFromMovingDuringCleanO2FilterTask = CustomOption.Create(920000002, Types.General, "Prevent Player From Moving During \"CleanO2FilterTask\" (Skeld)", false, null, true);
 
