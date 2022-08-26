@@ -4,6 +4,7 @@ using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 using System.Linq;
 using TheOtherRoles.Objects;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(HeliSabotageSystem), nameof(HeliSabotageSystem.Detoriorate))]
@@ -13,7 +14,7 @@ namespace TheOtherRoles.Patches {
         {
             if (!__instance.IsActive)
                 return;
-            if (AirshipStatus.Instance == null)
+            if (MapUtilities.CachedShipStatus == null)
                 return;
 
             if (__instance.Countdown > CustomOptionHolder.airshipHeliSabotageSystemTimeLimit.getFloat())

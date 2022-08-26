@@ -7,6 +7,7 @@ using BepInEx.IL2CPP;
 using HarmonyLib;
 using TheOtherRoles.Patches;
 using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -181,7 +182,7 @@ namespace TheOtherRoles
         public static void RepairOxygen() {
             if (!Loaded) return;
             try {
-                ShipStatus.Instance.RpcRepairSystem((SystemTypes)130, 64);
+                MapUtilities.CachedShipStatus.RpcRepairSystem((SystemTypes)130, 64);
                 RepairDamageMethod.Invoke(SubmarineOxygenSystemInstanceField.Invoke(null, Array.Empty<object>()), new object[] { CachedPlayer.LocalPlayer.PlayerControl, 64 });
             }
             catch (System.NullReferenceException) {

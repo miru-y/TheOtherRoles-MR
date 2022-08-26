@@ -2450,7 +2450,7 @@ namespace TheOtherRoles
                 }
                 for (int j = 0; j < playerData.Tasks.Count; j++) {
                     GameData.TaskInfo taskInfo = playerData.Tasks[j];
-                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
+                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(MapUtilities.CachedShipStatus.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
                     normalPlayerTask.Id = taskInfo.Id;
                     normalPlayerTask.Owner = playerData.Object;
                     normalPlayerTask.Initialize();
@@ -2459,7 +2459,7 @@ namespace TheOtherRoles
                         switch (normalPlayerTask.TaskType) {
                             case TaskTypes.FixWiring:
                             case TaskTypes.VentCleaning:
-                                List<Console> list = (from t in ShipStatus.Instance.AllConsoles
+                                List<Console> list = (from t in MapUtilities.CachedShipStatus.AllConsoles
                                                       where t.TaskTypes.Contains(normalPlayerTask.TaskType)
                                                       select t).ToList();
                                 Console console = list.First((Console v) => v.ConsoleId == normalPlayerTask.Data[0]);

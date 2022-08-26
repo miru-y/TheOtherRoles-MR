@@ -138,7 +138,7 @@ namespace TheOtherRoles.Patches {
         private static PlayerControl pickRandomCrewmate(int exiledPlayerId) {
             var possibleTargets = new List<PlayerControl>();
             // make possible targets
-            foreach (PlayerControl player in PlayerControl.AllPlayerControls) {
+            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
                 if (player.Data.Disconnected)
                     continue;
                 if (player.Data.Role.IsImpostor)

@@ -202,11 +202,11 @@ namespace TheOtherRoles
 			{
                 if (debugText == null || debugText.gameObject == null)
 				{
-                    RoomTracker roomTracker = HudManager.Instance?.roomTracker;
+                    RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance?.roomTracker;
                     GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
                     UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
                     GameObject.DontDestroyOnLoad(gameObject);
-                    gameObject.transform.SetParent(HudManager.Instance.transform);
+                    gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
                     gameObject.transform.localPosition = new Vector3(0, 0, -930f);
                     gameObject.transform.localScale = Vector3.one * 1f;
                     debugText = gameObject.GetComponent<TMPro.TMP_Text>();

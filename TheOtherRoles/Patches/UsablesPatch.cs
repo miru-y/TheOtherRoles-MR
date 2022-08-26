@@ -869,8 +869,8 @@ namespace TheOtherRoles.Patches
                     kataomoiMark.enabled = isShowKataomoiMark;
                     if (isShowKataomoiMark) {
                         Vector3 vector = Kataomoi.target.transform.position;
-                        vector /= ShipStatus.Instance.MapScale;
-                        vector.x *= Mathf.Sign(ShipStatus.Instance.transform.localScale.x);
+                        vector /= MapUtilities.CachedShipStatus.MapScale;
+                        vector.x *= Mathf.Sign(MapUtilities.CachedShipStatus.transform.localScale.x);
                         vector.z = -1f;
                         kataomoiMark.transform.localPosition = vector;
                     }

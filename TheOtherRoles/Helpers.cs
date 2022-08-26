@@ -321,13 +321,13 @@ namespace TheOtherRoles {
 
             if (Camouflager.camouflageTimer > 0f) return true; // No names are visible
             if (Ninja.isInvisble && Ninja.ninja == target) return true;
-            if (MapOptions.hideOutOfSightNametags && gameStarted && ShipStatus.Instance != null && source.transform != null && target.transform != null)
+            if (MapOptions.hideOutOfSightNametags && gameStarted && MapUtilities.CachedShipStatus != null && source.transform != null && target.transform != null)
             {
                 float distMod = 1.025f;
                 float distance = Vector3.Distance(source.transform.position, target.transform.position);
                 bool anythingBetween = PhysicsHelpers.AnythingBetween(source.GetTruePosition(), target.GetTruePosition(), Constants.ShadowMask, false);
 
-                if (distance > ShipStatus.Instance.CalculateLightRadius(source.Data) * distMod || anythingBetween) return true;
+                if (distance > MapUtilities.CachedShipStatus.CalculateLightRadius(source.Data) * distMod || anythingBetween) return true;
             }
             if (!MapOptions.hidePlayerNames) return false; // All names are visible
             if (source == null || target == null) return true;

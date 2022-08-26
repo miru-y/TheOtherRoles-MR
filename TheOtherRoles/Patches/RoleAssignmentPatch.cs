@@ -47,7 +47,7 @@ namespace TheOtherRoles.Patches {
         private static void assignRoles() {
             // Task Vs Mode
             if (CustomOptionHolder.enabledTaskVsMode.getBool()) {
-                foreach (var player in PlayerControl.AllPlayerControls)
+                foreach (var player in CachedPlayer.AllPlayers)
                     setRole((byte)RoleId.TaskRacer, player.PlayerId);
             } else {
                 var data = getRoleAssignmentData();
@@ -388,7 +388,7 @@ namespace TheOtherRoles.Patches {
             // Set Kataomoi target
             if (Kataomoi.kataomoi != null) {
                 var possibleTargets = new List<PlayerControl>();
-                foreach (PlayerControl p in PlayerControl.AllPlayerControls) {
+                foreach (PlayerControl p in CachedPlayer.AllPlayers) {
                     if (!p.isDead() && p != Kataomoi.kataomoi)
                         possibleTargets.Add(p);
                 }

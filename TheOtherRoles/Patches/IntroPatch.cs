@@ -95,7 +95,7 @@ namespace TheOtherRoles.Patches {
 
             // First kill
             if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "") {
-                PlayerControl target = PlayerControl.AllPlayerControls.ToArray().ToList().FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
+                PlayerControl target = CachedPlayer.AllPlayers.FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
                 if (target != null) {
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SetFirstKill, Hazel.SendOption.Reliable, -1);
                     writer.Write(target.PlayerId);
@@ -391,7 +391,7 @@ namespace TheOtherRoles.Patches {
                     }
                     for (int j = 0; j < playerData.Tasks.Count; j++) {
                         GameData.TaskInfo taskInfo = playerData.Tasks[j];
-                        NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
+                        NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(MapUtilities.CachedShipStatus.GetTaskById(taskInfo.TypeId), playerData.Object.transform);
                         normalPlayerTask.Id = taskInfo.Id;
                         normalPlayerTask.Owner = playerData.Object;
                         normalPlayerTask.Initialize();

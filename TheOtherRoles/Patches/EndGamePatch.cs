@@ -321,7 +321,7 @@ namespace TheOtherRoles.Patches
                 AdditionalTempData.winCondition = WinCondition.TaskMasterTeamWin;
                 bool addCrewmateLovers = !Lovers.existingWithKiller();
                 TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
-                foreach (PlayerControl p in PlayerControl.AllPlayerControls)
+                foreach (PlayerControl p in CachedPlayer.AllPlayers)
                 {
                     if (p == null) continue;
                     if (addCrewmateLovers && (p == Lovers.lover1 || p == Lovers.lover2))
@@ -349,7 +349,7 @@ namespace TheOtherRoles.Patches
                 // Madmate wins if team impostors wins
                 if (Madmate.madmate != null)
                 {
-                    foreach (WinningPlayerData winner in TempData.winners)
+                    foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
                     {
                         if (winner.IsImpostor)
                         {

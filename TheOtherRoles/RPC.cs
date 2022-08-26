@@ -520,7 +520,7 @@ namespace TheOtherRoles
             var dispatcher = AmongUsClient.Instance.Dispatcher;
             lock (dispatcher) {
                 AmongUsClient.Instance.Dispatcher.Add(new Action(() => {
-                    ShipStatus.Instance.enabled = false;
+                    MapUtilities.CachedShipStatus.enabled = false;
                     AmongUsClient.Instance.OnGameEnd(new EndGameResult((GameOverReason)reason, false));
                 }));
             }
@@ -532,8 +532,8 @@ namespace TheOtherRoles
 
             if (AmongUsClient.Instance.AmHost) {
                 bool is_send = true;
-                foreach (var p in PlayerControl.AllPlayerControls) {
-                    if (!p.isDummy && !p.notRealPlayer && !p.Data.Disconnected && !uncheckedEndGameResponsePlayerId.Contains(p.PlayerId)) {
+                foreach (var p in CachedPlayer.AllPlayers) {
+                    if (!p.PlayerControl.isDummy && !p.PlayerControl.notRealPlayer && !p.Data.Disconnected && !uncheckedEndGameResponsePlayerId.Contains(p.PlayerId)) {
                         is_send = false;
                         break;
                     }
@@ -754,7 +754,7 @@ namespace TheOtherRoles
         }
 
         public static void evilHackerCreatesMadmate(byte targetId) {
-            foreach (PlayerControl player in PlayerControl.AllPlayerControls) {
+            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
                 if (player.PlayerId == targetId) {
                     player.RemoveInfected();
                     erasePlayerRoles(player.PlayerId, true);
@@ -1105,7 +1105,7 @@ namespace TheOtherRoles
                 }
             
                 else if (kataomoiPlayer != null && CachedPlayer.LocalPlayer.PlayerControl == kataomoiPlayer)
-                    HudManager.Instance.KillOverlay.ShowKillAnimation(kataomoiPlayer.Data, kataomoiPlayer.Data);
+                    FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(kataomoiPlayer.Data, kataomoiPlayer.Data);
 
             PlayerControl guessedTarget = Helpers.playerById(guessedTargetId);
             if (Guesser.showInfoInGhostChat && CachedPlayer.LocalPlayer.Data.IsDead && guessedTarget != null) {
@@ -1181,7 +1181,7 @@ namespace TheOtherRoles
                 }
                 for (int i = 0; i < player.Tasks.Count; i++) {
                     GameData.TaskInfo taskInfo = player.Tasks[i];
-                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), player.Object.transform);
+                    NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate(MapUtilities.CachedShipStatus.GetTaskById(taskInfo.TypeId), player.Object.transform);
                     normalPlayerTask.Id = taskInfo.Id;
                     normalPlayerTask.Owner = player.Object;
                     normalPlayerTask.Initialize();

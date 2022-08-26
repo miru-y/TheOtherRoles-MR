@@ -1,6 +1,7 @@
 using HarmonyLib;
 using System.Linq;
 using System.Collections.Generic;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(NormalPlayerTask), nameof(NormalPlayerTask.PickRandomConsoles))]
@@ -9,7 +10,7 @@ namespace TheOtherRoles.Patches {
             if (!CustomOptionHolder.enableRandomizationInFixWiringTask.getBool() || taskType != TaskTypes.FixWiring) {
                 return;
             }
-            List<Console> list = (from t in ShipStatus.Instance.AllConsoles
+            List<Console> list = (from t in MapUtilities.CachedShipStatus.AllConsoles
                                           where t.TaskTypes.Contains(taskType)
                                           select t).ToList<Console>();
             List<Console> list2 = new List<Console>(list);

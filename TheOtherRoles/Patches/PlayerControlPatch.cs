@@ -1167,15 +1167,15 @@ namespace TheOtherRoles.Patches
             }
             if (!DestroyableSingleton<TutorialManager>.InstanceExists) {
                 bool isAll = true;
-                foreach (var p in PlayerControl.AllPlayerControls) {
-                    if (!p.roleAssigned) {
+                foreach (var p in CachedPlayer.AllPlayers) {
+                    if (!p.PlayerControl.roleAssigned) {
                         isAll = false;
                         break;
 					}
 				}
 
                 if (isAll) {
-                    foreach (var p in PlayerControl.AllPlayerControls)
+                    foreach (var p in CachedPlayer.AllPlayers)
                         PlayerNameColor.Set(p);
                     __instance.StopAllCoroutines();
                     DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());

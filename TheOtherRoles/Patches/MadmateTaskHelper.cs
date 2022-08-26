@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     class MadmateTaskHelper
@@ -28,15 +29,15 @@ namespace TheOtherRoles.Patches {
             List<byte> list = new List<byte>(10);
             SetTasksToList2(
                 ref list,
-                ShipStatus.Instance.CommonTasks.ToList<NormalPlayerTask>(),
+                MapUtilities.CachedShipStatus.CommonTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateCommonTasks.getFloat()));
             SetTasksToList2(
                 ref list,
-                ShipStatus.Instance.LongTasks.ToList<NormalPlayerTask>(),
+                MapUtilities.CachedShipStatus.LongTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateLongTasks.getFloat()));
             SetTasksToList2(
                 ref list,
-                ShipStatus.Instance.NormalTasks.ToList<NormalPlayerTask>(),
+                MapUtilities.CachedShipStatus.NormalTasks.ToList<NormalPlayerTask>(),
                 Mathf.RoundToInt(CustomOptionHolder.madmateShortTasks.getFloat()));
 
             byte[] taskTypeIds = list.ToArray();
@@ -47,7 +48,7 @@ namespace TheOtherRoles.Patches {
             }
             for (int i = 0; i < playerById.Tasks.Count; i++) {
                 GameData.TaskInfo taskInfo = playerById.Tasks[i];
-                NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), me.transform);
+                NormalPlayerTask normalPlayerTask = UnityEngine.Object.Instantiate<NormalPlayerTask>(MapUtilities.CachedShipStatus.GetTaskById(taskInfo.TypeId), me.transform);
                 normalPlayerTask.Id = taskInfo.Id;
                 normalPlayerTask.Owner = me;
                 normalPlayerTask.Initialize();

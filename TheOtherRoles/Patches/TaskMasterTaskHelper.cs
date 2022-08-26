@@ -4,6 +4,7 @@ using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Patches {
     class TaskMasterTaskHelper
@@ -27,15 +28,15 @@ namespace TheOtherRoles.Patches {
             List<byte> list = new List<byte>(10);
             taskMasterAddCommonTasks = SetTasksToList(
                 ref list,
-                ShipStatus.Instance.CommonTasks.ToList(),
+                MapUtilities.CachedShipStatus.CommonTasks.ToList(),
                 Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraCommonTasks.getFloat()));
             taskMasterAddLongTasks = SetTasksToList(
                 ref list,
-                ShipStatus.Instance.LongTasks.ToList(),
+                MapUtilities.CachedShipStatus.LongTasks.ToList(),
                 Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraLongTasks.getFloat()));
             taskMasterAddShortTasks = SetTasksToList(
                 ref list,
-                ShipStatus.Instance.NormalTasks.ToList(),
+                MapUtilities.CachedShipStatus.NormalTasks.ToList(),
                 Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraShortTasks.getFloat()));
 
             return list.ToArray();

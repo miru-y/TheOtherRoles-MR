@@ -5,6 +5,8 @@ using HarmonyLib;
 using Hazel;
 using PowerTools;
 using TheOtherRoles.Objects;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -238,14 +240,14 @@ namespace TheOtherRoles.Patches
                         __instance.Close();
                         CustomButton.stopCountdown = false;
                         // サボタージュのクールダウンをリセット
-                        SabotageSystemType saboSystem = ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>();
+                        SabotageSystemType saboSystem = MapUtilities.CachedShipStatus.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>();
                         AccessTools.PropertySetter(typeof(SabotageSystemType), "IsDirty").Invoke(saboSystem, new object[]
                         {
                             true
                         });
                         saboSystem.ForceSabTime(0f);
                         saboSystem.Timer = initialSabotageCooldown;
-                        DoorsSystemType doorSystem = ShipStatus.Instance.Systems[SystemTypes.Doors].Cast<DoorsSystemType>();
+                        DoorsSystemType doorSystem = MapUtilities.CachedShipStatus.Systems[SystemTypes.Doors].Cast<DoorsSystemType>();
                         AccessTools.PropertySetter(typeof(DoorsSystemType), "IsDirty").Invoke(doorSystem, new object[]
                         {
                             true
@@ -288,7 +290,7 @@ namespace TheOtherRoles.Patches
                 bool result = true;
                 dic.TryGetValue(tag, out ulong value);
 
-                foreach (PlayerControl pc in PlayerControl.AllPlayerControls)
+                foreach (var pc in CachedPlayer.AllPlayers)
                 {
                     if (pc.Data.IsDead ? withGhost : withSurvivor)
                         result &= (value & ((ulong)1 << pc.PlayerId)) != 0;
@@ -442,14 +444,14 @@ namespace TheOtherRoles.Patches
                             __instance.Close();
                             CustomButton.stopCountdown = false;
                             // サボタージュのクールダウンをリセット
-                            SabotageSystemType saboSystem = ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>();
+                            SabotageSystemType saboSystem = MapUtilities.CachedShipStatus.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>();
                             AccessTools.PropertySetter(typeof(SabotageSystemType), "IsDirty").Invoke(saboSystem, new object[]
                             {
                                 true
                             });
                             saboSystem.ForceSabTime(0f);
                             saboSystem.Timer = initialSabotageCooldown;
-                            DoorsSystemType doorSystem = ShipStatus.Instance.Systems[SystemTypes.Doors].Cast<DoorsSystemType>();
+                            DoorsSystemType doorSystem = MapUtilities.CachedShipStatus.Systems[SystemTypes.Doors].Cast<DoorsSystemType>();
                             AccessTools.PropertySetter(typeof(DoorsSystemType), "IsDirty").Invoke(doorSystem, new object[]
                             {
                                 true

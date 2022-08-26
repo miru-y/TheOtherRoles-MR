@@ -678,7 +678,7 @@ namespace TheOtherRoles.Patches {
 
             static void StartMeeting(PlayerControl reporter, GameData.PlayerInfo target)
             {
-                ShipStatus.Instance.StartCoroutine(CoStartMeeting(reporter, target).WrapToIl2Cpp());
+                MapUtilities.CachedShipStatus.StartCoroutine(CoStartMeeting(reporter, target).WrapToIl2Cpp());
             }
 
             static IEnumerator CoStartMeeting(PlayerControl reporter, GameData.PlayerInfo target)
@@ -690,13 +690,10 @@ namespace TheOtherRoles.Patches {
                         yield return null;
                     }
                     MeetingRoomManager.Instance.RemoveSelf();
-                    for (int i = 0; i < PlayerControl.AllPlayerControls.Count; i++)
+                    foreach (var p in CachedPlayer.AllPlayers)
                     {
-                        PlayerControl playerControl = PlayerControl.AllPlayerControls[i];
-                        if (playerControl != null)
-                        {
-                            playerControl.ResetForMeeting();
-                        }
+                        if (p.PlayerControl != null)
+                            p.PlayerControl.ResetForMeeting();
                     }
                     if (MapBehaviour.Instance)
                     {
@@ -706,7 +703,7 @@ namespace TheOtherRoles.Patches {
                     {
                         Minigame.Instance.ForceClose();
                     }
-                    ShipStatus.Instance.OnMeetingCalled();
+                    MapUtilities.CachedShipStatus.OnMeetingCalled();
                     KillAnimation.SetMovement(reporter, true);
                 }
 
@@ -738,10 +735,10 @@ namespace TheOtherRoles.Patches {
                     greyscreen.gameObject.SetActive(true);
                     greyscreen.enabled = true;
                     TMPro.TMP_Text text;
-                    RoomTracker roomTracker = HudManager.Instance?.roomTracker;
+                    RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance?.roomTracker;
                     GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
                     UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
-                    gameObject.transform.SetParent(HudManager.Instance.transform);
+                    gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
                     gameObject.transform.localPosition = new Vector3(0, 0, -930f);
                     gameObject.transform.localScale = Vector3.one * 5f;
                     text = gameObject.GetComponent<TMPro.TMP_Text>();
