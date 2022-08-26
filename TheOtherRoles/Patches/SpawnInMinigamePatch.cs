@@ -93,7 +93,7 @@ namespace TheOtherRoles.Patches
             {
                 PassiveButton passiveButton = __instance.LocationButtons[i];
                 SpawnInMinigame.SpawnLocation pt = array[i];
-                passiveButton.OnClick.AddListener((UnityEngine.Events.UnityAction)(() => __instance.SpawnAt(pt.Location)));
+                passiveButton.OnClick.AddListener((UnityEngine.Events.UnityAction)(() => SpawnAt(__instance, pt.Location)));
                 passiveButton.GetComponent<SpriteAnim>().Stop();
                 passiveButton.GetComponent<SpriteRenderer>().sprite = pt.Image;
                 // passiveButton.GetComponentInChildren<TextMeshPro>().text = DestroyableSingleton<TranslationController>.Instance.GetString(pt.Name, Array.Empty<object>());
@@ -366,6 +366,110 @@ namespace TheOtherRoles.Patches
             writer.Write((int)tag);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
             RPCProcedure.synchronize(playerId, (int)tag);
+        }
+
+        static void SpawnAt(SpawnInMinigame __instance, Vector3 spawnAt)
+        {
+            if (!CustomOptionHolder.airshipSynchronizedSpawning.getBool() || CustomOptionHolder.airshipRandomSpawn.getBool())
+            {
+                if (isFirstSpawn) resetButtons();
+                CustomButton.stopCountdown = false;
+                if (__instance.amClosing != Minigame.CloseState.None)
+                {
+                    return;
+                }
+                __instance.gotButton = true;
+                PlayerControl.LocalPlayer.gameObject.SetActive(true);
+                __instance.StopAllCoroutines();
+                PlayerControl.LocalPlayer.NetTransform.RpcSnapTo(spawnAt);
+                DestroyableSingleton<HudManager>.Instance.PlayerCam.SnapToTarget();
+                __instance.Close();
+            }
+            else
+            {
+                Synchronize(SynchronizeTag.PreSpawnMinigame, PlayerControl.LocalPlayer.PlayerId);
+                if (__instance.amClosing != Minigame.CloseState.None)
+                {
+                    return;
+                }
+                if (__instance.gotButton) return;
+
+                __instance.gotButton = true;
+
+
+                foreach (var button in __instance.LocationButtons)
+                {
+                    button.enabled = false;
+                }
+
+                __instance.StartCoroutine(Effects.Lerp(10f, new Action<float>((p) =>
+                {
+                    float time = p * 10f;
+
+
+                    foreach (var button in __instance.LocationButtons)
+                    {
+                        if (selected == button)
+                        {
+                            if (time > 0.3f)
+                            {
+                                float x = button.transform.localPosition.x;
+                                if (x < 0f) x += 10f * Time.deltaTime;
+                                if (x > 0f) x -= 10f * Time.deltaTime;
+                                if (Mathf.Abs(x) < 10f * Time.deltaTime) x = 0f;
+                                button.transform.localPosition = new Vector3(x, button.transform.localPosition.y, button.transform.localPosition.z);
+                            }
+                        }
+                        else
+                        {
+                            var color = button.GetComponent<SpriteRenderer>().color;
+                            float a = color.a;
+                            if (a > 0f) a -= 2f * Time.deltaTime;
+                            if (a < 0f) a = 0f;
+                            button.GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, a);
+                            button.GetComponentInChildren<TextMeshPro>().color = new Color(1f, 1f, 1f, a);
+                        }
+
+                        if (__instance.amClosing != Minigame.CloseState.None) return;
+
+                        if (synchronizeData.Align(SynchronizeTag.PreSpawnMinigame, false) || p == 1f)
+                        {
+                            PlayerControl.LocalPlayer.gameObject.SetActive(true);
+                            __instance.StopAllCoroutines();
+                            PlayerControl.LocalPlayer.NetTransform.RpcSnapTo(spawnAt);
+                            DestroyableSingleton<HudManager>.Instance.PlayerCam.SnapToTarget();
+                            synchronizeData.Reset(SynchronizeTag.PreSpawnMinigame);
+                            __instance.Close();
+                            CustomButton.stopCountdown = false;
+                            // サボタージュのクールダウンをリセット
+                            SabotageSystemType saboSystem = ShipStatus.Instance.Systems[SystemTypes.Sabotage].Cast<SabotageSystemType>();
+                            AccessTools.PropertySetter(typeof(SabotageSystemType), "IsDirty").Invoke(saboSystem, new object[]
+                            {
+                                true
+                            });
+                            saboSystem.ForceSabTime(0f);
+                            saboSystem.Timer = initialSabotageCooldown;
+                            DoorsSystemType doorSystem = ShipStatus.Instance.Systems[SystemTypes.Doors].Cast<DoorsSystemType>();
+                            AccessTools.PropertySetter(typeof(DoorsSystemType), "IsDirty").Invoke(doorSystem, new object[]
+                            {
+                                true
+                            });
+                            doorSystem.timers[SystemTypes.MainHall] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Brig] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Comms] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Medical] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Engine] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Records] = initialDoorCooldown;
+                            doorSystem.timers[SystemTypes.Kitchen] = initialDoorCooldown;
+
+                            if (isFirstSpawn) resetButtons();
+                        }
+                    }
+
+                })));
+
+                return;
+            }
         }
     }
 }
