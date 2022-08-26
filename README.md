@@ -96,7 +96,10 @@ The [Role Assignment](#role-assignment) sections explains how the roles are bein
 # Changelog
 <details>
   <summary>Click to show the Changelog</summary>
-  
+
+**Version 4.1.7**
+- Updated to Among Us version 2022.8.24
+
 **Version 4.1.6**  
 - Added Sound Effects: Most buttons / role funcionalities now have a sound!
 - Added a mod option: Enable Sound Effects  
