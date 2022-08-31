@@ -28,6 +28,7 @@ namespace TheOtherRoles.Patches {
                 || (Jackal.jackal != null && Jackal.jackal.PlayerId == player.PlayerId && Jackal.hasImpostorVision)
                 || (Sidekick.sidekick != null && Sidekick.sidekick.PlayerId == player.PlayerId && Sidekick.hasImpostorVision)
                 || (Madmate.madmate != null && Madmate.madmate.PlayerId == player.PlayerId && Madmate.hasImpostorVision)
+                || (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller.PlayerId == player.PlayerId && MadmateKiller.hasImpostorVision)
                 || (Spy.spy != null && Spy.spy.PlayerId == player.PlayerId && Spy.hasImpostorVision)
                 || (Jester.jester != null && Jester.jester.PlayerId == player.PlayerId && Jester.hasImpostorVision)) {
                 //__result = __instance.MaxLightRadius * PlayerControl.GameOptions.ImpostorLightMod;

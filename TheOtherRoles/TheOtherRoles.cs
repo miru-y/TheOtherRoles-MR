@@ -63,6 +63,8 @@ namespace TheOtherRoles
             Yasuna.clearAndReload();
             DoorHacker.clearAndReload();
             Kataomoi.clearAndReload();
+            KillerCreator.clearAndReload();
+            MadmateKiller.clearAndReload();
 
             // Modifier
             Bait.clearAndReload();
@@ -243,6 +245,7 @@ namespace TheOtherRoles
             public static bool canKillNeutrals = false;
             public static bool spyCanDieToSheriff = false;
             public static bool madmateCanDieToSheriff = false;
+            public static bool madmateKillerCanDieToSheriff = false;
 
             public static PlayerControl currentTarget;
 
@@ -265,6 +268,7 @@ namespace TheOtherRoles
                 remainingShots = Mathf.RoundToInt(CustomOptionHolder.sheriffNumberOfShots.getFloat());
                 canKillNeutrals = CustomOptionHolder.sheriffCanKillNeutrals.getBool();
                 spyCanDieToSheriff = CustomOptionHolder.spyCanDieToSheriff.getBool();
+                madmateKillerCanDieToSheriff = CustomOptionHolder.madmateKillerCanDieToSheriff.getBool();
                 madmateCanDieToSheriff = CustomOptionHolder.madmateCanDieToSheriff.getBool();
                 if (CustomOptionHolder.evilHackerSpawnRate.getSelection() > 0 &&
                     CustomOptionHolder.evilHackerCanCreateMadmate.getBool())
@@ -2472,6 +2476,47 @@ namespace TheOtherRoles
             }
             hostTaskTypeIds = null;
             hostTaskIdDataTable.Clear();
+        }
+    }
+
+    public static class KillerCreator {
+        public static Color color = Palette.ImpostorRed;
+        public static PlayerControl killerCreator;
+        public static PlayerControl currentTarget;
+        static Sprite killerReserveButtonSprite;
+
+
+        public static Sprite getKillerReserveButtonSprite() {
+            if (killerReserveButtonSprite) return killerReserveButtonSprite;
+            killerReserveButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.SidekickButton.png", 115f);
+            return killerReserveButtonSprite;
+        }
+
+        public static void clearAndReload() {
+            killerCreator = null;
+            currentTarget = null;
+        }
+    }
+
+    public static class MadmateKiller
+    {
+        public static Color color = Palette.ImpostorRed;
+        public static PlayerControl madmateKiller = null;
+        public static bool canEnterVents = false;
+        public static bool canMoveVents = false;
+        public static bool hasImpostorVision = false;
+        public static bool noticeImpostors = false;
+        public static bool canFixLightsTask = false;
+        public static bool canFixCommsTask = false;
+
+        public static void clearAndReload() {
+            madmateKiller = null;
+            canEnterVents = CustomOptionHolder.madmateKillerCanEnterVents.getBool();
+            canMoveVents = CustomOptionHolder.madmateKillerCanMoveVents.getBool();
+            hasImpostorVision = CustomOptionHolder.madmateKillerHasImpostorVision.getBool();
+            noticeImpostors = CustomOptionHolder.madmateKillerNoticeImpostors.getBool();
+            canFixLightsTask = CustomOptionHolder.madmateKillerCanFixLightsTask.getBool();
+            canFixCommsTask = CustomOptionHolder.madmateKillerCanFixCommsTask.getBool();
         }
     }
 

@@ -18,17 +18,16 @@ namespace TheOtherRoles.Patches {
             if (CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor)
                 return true;
 
-            if (Madmate.madmate == null)
-                return false;
+            if (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == CachedPlayer.LocalPlayer.PlayerControl && MadmateKiller.noticeImpostors)
+                return true;
 
-            if (Madmate.madmate != CachedPlayer.LocalPlayer.PlayerControl)
-                return false;
+            if (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl && Madmate.noticeImpostors)
+			{
+                var (playerCompleted, playerTotal) = TasksHandler.taskInfo(Madmate.madmate.Data, true);
+                return playerTotal - playerCompleted <= 0;
+            }
 
-            if (!Madmate.noticeImpostors)
-                return false;
-
-            var (playerCompleted, playerTotal) = TasksHandler.taskInfo(Madmate.madmate.Data, true);
-            return playerTotal - playerCompleted <= 0;
+            return false;
         }
 
         static void resetNameTagsAndColors() {
@@ -202,7 +201,7 @@ namespace TheOtherRoles.Patches {
             }
 
             // Crewmate roles with no changes: Mini
-            // Impostor roles with no changes: Morphling, Camouflager, Vampire, Godfather, Eraser, Janitor, Cleaner, Warlock, BountyHunter,  Witch and Mafioso, DoorHacker
+            // Impostor roles with no changes: Morphling, Camouflager, Vampire, Godfather, Eraser, Janitor, Cleaner, Warlock, BountyHunter,  Witch and Mafioso, DoorHacker, KillerCreator, MadmateKiller
         }
 
         static void setNameTags() {

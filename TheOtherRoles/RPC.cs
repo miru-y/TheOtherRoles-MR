@@ -64,6 +64,8 @@ namespace TheOtherRoles
         TaskMaster,
         DoorHacker,
         Kataomoi,
+        KillerCreator,
+        MadmateKiller,
         Crewmate,
         Impostor,
         // Modifier ---
@@ -101,6 +103,7 @@ namespace TheOtherRoles
         ConsumeSecurityCameraTime,
         UncheckedEndGame,
         UncheckedEndGame_Response,
+        UncheckedSetVanilaRole,
         TaskVsMode_Ready, // Task Vs Mode
         TaskVsMode_Start, // Task Vs Mode
         TaskVsMode_AllTaskCompleted, // Task Vs Mode
@@ -163,6 +166,8 @@ namespace TheOtherRoles
         KataomoiWin,
         KataomoiStalking,
         Synchronize,
+        KillerCreatorCreatesMadmateKiller,
+        MadmateKillerPromotes,
     }
 
     public static class RPCProcedure {
@@ -371,6 +376,12 @@ namespace TheOtherRoles
                     case RoleId.Kataomoi:
                         Kataomoi.kataomoi = player;
                         break;
+                    case RoleId.KillerCreator:
+                        KillerCreator.killerCreator = player;
+                        break;
+                    case RoleId.MadmateKiller:
+                        MadmateKiller.madmateKiller = player;
+                        break;
 
                     // Task Vs Mode
                     case RoleId.TaskRacer:
@@ -546,6 +557,13 @@ namespace TheOtherRoles
             }
         }
 
+        public static void uncheckedSetVanilaRole(byte playerId, RoleTypes type) {
+            var player = Helpers.playerById(playerId);
+            if (player == null) return;
+            DestroyableSingleton<RoleManager>.Instance.SetRole(player, type);
+            player.Data.Role.Role = type;
+        }
+
         // Role functionality
 
         public static void engineerFixLights() {
@@ -626,7 +644,7 @@ namespace TheOtherRoles
             Shifter.clearAndReload();
 
             // Suicide (exile) when impostor or impostor variants
-            if (player.Data.Role.IsImpostor || player == Jackal.jackal || player == Sidekick.sidekick || Jackal.formerJackals.Contains(player) || player == Jester.jester || player == Arsonist.arsonist || player == Vulture.vulture || player == Lawyer.lawyer || player == Kataomoi.kataomoi) {
+            if (player.Data.Role.IsImpostor || player == MadmateKiller.madmateKiller || player == Jackal.jackal || player == Sidekick.sidekick || Jackal.formerJackals.Contains(player) || player == Jester.jester || player == Arsonist.arsonist || player == Vulture.vulture || player == Lawyer.lawyer || player == Kataomoi.kataomoi) {
                 oldShifter.Exiled();
                 return;
             }
@@ -860,6 +878,8 @@ namespace TheOtherRoles
             if (player == Witch.witch) Witch.clearAndReload();
             if (player == Ninja.ninja) Ninja.clearAndReload();
             if (player == DoorHacker.doorHacker) DoorHacker.clearAndReload();
+            if (player == KillerCreator.killerCreator) KillerCreator.clearAndReload();
+            if (player == MadmateKiller.madmateKiller) MadmateKiller.clearAndReload();
 
             // Other roles
             if (player == Jester.jester) Jester.clearAndReload();
@@ -1227,6 +1247,35 @@ namespace TheOtherRoles
         public static void synchronize(byte playerId, int tag) {
             SpawnInMinigamePatch.SynchronizeData((SpawnInMinigamePatch.SynchronizeTag)tag, playerId);
         }
+
+        public static void killerCreatorCreatesMadmateKiller(byte targetId) {
+            if (KillerCreator.killerCreator == null) return;
+            if (MadmateKiller.madmateKiller != null) return;
+
+            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
+                if (player.PlayerId == targetId) {
+                    erasePlayerRoles(player.PlayerId, true);
+                    MadmateKiller.madmateKiller = player;
+
+                    if (player == CachedPlayer.LocalPlayer.PlayerControl)
+                        SoundEffectsManager.play("jackalSidekick");
+
+                    DestroyableSingleton<RoleManager>.Instance.SetRole(player, RoleTypes.Crewmate);
+                    break;
+                }
+            }
+        }
+
+        public static void madmateKillerPromotes() {
+            if (KillerCreator.killerCreator == null) return;
+            if (MadmateKiller.madmateKiller == null || MadmateKiller.madmateKiller.Data.RoleType == RoleTypes.Impostor) return;
+
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedSetVanilaRole, SendOption.Reliable);
+            writer.Write(MadmateKiller.madmateKiller.PlayerId);
+            writer.Write((byte)RoleTypes.Impostor);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+            uncheckedSetVanilaRole(MadmateKiller.madmateKiller.PlayerId, RoleTypes.Impostor);
+        }
     }
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
@@ -1323,6 +1372,9 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.UncheckedEndGame_Response:
                     playerId = reader.ReadByte();
                     RPCProcedure.uncheckedEndGameResponse(playerId);
+                    break;
+                case (byte)CustomRPC.UncheckedSetVanilaRole:
+                    RPCProcedure.uncheckedSetVanilaRole(reader.ReadByte(), (RoleTypes)reader.ReadByte());
                     break;
                 case (byte)CustomRPC.TaskVsMode_Ready: // Task Vs Mode
                     RPCProcedure.taskVsModeReady(reader.ReadByte());
@@ -1534,6 +1586,12 @@ namespace TheOtherRoles
                     break;
                 case (byte)CustomRPC.Synchronize:
                     RPCProcedure.synchronize(reader.ReadByte(), reader.ReadInt32());
+                    break;
+                case (byte)CustomRPC.KillerCreatorCreatesMadmateKiller:
+                    RPCProcedure.killerCreatorCreatesMadmateKiller(reader.ReadByte());
+                    break;
+                case (byte)CustomRPC.MadmateKillerPromotes:
+                    RPCProcedure.madmateKillerPromotes();
                     break;
             }
         }

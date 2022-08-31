@@ -170,6 +170,7 @@ namespace TheOtherRoles.Patches
             if (Lawyer.lawyer != null) notWinners.Add(Lawyer.lawyer);
             if (Pursuer.pursuer != null) notWinners.Add(Pursuer.pursuer);
             if (Kataomoi.kataomoi != null) notWinners.Add(Kataomoi.kataomoi);
+            if (MadmateKiller.madmateKiller != null) notWinners.Add(MadmateKiller.madmateKiller);
 
             notWinners.AddRange(Jackal.formerJackals);
 
@@ -346,17 +347,30 @@ namespace TheOtherRoles.Patches
             }
             else
             {
-                // Madmate wins if team impostors wins
-                if (Madmate.madmate != null)
+                bool isImpostor = false;
+                foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
                 {
-                    foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
+                    if (winner.IsImpostor)
                     {
-                        if (winner.IsImpostor)
-                        {
-                            WinningPlayerData wpd = new WinningPlayerData(Madmate.madmate.Data);
-                            TempData.winners.Add(wpd);
-                            break;
-                        }
+                        isImpostor = true;
+                        break;
+                    }
+                }
+
+                if (isImpostor)
+				{
+                    // Madmate wins if team impostors wins
+                    if (Madmate.madmate != null)
+                    {
+                        WinningPlayerData wpd = new WinningPlayerData(Madmate.madmate.Data);
+                        TempData.winners.Add(wpd);
+                    }
+
+                    // MadmateKiller wins if team impostors wins
+                    if (MadmateKiller.madmateKiller != null)
+                    {
+                        WinningPlayerData wpd = new WinningPlayerData(MadmateKiller.madmateKiller.Data);
+                        TempData.winners.Add(wpd);
                     }
                 }
             }
@@ -967,7 +981,7 @@ namespace TheOtherRoles.Patches
                             bool lover = isLover(playerInfo);
                             if (lover) numLoversAlive++;
 
-                            if (playerInfo.Role.IsImpostor)
+                            if (playerInfo.Role.IsImpostor || (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller.PlayerId == playerInfo.PlayerId && KillerCreator.killerCreator != null && KillerCreator.killerCreator.isDead()))
                             {
                                 numImpostorsAlive++;
                                 if (lover) impLover = true;

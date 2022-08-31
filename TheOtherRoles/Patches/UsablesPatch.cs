@@ -114,11 +114,21 @@ namespace TheOtherRoles.Patches
             bool canUse;
             bool couldUse;
             __instance.CanUse(CachedPlayer.LocalPlayer.Data, out canUse, out couldUse);
-            bool canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Spy.spy && CachedPlayer.LocalPlayer.PlayerControl != Madmate.madmate;
             if (!canUse) return false; // No need to execute the native method as using is disallowed anyways
 
             bool isEnter = !CachedPlayer.LocalPlayer.PlayerControl.inVent;
-
+            bool canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Spy.spy;
+            if (canMoveInVents) canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Madmate.madmate;
+            if (canMoveInVents)
+			{
+                if (CachedPlayer.LocalPlayer.PlayerControl == MadmateKiller.madmateKiller && 
+                    CachedPlayer.LocalPlayer.PlayerControl.Data.RoleType == RoleTypes.Crewmate &&
+                    !MadmateKiller.canMoveVents)
+				{
+                    canMoveInVents = false;
+                }
+            }
+            
             if (__instance.name.StartsWith("JackInTheBoxVent_")) {
                 __instance.SetButtons(isEnter && canMoveInVents);
                 MessageWriter writer = AmongUsClient.Instance.StartRpc(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UseUncheckedVent, Hazel.SendOption.Reliable);
@@ -314,9 +324,11 @@ namespace TheOtherRoles.Patches
 
             if (Swapper.swapper != null && Swapper.swapper == CachedPlayer.LocalPlayer.PlayerControl)
                 return !__instance.TaskTypes.Any(x => x == TaskTypes.FixLights || x == TaskTypes.FixComms);
-            if (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl &&
-                __instance.AllowImpostor)
+            if (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl && __instance.AllowImpostor)
                 return !__instance.TaskTypes.Any(x => x == TaskTypes.FixLights || x == TaskTypes.FixComms);
+            if (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == CachedPlayer.LocalPlayer.PlayerControl && MadmateKiller.madmateKiller.Data.RoleType == RoleTypes.Crewmate && __instance.AllowImpostor)
+                return !__instance.TaskTypes.Any(x => (!MadmateKiller.canFixLightsTask && x == TaskTypes.FixLights) || (!MadmateKiller.canFixCommsTask && x == TaskTypes.FixComms));
+
             if (__instance.AllowImpostor) return true;
             if (!Helpers.hasFakeTasks(pc.Object)) return true;
             __result = float.MaxValue;
@@ -330,7 +342,8 @@ namespace TheOtherRoles.Patches
         static void Postfix(TuneRadioMinigame __instance) {
             // Block Swapper from fixing comms. Still looking for a better way to do this, but deleting the task doesn't seem like a viable option since then the camera, admin table, ... work while comms are out
             if ((Swapper.swapper != null && Swapper.swapper == CachedPlayer.LocalPlayer.PlayerControl) ||
-                (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl)) {
+                (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl) ||
+                (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == CachedPlayer.LocalPlayer.PlayerControl && MadmateKiller.madmateKiller.Data.RoleType == RoleTypes.Crewmate && !MadmateKiller.canFixCommsTask)) {
                 __instance.Close();
             }
         }
@@ -342,7 +355,8 @@ namespace TheOtherRoles.Patches
         static void Postfix(SwitchMinigame __instance) {
             // Block Swapper from fixing lights. One could also just delete the PlayerTask, but I wanted to do it the same way as with coms for now.
             if ((Swapper.swapper != null && Swapper.swapper == CachedPlayer.LocalPlayer.PlayerControl) ||
-                (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl)) {
+                (Madmate.madmate != null && Madmate.madmate == CachedPlayer.LocalPlayer.PlayerControl) ||
+                (MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == CachedPlayer.LocalPlayer.PlayerControl && MadmateKiller.madmateKiller.Data.RoleType == RoleTypes.Crewmate && !MadmateKiller.canFixLightsTask)) {
                 __instance.Close();
             }
         }

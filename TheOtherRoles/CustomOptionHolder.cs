@@ -329,6 +329,15 @@ namespace TheOtherRoles {
         public static CustomOption doorHackerCooldown;
         public static CustomOption doorHackerDuration;
 
+        public static CustomOption killerCreatorSpawnRate;
+        public static CustomOption madmateKillerCanDieToSheriff;
+        public static CustomOption madmateKillerCanEnterVents;
+        public static CustomOption madmateKillerCanMoveVents;
+        public static CustomOption madmateKillerHasImpostorVision;
+        public static CustomOption madmateKillerNoticeImpostors;
+        public static CustomOption madmateKillerCanFixLightsTask;
+        public static CustomOption madmateKillerCanFixCommsTask;
+
         public static CustomOption kataomoiSpawnRate;
         public static CustomOption kataomoiStareCooldown;
         public static CustomOption kataomoiStareDuration;
@@ -521,6 +530,14 @@ namespace TheOtherRoles {
             doorHackerCooldown = CustomOption.Create(910000201, Types.Impostor, "Door Hacker Cooldown", 30f, 0f, 60f, 2.5f, doorHackerSpawnRate);
             doorHackerDuration = CustomOption.Create(910000202, Types.Impostor, "Door Hacker Duration", 5f, 1f, 30f, 0.5f, doorHackerSpawnRate);
 
+            killerCreatorSpawnRate = CustomOption.Create(910000400, Types.Impostor, cs(KillerCreator.color, "Killer Creator"), rates, null, true);
+            madmateKillerCanDieToSheriff = CustomOption.Create(910000401, Types.Impostor, "Madmate Killer Can Die To Sheriff", false, killerCreatorSpawnRate);
+            madmateKillerCanEnterVents = CustomOption.Create(910000402, Types.Impostor, "Madmate Killer Can Enter Vents", false, killerCreatorSpawnRate);
+            madmateKillerCanMoveVents = CustomOption.Create(910000407, Types.Impostor, "Madmate Killer Can Move Vents", false, killerCreatorSpawnRate);
+            madmateKillerHasImpostorVision = CustomOption.Create(910000403, Types.Impostor, "Madmate Killer Has Impostor Vision", false, killerCreatorSpawnRate);
+            madmateKillerNoticeImpostors = CustomOption.Create(910000404, Types.Impostor, "Show Impostors When Become Madmate Killer", false, killerCreatorSpawnRate);
+            madmateKillerCanFixLightsTask = CustomOption.Create(910000405, Types.Impostor, "Madmate Killer Can Fix Lights Task", false, killerCreatorSpawnRate);
+            madmateKillerCanFixCommsTask = CustomOption.Create(910000406, Types.Impostor, "Madmate Killer Can Fix Comms Task", false, killerCreatorSpawnRate);
 
             jesterSpawnRate = CustomOption.Create(60, Types.Neutral, cs(Jester.color, "Jester"), rates, null, true);
             jesterCanCallEmergency = CustomOption.Create(61, Types.Neutral, "Jester Can Call Emergency Meeting", true, jesterSpawnRate);

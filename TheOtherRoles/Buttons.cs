@@ -59,6 +59,7 @@ namespace TheOtherRoles
 
         public static CustomButton doorHackerButton;
         public static CustomButton taskVsModeRetireButton;
+        public static CustomButton killerCreatorCreatesKillerReserveButton;
 
         public static Dictionary<byte, List<CustomButton>> deputyHandcuffedButtons = null;
         public static PoolablePlayer morphTargetDisplay;
@@ -313,6 +314,7 @@ namespace TheOtherRoles
                         if ((Sheriff.currentTarget.Data.Role.IsImpostor && (Sheriff.currentTarget != Mini.mini || Mini.isGrownUp())) ||
                             (Sheriff.spyCanDieToSheriff && Spy.spy == Sheriff.currentTarget) ||
                             (Sheriff.madmateCanDieToSheriff && Madmate.madmate == Sheriff.currentTarget) ||
+                            (Sheriff.madmateKillerCanDieToSheriff && MadmateKiller.madmateKiller == Sheriff.currentTarget) ||
                             (Sheriff.canKillNeutrals && (Arsonist.arsonist == Sheriff.currentTarget || Jester.jester == Sheriff.currentTarget || Vulture.vulture == Sheriff.currentTarget || Lawyer.lawyer == Sheriff.currentTarget || Pursuer.pursuer == Sheriff.currentTarget || Kataomoi.kataomoi == Sheriff.currentTarget)) ||
                             (Jackal.jackal == Sheriff.currentTarget || Sidekick.sidekick == Sheriff.currentTarget)) {
                             targetId = Sheriff.currentTarget.PlayerId;
@@ -1844,6 +1846,32 @@ namespace TheOtherRoles
                 KeyCode.KeypadPlus
                 );
             zoomOutButton.Timer = 0f;
+
+            // KillerCreator creates KillerReserve button
+            killerCreatorCreatesKillerReserveButton = new CustomButton(
+                () => {
+                    /*
+                     * creates KillerReserve
+                     */
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.KillerCreatorCreatesMadmateKiller, Hazel.SendOption.Reliable, -1);
+                    writer.Write(KillerCreator.currentTarget.PlayerId);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.killerCreatorCreatesMadmateKiller(KillerCreator.currentTarget.PlayerId);
+                    SoundEffectsManager.play("jackalSidekick");
+                },
+                () => {
+                    return KillerCreator.killerCreator != null &&
+                      KillerCreator.killerCreator == CachedPlayer.LocalPlayer.PlayerControl &&
+                      MadmateKiller.madmateKiller == null &&
+                      !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead;
+                },
+                () => { return KillerCreator.currentTarget && CachedPlayer.LocalPlayer.PlayerControl.CanMove; },
+                () => { },
+                EvilHacker.getMadmateButtonSprite(),
+                new Vector3(-2.7f, -0.06f, 0),
+                __instance,
+                null
+            );
 
             // Set the default (or settings from the previous game) timers/durations when spawning the buttons
             setCustomButtonCooldowns();

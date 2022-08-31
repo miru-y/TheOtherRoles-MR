@@ -249,7 +249,7 @@ namespace TheOtherRoles {
             if (player == Madmate.madmate)
                 return !Madmate.noticeImpostors;
 
-            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Contains(player) || player == Kataomoi.kataomoi);
+            return (player == Jester.jester || player == Jackal.jackal || player == Sidekick.sidekick || player == Arsonist.arsonist || player == Vulture.vulture || Jackal.formerJackals.Contains(player) || player == Kataomoi.kataomoi || player == MadmateKiller.madmateKiller);
         }
 
         public static bool canBeErased(this PlayerControl player) {
@@ -410,6 +410,8 @@ namespace TheOtherRoles {
             else if (Vulture.canUseVents && Vulture.vulture != null && Vulture.vulture == player)
                 roleCouldUse = true;
             else if (Madmate.canEnterVents && Madmate.madmate != null && Madmate.madmate == player)
+                roleCouldUse = true;
+            else if (MadmateKiller.canEnterVents && MadmateKiller.madmateKiller != null && MadmateKiller.madmateKiller == player)
                 roleCouldUse = true;
             else if (player.Data?.Role != null && player.Data.Role.CanVent)  {
                 if (Janitor.janitor != null && Janitor.janitor == CachedPlayer.LocalPlayer.PlayerControl)

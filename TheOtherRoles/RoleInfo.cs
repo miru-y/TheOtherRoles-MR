@@ -75,6 +75,8 @@ namespace TheOtherRoles
         public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
         public static RoleInfo doorHacker = new RoleInfo("DoorHacker", DoorHacker.color, "Slip through the door and cover your tracks.", "Slip through the door and cover your tracks.", RoleId.DoorHacker);
         public static RoleInfo kataomoi = new RoleInfo("Kataomoi", Kataomoi.color, "Become one with your unrequited love.", "Become one with your unrequited love.", RoleId.Kataomoi, true);
+        public static RoleInfo killerCreator = new RoleInfo("Killer Creator", KillerCreator.color, "Make a Madmate Killer.", "Make a Madmate Killer.", RoleId.KillerCreator);
+        public static RoleInfo madmateKiller = new RoleInfo("Madmate Killer", MadmateKiller.color, "If Impostor dies, kill the Crewmates.", "If Impostor dies, kill the Crewmates.", RoleId.MadmateKiller);
 
         // Task Vs Mode
         public static RoleInfo taskRacer = new RoleInfo("Task Racer", TaskRacer.color, "Finish the task before everyone\nelse and aim for 1st!", "Finish the task before everyone\nelse and aim for 1st!", RoleId.TaskRacer);
@@ -150,6 +152,8 @@ namespace TheOtherRoles
             taskMaster,
             doorHacker,
             kataomoi,
+            killerCreator,
+            madmateKiller,
 
             // Task Vs Mode
             taskRacer,
@@ -223,6 +227,8 @@ namespace TheOtherRoles
             if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
             if (p == DoorHacker.doorHacker) infos.Add(doorHacker);
             if (p == Kataomoi.kataomoi) infos.Add(kataomoi);
+            if (p == KillerCreator.killerCreator) infos.Add(killerCreator);
+            if (p == MadmateKiller.madmateKiller) infos.Add(madmateKiller);
 
             // Task Vs Mode
             if (TaskRacer.isTaskRacer(p))

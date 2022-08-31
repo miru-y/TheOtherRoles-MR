@@ -267,6 +267,19 @@ namespace TheOtherRoles.Patches
             }
         }
 
+        static void madmateKillerCheckPromotion()  {
+            // If LocalPlayer is MadmateKiller, the KillerCreator is disconnected and MadmateKiller promotion is enabled, then trigger promotion
+            if (MadmateKiller.madmateKiller == null || MadmateKiller.madmateKiller != CachedPlayer.LocalPlayer.PlayerControl) return;
+            if (MadmateKiller.madmateKiller.Data.IsDead || MadmateKiller.madmateKiller.Data.RoleType == RoleTypes.Impostor) return;
+
+            if (KillerCreator.killerCreator == null || KillerCreator.killerCreator?.Data?.Disconnected == true)
+            {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.MadmateKillerPromotes, Hazel.SendOption.Reliable, -1);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.madmateKillerPromotes();
+            }
+        }
+
         static void eraserSetTarget() {
             if (Eraser.eraser == null || Eraser.eraser != CachedPlayer.LocalPlayer.PlayerControl) return;
 
@@ -922,6 +935,12 @@ namespace TheOtherRoles.Patches
             }
         }
 
+        static void killerCreatorSetTarget() {
+            if (KillerCreator.killerCreator == null || KillerCreator.killerCreator != CachedPlayer.LocalPlayer.PlayerControl) return;
+            KillerCreator.currentTarget = setTarget(true);
+            setPlayerOutline(KillerCreator.currentTarget, KillerCreator.color);
+        }
+
         static void reduceKillCooldown(PlayerControl __instance)
         {
             if (CustomOptionHolder.alwaysConsumeKillCooldown.getBool())
@@ -993,6 +1012,8 @@ namespace TheOtherRoles.Patches
                 deputyCheckPromotion();
                 // Check for sidekick promotion on Jackal disconnect
                 sidekickCheckPromotion();
+                // Check for MadmateKiller promotion on KillerCreator disconnect
+                madmateKillerCheckPromotion();
                 // SecurityGuard
                 securityGuardSetTarget();
                 securityGuardUpdate();
@@ -1027,6 +1048,8 @@ namespace TheOtherRoles.Patches
                 doorHackerUpdate();
                 // Kataomoi
                 kataomoiUpdate();
+                // KillerCreator
+                killerCreatorSetTarget();
 
                 // Task Vs Mode
                 TaskRacer.update();
@@ -1242,6 +1265,13 @@ namespace TheOtherRoles.Patches
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SidekickPromotes, Hazel.SendOption.Reliable, -1);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.sidekickPromotes();
+            }
+
+            // MadmateKiller promotion trigger on murder
+            if (MadmateKiller.madmateKiller != null && !MadmateKiller.madmateKiller.isDead() && target == KillerCreator.killerCreator && KillerCreator.killerCreator == CachedPlayer.LocalPlayer.PlayerControl) {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.MadmateKillerPromotes, Hazel.SendOption.Reliable, -1);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.madmateKillerPromotes();
             }
 
             // Pursuer promotion trigger on murder (the host sends the call such that everyone recieves the update before a possible game End)
@@ -1564,6 +1594,13 @@ namespace TheOtherRoles.Patches
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SidekickPromotes, Hazel.SendOption.Reliable, -1);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.sidekickPromotes();
+            }
+
+            // MadmateKiller promotion trigger on exile
+            if (MadmateKiller.madmateKiller != null && !MadmateKiller.madmateKiller.isDead() && __instance == KillerCreator.killerCreator && KillerCreator.killerCreator == CachedPlayer.LocalPlayer.PlayerControl) {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.MadmateKillerPromotes, Hazel.SendOption.Reliable, -1);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.madmateKillerPromotes();
             }
 
             // Pursuer promotion trigger on exile & suicide (the host sends the call such that everyone recieves the update before a possible game End)
