@@ -197,54 +197,70 @@ namespace TheOtherRoles
             }
 
 #if false
-            // Debug
-            if (Input.GetKey(KeyCode.Alpha0))
+            if (Input.GetKey(KeyCode.LeftControl))
 			{
-                if (debugText == null || debugText.gameObject == null)
+                if (FastDestroyableSingleton<HudManager>.Instance != null)
 				{
-                    RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance?.roomTracker;
-                    GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
-                    UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
-                    GameObject.DontDestroyOnLoad(gameObject);
-                    gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
-                    gameObject.transform.localPosition = new Vector3(0, 0, -930f);
-                    gameObject.transform.localScale = Vector3.one * 1f;
-                    debugText = gameObject.GetComponent<TMPro.TMP_Text>();
-                    debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
-                }
+                    if (Input.GetKeyDown(KeyCode.Alpha9))
+                    {
+                        if (debugText != null)
+                        {
+                            if (debugText.gameObject != null)
+                                GameObject.DestroyImmediate(debugText.gameObject);
+                            debugText = null;
+                        }
+                    }
 
-                var builder = new System.Text.StringBuilder();
+                    if (Input.GetKey(KeyCode.Alpha0))
+                    {
+                        if (debugText == null || debugText.gameObject == null)
+                        {
+                            RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance.roomTracker;
+                            GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
+                            UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
+                            gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
+                            gameObject.transform.localPosition = new Vector3(0, 0, -930f);
+                            gameObject.transform.localScale = Vector3.one * 1f;
+                            debugText = gameObject.GetComponent<TMPro.TMP_Text>();
+                            debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+                        }
+
+                        var builder = new System.Text.StringBuilder();
+                        {
+                        }
+
+                        debugText.text = builder.ToString();
+                        debugText.gameObject.SetActive(true);
+                    }
+                    else if (debugText != null)
+                    {
+                        debugText.gameObject.SetActive(false);
+                    }
+                }
+ 
+
+                if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
+                    for (int i = 0; i < bots.Count; ++i)
+                    {
+                        int index = random.Next(bots.Count);
+                        while (bots[index].Data.IsDead)
+                            index = random.Next(bots.Count);
+                        MeetingHud.Instance.CmdCastVote(bots[i].PlayerId, bots[index].PlayerId);
+                    }
                 }
 
-                debugText.text = builder.ToString();
-                debugText.gameObject.SetActive(true);
-            }
-            else if (debugText != null)
-			{
-                debugText.gameObject.SetActive(false);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                for (int i = 0; i < bots.Count; ++i)
+                if (Input.GetKeyDown(KeyCode.Alpha2))
                 {
-                    int index = random.Next(bots.Count);
-                    while (bots[index].Data.IsDead)
-                        index = random.Next(bots.Count);
-                    MeetingHud.Instance.CmdCastVote(bots[i].PlayerId, bots[index].PlayerId);
+                    MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+                    killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                    killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
+                    killWriter.Write(byte.MaxValue);
+                    AmongUsClient.Instance.FinishRpcImmediately(killWriter);
+                    RPCProcedure.uncheckedMurderPlayer(CachedPlayer.LocalPlayer.PlayerId, CachedPlayer.LocalPlayer.PlayerId, Byte.MaxValue);
                 }
             }
-
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
-                killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
-                killWriter.Write(CachedPlayer.LocalPlayer.PlayerId);
-                killWriter.Write(byte.MaxValue);
-                AmongUsClient.Instance.FinishRpcImmediately(killWriter);
-                RPCProcedure.uncheckedMurderPlayer(CachedPlayer.LocalPlayer.PlayerId, CachedPlayer.LocalPlayer.PlayerId, Byte.MaxValue);
-            }
+ 
 #endif
         }
 
