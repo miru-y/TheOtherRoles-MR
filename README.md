@@ -5,6 +5,7 @@ This mod is The Other Roles extension mod which implements new roles and systems
   - [Task Master](#task-master-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Door Hacker](#door-hacker-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Kataomoi](#kataomoi-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Pepper, Tsunaarare)
+  - [Killer Creator](#killer-creator-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Asazaki)
 - **New Systems**
   - **System:** Added "Task Vs Mode".
   - **System:** Added "Custom Preset System".
@@ -86,7 +87,7 @@ Even more roles are coming soon. :)
 | [Evil Guesser](#guesser) | [Snitch](#snitch) |  |  |
 | [Evil Yasuna (MR Edition only)](#yasuna-mr-edition-only) | [Spy](#spy) |  |  |
 | [Door Hacker (MR Edition only)](#door-hacker-mr-edition-only) | [Portalmaker](#portalmaker) |  |  |
-|  | [Security Guard](#security-guard) |  |  |
+| [Killer Creator (MR Edition only)](#killer-creator-mr-edition-only) | [Security Guard](#security-guard) |  |  |
 |  | [Medium](#medium) |  |  |
 |  | [Nice Guesser](#guesser) |  |
 |  | [Yasuna (MR Edition only)](#yasuna-mr-edition-only) | |
@@ -1006,6 +1007,24 @@ During the game, press the "DoorHack" button in the lower right corner to enter 
 |Door Hacker Duration|Effect duration of door hack function.|
 -----------------------
 
+## Killer Creator (MR Edition only)
+### **Team: Impostors**
+This is an Impostor roles that allows for a one-time nomination of **"Madmate Killer"** from among the Crewmates.\
+**"Madmate Killer"** is promoted to Impostor upon the death of **"Killer Creator"**.\
+*If the **"Madmate Killer"** becomes a **"Madmate Killer"**, all tasks are treated as completed.\
+*If the Impostor team wins with the **"Killer Creator"** still alive, the **"Madmate Killer"** also wins.
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+|**"Madmate Killer"** Can Die To Sheriff|ON/OFF|
+|**"Madmate Killer"** Can Enter Vents|ON/OFF|
+|**"Madmate Killer"** Can Move Vents|ON/OFF|
+|**"Madmate Killer"** Has Impostor Vision|ON/OFF|
+|Show Impostors When Become **"Madmate Killer"**|ON/OFF|
+|**"Madmate Killer"** Can Fix Lights Task|ON/OFF|
+|**"Madmate Killer"** Can Fix Comms Task|ON/OFF|
+-----------------------
 
 ## Guesser
 ### **Team: Crewmates or Impostors**
