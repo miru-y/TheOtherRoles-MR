@@ -89,7 +89,7 @@ namespace TheOtherRoles.Patches
                 }
                 TheOtherRolesPlugin.Instance.Config.Save();
                 CustomOption.ShareOptionSelections();
-                CachedPlayer.LocalPlayer.PlayerControl.RpcSyncSettings(SaveManager.hostOptionsData);
+                CachedPlayer.LocalPlayer.PlayerControl.RpcSyncSettings(GameOptionsData.hostOptionsData);
             }
 
             public void OnRename(string newPresetName) {

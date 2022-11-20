@@ -7,6 +7,7 @@ using System.Linq;
 using Hazel;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
+using TheOtherRoles.CustomGameModes;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
@@ -16,6 +17,7 @@ namespace TheOtherRoles.Patches {
         public static void Prefix(IntroCutscene __instance) {
             // Generate and initialize player icons
             int playerCounter = 0;
+            int hideNSeekCounter = 0;
             if (CachedPlayer.LocalPlayer != null && FastDestroyableSingleton<HudManager>.Instance != null) {
                 Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z);
                 foreach (PlayerControl p in CachedPlayer.AllPlayers) {
@@ -29,16 +31,26 @@ namespace TheOtherRoles.Patches {
                     player.cosmetics.nameText.text = data.PlayerName;
                     player.SetFlipX(true);
                     MapOptions.playerIcons[p.PlayerId] = player;
+                    player.gameObject.SetActive(false);
 
                     if (CachedPlayer.LocalPlayer.PlayerControl == Arsonist.arsonist && p != Arsonist.arsonist) {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, -0.25f, 0) + Vector3.right * playerCounter++ * 0.35f;
                         player.transform.localScale = Vector3.one * 0.2f;
                         player.setSemiTransparent(true);
                         player.gameObject.SetActive(true);
-                    } else if (CachedPlayer.LocalPlayer.PlayerControl == BountyHunter.bountyHunter) {
-                        player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
-                        player.transform.localScale = Vector3.one * 0.4f;
-                        player.gameObject.SetActive(false);
+                    } else if (HideNSeek.isHideNSeekGM) {
+                        if (HideNSeek.isHunted() && p.Data.Role.IsImpostor) {
+                            player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0.4f, 0) + Vector3.right * playerCounter++ * 0.6f;
+                            player.transform.localScale = Vector3.one * 0.3f;
+                            player.cosmetics.nameText.text += $"{Helpers.cs(Color.red, " (Hunter)")}";
+                            player.gameObject.SetActive(true);
+                        } else if (!p.Data.Role.IsImpostor) {
+                            player.transform.localPosition = bottomLeft + new Vector3(-0.35f, -0.25f, 0) + Vector3.right * hideNSeekCounter++ * 0.35f;
+                            player.transform.localScale = Vector3.one * 0.2f;
+                            player.setSemiTransparent(true);
+                            player.gameObject.SetActive(true);
+                        }
+
                     } else if (CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi && p == Kataomoi.target) {
                         player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
                         player.transform.localScale = Vector3.one * 0.4f;
@@ -72,9 +84,11 @@ namespace TheOtherRoles.Patches {
                             TaskRacer.rankMarkObjects[index].transform.localPosition = position + new Vector3(0f, 0.39f, -8f);
                             TaskRacer.rankMarkObjects[index].transform.localScale = Vector3.one * 0.8f;
                         }
-                    } else {
+                    } else {   //  This can be done for all players not just for the bounty hunter as it was before. Allows the thief to have the correct position and scaling
+                        player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0f, 0);
+                        player.transform.localScale = Vector3.one * 0.4f;
                         player.gameObject.SetActive(false);
-                    }
+                    } 
                 }
             }
 
@@ -94,8 +108,8 @@ namespace TheOtherRoles.Patches {
             SoundEffectsManager.Load();
 
             // First kill
-            if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "") {
-                PlayerControl target = CachedPlayer.AllPlayers.FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
+            if (AmongUsClient.Instance.AmHost && MapOptions.shieldFirstKill && MapOptions.firstKillName != "" && !HideNSeek.isHideNSeekGM) {
+                PlayerControl target = PlayerControl.AllPlayerControls.ToArray().ToList().FirstOrDefault(x => x.Data.PlayerName.Equals(MapOptions.firstKillName));
                 if (target != null) {
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.SetFirstKill, Hazel.SendOption.Reliable, -1);
                     writer.Write(target.PlayerId);
@@ -105,6 +119,55 @@ namespace TheOtherRoles.Patches {
             }
 
             MapOptions.firstKillName = "";
+
+            if (HideNSeek.isHideNSeekGM)
+            {
+                foreach (PlayerControl player in HideNSeek.getHunters())
+                {
+                    player.moveable = false;
+                    player.NetTransform.Halt();
+                    HideNSeek.timer = HideNSeek.hunterWaitingTime;
+                    FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(HideNSeek.hunterWaitingTime, new Action<float>((p) => {
+                        if (p == 1f)
+                        {
+                            player.moveable = true;
+                            HideNSeek.timer = CustomOptionHolder.hideNSeekTimer.getFloat() * 60;
+                            HideNSeek.isWaitingTimer = false;
+                        }
+                    })));
+                }
+
+                if (HideNSeek.polusVent == null && PlayerControl.GameOptions.MapId == 2)
+                {
+                    var list = GameObject.FindObjectsOfType<Vent>().ToList();
+                    var adminVent = list.FirstOrDefault(x => x.gameObject.name == "AdminVent");
+                    var bathroomVent = list.FirstOrDefault(x => x.gameObject.name == "BathroomVent");
+                    HideNSeek.polusVent = UnityEngine.Object.Instantiate<Vent>(adminVent);
+                    HideNSeek.polusVent.gameObject.AddSubmergedComponent(SubmergedCompatibility.Classes.ElevatorMover);
+                    HideNSeek.polusVent.transform.position = new Vector3(36.55068f, -21.5168f, -0.0215168f);
+                    HideNSeek.polusVent.Left = adminVent;
+                    HideNSeek.polusVent.Right = bathroomVent;
+                    HideNSeek.polusVent.Center = null;
+                    HideNSeek.polusVent.Id = MapUtilities.CachedShipStatus.AllVents.Select(x => x.Id).Max() + 1; // Make sure we have a unique id
+                    var allVentsList = MapUtilities.CachedShipStatus.AllVents.ToList();
+                    allVentsList.Add(HideNSeek.polusVent);
+                    MapUtilities.CachedShipStatus.AllVents = allVentsList.ToArray();
+                    HideNSeek.polusVent.gameObject.SetActive(true);
+                    HideNSeek.polusVent.name = "newVent_" + HideNSeek.polusVent.Id;
+
+                    adminVent.Center = HideNSeek.polusVent;
+                    bathroomVent.Center = HideNSeek.polusVent;
+                }
+
+                ShipStatusPatch.originalNumCrewVisionOption = PlayerControl.GameOptions.CrewLightMod;
+                ShipStatusPatch.originalNumImpVisionOption = PlayerControl.GameOptions.ImpostorLightMod;
+                ShipStatusPatch.originalNumKillCooldownOption = PlayerControl.GameOptions.killCooldown;
+
+                PlayerControl.GameOptions.ImpostorLightMod = CustomOptionHolder.hideNSeekHunterVision.getFloat();
+                PlayerControl.GameOptions.CrewLightMod = CustomOptionHolder.hideNSeekHuntedVision.getFloat();
+                PlayerControl.GameOptions.KillCooldown = CustomOptionHolder.hideNSeekKillCooldown.getFloat();
+            }
+
             if (Kataomoi.kataomoi != null && CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi) {
                 if (FastDestroyableSingleton<HudManager>.Instance != null) {
                     Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
@@ -205,18 +268,13 @@ namespace TheOtherRoles.Patches {
     class IntroPatch {
         public static void setupIntroTeamIcons(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
             // Intro solo teams
-            if (CachedPlayer.LocalPlayer.PlayerControl == Jester.jester || CachedPlayer.LocalPlayer.PlayerControl == Jackal.jackal || CachedPlayer.LocalPlayer.PlayerControl == Arsonist.arsonist || CachedPlayer.LocalPlayer.PlayerControl == Vulture.vulture || CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer || CachedPlayer.LocalPlayer.PlayerControl == Kataomoi.kataomoi) {
-                var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
-                soloTeam.Add(CachedPlayer.LocalPlayer.PlayerControl);
-                yourTeam = soloTeam;
-            }
 
             /*
              * Madmate is a solo team as well
              * This code is redundant, but this part should be decoupled from the original code
              * to merge future changes
              */
-            if (CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate) {
+            if (CachedPlayer.LocalPlayer.PlayerControl == Madmate.madmate || Helpers.isNeutral(CachedPlayer.LocalPlayer.PlayerControl)) {
                 var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
                 soloTeam.Add(CachedPlayer.LocalPlayer.PlayerControl);
                 yourTeam = soloTeam;

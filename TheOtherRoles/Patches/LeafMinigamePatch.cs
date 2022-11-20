@@ -2,7 +2,7 @@ using HarmonyLib;
 using UnityEngine;
 using TheOtherRoles.Players;
 using System;
-using BepInEx.IL2CPP.Utils.Collections;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(LeafMinigame), nameof(LeafMinigame.Begin))]

@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace TheOtherRoles
@@ -58,7 +57,7 @@ namespace TheOtherRoles
         {
             if (AudioClipName == null) return null;
 
-            if (audioClips == null) audioClips = UnityEngine.Object.FindObjectsOfTypeAll(AudioClip.Il2CppType);
+            if (audioClips == null) audioClips = UnityEngine.Object.FindObjectsOfTypeAll(AudioClip.GetIl2CppType());
 
             if (AudioClip != null) return AudioClip;
 

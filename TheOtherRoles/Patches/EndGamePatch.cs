@@ -9,6 +9,7 @@ using System.Text;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using Hazel;
+using TheOtherRoles.CustomGameModes;
 
 namespace TheOtherRoles.Patches
 {
@@ -20,7 +21,7 @@ namespace TheOtherRoles.Patches
         JesterWin = 13,
         ArsonistWin = 14,
         VultureWin = 15,
-        LawyerSoloWin = 16,
+        ProsecutorWin = 16,
         KataomoiWin = 80,
         TaskMasterWin = 100,
 
@@ -42,9 +43,9 @@ namespace TheOtherRoles.Patches
         MiniLose,
         ArsonistWin,
         VultureWin,
-        LawyerSoloWin,
         AdditionalLawyerBonusWin,
         AdditionalAlivePursuerWin,
+        ProsecutorWin,
         TaskMasterTeamWin,
         KataomoiWin,
 
@@ -61,6 +62,7 @@ namespace TheOtherRoles.Patches
         public static List<WinCondition> additionalWinConditions = new List<WinCondition>();
         public static List<PlayerRoleInfo> playerRoles = new List<PlayerRoleInfo>();
         public static List<TaskVsModeInfo> taskVsModeInfos = new List<TaskVsModeInfo>();
+        public static float timer = 0;
 
         public static void clear()
         {
@@ -68,6 +70,7 @@ namespace TheOtherRoles.Patches
             taskVsModeInfos.Clear();
             additionalWinConditions.Clear();
             winCondition = WinCondition.Default;
+            timer = 0;
         }
 
         internal class PlayerRoleInfo
@@ -79,6 +82,8 @@ namespace TheOtherRoles.Patches
             public int ExTasksCompleted { get; set; }
             public int ExTasksTotal { get; set; }
             public string ExtraInfo { get; set; }
+            public bool IsGuesser { get; set; }
+            public int? Kills { get; set; }
         }
 
         internal class TaskVsModeInfo
@@ -139,9 +144,14 @@ namespace TheOtherRoles.Patches
                     int allTasks = PlayerControl.GameOptions.NumCommonTasks + PlayerControl.GameOptions.NumLongTasks + PlayerControl.GameOptions.NumShortTasks;
                     var roles = RoleInfo.getRoleInfoForPlayer(playerControl);
                     var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(playerControl.Data, true, true);
+                    bool isGuesser = HandleGuesser.isGuesserGm && HandleGuesser.isGuesser(playerControl.PlayerId);
+                    int? killCount = GameHistory.deadPlayers.FindAll(x => x.killerIfExisting != null && x.killerIfExisting.PlayerId == playerControl.PlayerId).Count;
+                    if (killCount == 0 && !(new List<RoleInfo>() { RoleInfo.sheriff, RoleInfo.jackal, RoleInfo.sidekick, RoleInfo.thief }.Contains(RoleInfo.getRoleInfoForPlayer(playerControl, false).FirstOrDefault()) || playerControl.Data.Role.IsImpostor))
+                    {
+                        killCount = null;
+                    }
                     bool isTaskMaster = TaskMaster.isTaskMaster(playerControl.PlayerId);
                     bool isTaskMasterExTasks = isTaskMaster && TaskMaster.isTaskComplete;
-
                     string extraInfo = "";
                     if (Kataomoi.kataomoi != null && Kataomoi.target == playerControl.PlayerControl)
                         extraInfo = Helpers.cs(Kataomoi.color, "♥");
@@ -155,6 +165,8 @@ namespace TheOtherRoles.Patches
                         ExTasksTotal = isTaskMasterExTasks ? TaskMaster.allExTasks : isTaskMaster ? TaskMasterTaskHelper.GetTaskMasterTasks() : 0,
                         ExTasksCompleted = isTaskMasterExTasks ? TaskMaster.clearExTasks : 0,
                         ExtraInfo = extraInfo,
+                        IsGuesser = isGuesser,
+                        Kills = killCount
                     });
                 }
             }
@@ -169,6 +181,7 @@ namespace TheOtherRoles.Patches
             if (Madmate.madmate != null) notWinners.Add(Madmate.madmate);
             if (Lawyer.lawyer != null) notWinners.Add(Lawyer.lawyer);
             if (Pursuer.pursuer != null) notWinners.Add(Pursuer.pursuer);
+            if (Thief.thief != null) notWinners.Add(Thief.thief);
             if (Kataomoi.kataomoi != null) notWinners.Add(Kataomoi.kataomoi);
             if (MadmateKiller.madmateKiller != null) notWinners.Add(MadmateKiller.madmateKiller);
 
@@ -187,7 +200,7 @@ namespace TheOtherRoles.Patches
             bool loversWin = Lovers.existingAndAlive() && (gameOverReason == (GameOverReason)CustomGameOverReason.LoversWin || (TempData.DidHumansWin(gameOverReason) && !Lovers.existingWithKiller())); // Either they win if they are among the last 3 players, or they win if they are both Crewmates and both alive and the Crew wins (Team Imp/Jackal Lovers can only win solo wins)
             bool teamJackalWin = gameOverReason == (GameOverReason)CustomGameOverReason.TeamJackalWin && ((Jackal.jackal != null && !Jackal.jackal.Data.IsDead) || (Sidekick.sidekick != null && !Sidekick.sidekick.Data.IsDead));
             bool vultureWin = Vulture.vulture != null && gameOverReason == (GameOverReason)CustomGameOverReason.VultureWin;
-            bool lawyerSoloWin = Lawyer.lawyer != null && gameOverReason == (GameOverReason)CustomGameOverReason.LawyerSoloWin;
+            bool prosecutorWin = Lawyer.lawyer != null && gameOverReason == (GameOverReason)CustomGameOverReason.ProsecutorWin;
             bool taskMasterTeamWin = TaskMaster.taskMaster != null && gameOverReason == (GameOverReason)CustomGameOverReason.TaskMasterWin;
             bool kataomoiWin = Kataomoi.kataomoi != null && gameOverReason == (GameOverReason)CustomGameOverReason.KataomoiWin;
             bool taskVsModeEnd = TaskRacer.isValid() && gameOverReason == (GameOverReason)CustomGameOverReason.TaskVsModeEnd;
@@ -256,6 +269,15 @@ namespace TheOtherRoles.Patches
                 AdditionalTempData.winCondition = WinCondition.VultureWin;
             }
 
+            // Prosecutor win
+            else if (prosecutorWin)
+            {
+                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+                WinningPlayerData wpd = new WinningPlayerData(Lawyer.lawyer.Data);
+                TempData.winners.Add(wpd);
+                AdditionalTempData.winCondition = WinCondition.ProsecutorWin;
+            }
+
             // Lovers win conditions
             else if (loversWin)
             {
@@ -307,14 +329,6 @@ namespace TheOtherRoles.Patches
                     wpdFormerJackal.IsImpostor = false;
                     TempData.winners.Add(wpdFormerJackal);
                 }
-            }
-            // Lawyer solo win 
-            else if (lawyerSoloWin && !Pursuer.notAckedExiled)
-            {
-                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
-                WinningPlayerData wpd = new WinningPlayerData(Lawyer.lawyer.Data);
-                TempData.winners.Add(wpd);
-                AdditionalTempData.winCondition = WinCondition.LawyerSoloWin;
             }
             // TaskMaster team win
             else if (taskMasterTeamWin)
@@ -378,7 +392,7 @@ namespace TheOtherRoles.Patches
             if (!happyBirthdayModeEnd)
 			{
                 // Possible Additional winner: Lawyer
-                if (!lawyerSoloWin && Lawyer.lawyer != null && Lawyer.target != null && (!Lawyer.target.Data.IsDead || Lawyer.target == Jester.jester) && !Pursuer.notAckedExiled)
+                if (Lawyer.lawyer != null && Lawyer.target != null && (!Lawyer.target.Data.IsDead || Lawyer.target == Jester.jester) && !Pursuer.notAckedExiled && !Lawyer.isProsecutor)
                 {
                     WinningPlayerData winningClient = null;
                     foreach (WinningPlayerData winner in TempData.winners.GetFastEnumerator())
@@ -403,10 +417,13 @@ namespace TheOtherRoles.Patches
                 }
             }
 
+            AdditionalTempData.timer = ((float)(DateTime.UtcNow - HideNSeek.startTime).TotalMilliseconds) / 1000;
+
             // Reset Settings
+            if (MapOptions.gameMode == CustomGamemodes.HideNSeek) ShipStatusPatch.resetVanillaSettings();
             RPCProcedure.resetVariables();
 
-            if (TheOtherRolesPlugin.DebugMode.Value)
+            if (TheOtherRolesPlugin.DebugMode.Value == "true")
             {
                 for (int i = 0; i < DebugManager.bots.Count; ++i)
                     PlayerControl.AllPlayerControls.Remove(DebugManager.bots[i]);
@@ -554,9 +571,9 @@ namespace TheOtherRoles.Patches
                     textRenderer.text = "Vulture Wins";
                     textRenderer.color = Vulture.color;
                 }
-                else if (AdditionalTempData.winCondition == WinCondition.LawyerSoloWin)
+                else if (AdditionalTempData.winCondition == WinCondition.ProsecutorWin)
                 {
-                    textRenderer.text = "Lawyer Wins";
+                    textRenderer.text = "Prosecutor Wins";
                     textRenderer.color = Lawyer.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.LoversTeamWin)
@@ -611,7 +628,7 @@ namespace TheOtherRoles.Patches
                     }
                 }
 
-                if (MapOptions.showRoleSummary || CustomOptionHolder.enabledTaskVsMode.getBool())
+                if (MapOptions.showRoleSummary || CustomOptionHolder.enabledTaskVsMode.getBool() || HideNSeek.isHideNSeekGM)
                 {
                     var position = Camera.main.ViewportToWorldPoint(new Vector3(0f, 1f, Camera.main.nearClipPlane));
                     GameObject roleSummary = UnityEngine.Object.Instantiate(__instance.WinText.gameObject);
@@ -619,6 +636,13 @@ namespace TheOtherRoles.Patches
                     roleSummary.transform.localScale = new Vector3(1f, 1f, 1f);
 
                     var roleSummaryText = new StringBuilder();
+                    if (HideNSeek.isHideNSeekGM)
+                    {
+                        int minutes = (int)AdditionalTempData.timer / 60;
+                        int seconds = (int)AdditionalTempData.timer % 60;
+                        roleSummaryText.AppendLine($"<color=#FAD934FF>Time: {minutes:00}:{seconds:00}</color> \n");
+                    }
+
                     // Task Vs Mode
                     if (CustomOptionHolder.enabledTaskVsMode.getBool())
                     {
@@ -641,7 +665,9 @@ namespace TheOtherRoles.Patches
                         foreach (var data in AdditionalTempData.playerRoles)
                         {
                             var roles = string.Join(" ", data.Roles.Select(x => Helpers.cs(x.color, x.name)));
+                            if (data.IsGuesser) roles += " (Guesser)";
                             var taskInfo = data.TasksTotal > 0 ? $" - <color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
+                            if (data.Kills != null) taskInfo += $" - <color=#FF0000FF>(Kills: {data.Kills})</color>";
                             var taskInfo2 = data.ExTasksTotal > 0 ? $" Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
                             roleSummaryText.AppendLine($"{data.ExtraInfo}{data.PlayerName} - {roles}{taskInfo}{taskInfo2}");
                         }
@@ -693,12 +719,12 @@ namespace TheOtherRoles.Patches
                 if (CheckAndEndGameForTaskMasterWin(__instance)) return false;
                 if (CheckAndEndGameForMiniLose(__instance)) return false;
                 if (CheckAndEndGameForJesterWin(__instance)) return false;
-                if (CheckAndEndGameForLawyerMeetingWin(__instance)) return false;
                 if (CheckAndEndGameForKataomoiWin(__instance)) return false;
                 if (CheckAndEndGameForArsonistWin(__instance)) return false;
                 if (CheckAndEndGameForVultureWin(__instance)) return false;
                 if (CheckAndEndGameForSabotageWin(__instance)) return false;
                 if (CheckAndEndGameForTaskWin(__instance)) return false;
+                if (CheckAndEndGameForProsecutorWin(__instance)) return false;
                 if (CheckAndEndGameForLoverWin(__instance, statistics)) return false;
                 if (CheckAndEndGameForJackalWin(__instance, statistics)) return false;
                 if (CheckAndEndGameForImpostorWin(__instance, statistics)) return false;
@@ -785,17 +811,6 @@ namespace TheOtherRoles.Patches
                 return false;
             }
 
-            private static bool CheckAndEndGameForLawyerMeetingWin(ShipStatus __instance)
-            {
-                if (Lawyer.triggerLawyerWin)
-                {
-                    __instance.enabled = false;
-                    ShipStatus.RpcEndGame((GameOverReason)CheckCustomGameOverReason(CustomGameOverReason.LawyerSoloWin), false);
-                    return true;
-                }
-                return false;
-            }
-
             private static bool CheckAndEndGameForSabotageWin(ShipStatus __instance)
             {
                 if (MapUtilities.Systems == null) return false;
@@ -830,10 +845,22 @@ namespace TheOtherRoles.Patches
 
             private static bool CheckAndEndGameForTaskWin(ShipStatus __instance)
             {
+                if (HideNSeek.isHideNSeekGM && !HideNSeek.taskWinPossible) return false;
                 if (GameData.Instance.TotalTasks > 0 && GameData.Instance.TotalTasks <= GameData.Instance.CompletedTasks)
                 {
                     __instance.enabled = false;
                     ShipStatus.RpcEndGame(CheckGameOverReason(GameOverReason.HumansByTask), false);
+                    return true;
+                }
+                return false;
+            }
+
+            private static bool CheckAndEndGameForProsecutorWin(ShipStatus __instance)
+            {
+                if (Lawyer.triggerProsecutorWin)
+                {
+                    __instance.enabled = false;
+                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.ProsecutorWin, false);
                     return true;
                 }
                 return false;
@@ -863,6 +890,9 @@ namespace TheOtherRoles.Patches
 
             private static bool CheckAndEndGameForImpostorWin(ShipStatus __instance, PlayerStatistics statistics)
             {
+                if (HideNSeek.isHideNSeekGM)
+                    if ((0 != statistics.TotalAlive - statistics.TeamImpostorsAlive)) return false;
+
                 if (statistics.TeamImpostorsAlive >= statistics.TotalAlive - statistics.TeamImpostorsAlive && statistics.TeamJackalAlive == 0 && !(statistics.TeamImpostorHasAliveLover && statistics.TeamLoversAlive == 2))
                 {
                     __instance.enabled = false;
@@ -887,6 +917,13 @@ namespace TheOtherRoles.Patches
 
             private static bool CheckAndEndGameForCrewmateWin(ShipStatus __instance, PlayerStatistics statistics)
             {
+                if (HideNSeek.isHideNSeekGM && HideNSeek.timer <= 0 && !HideNSeek.isWaitingTimer)
+                {
+                    __instance.enabled = false;
+                    ShipStatus.RpcEndGame(GameOverReason.HumansByVote, false);
+                    return true;
+                }
+
                 if (statistics.TeamImpostorsAlive == 0 && statistics.TeamJackalAlive == 0)
                 {
                     __instance.enabled = false;

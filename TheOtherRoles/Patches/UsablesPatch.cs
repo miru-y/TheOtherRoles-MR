@@ -9,10 +9,10 @@ using static TheOtherRoles.MapOptions;
 using System.Collections.Generic;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
-using UnhollowerBaseLib.Attributes;
+using TheOtherRoles.Objects;
+using TheOtherRoles.CustomGameModes;
 
-namespace TheOtherRoles.Patches
-{
+namespace TheOtherRoles.Patches {
 
     [HarmonyPatch(typeof(Vent), nameof(Vent.CanUse))]
     public static class VentCanUsePatch
@@ -110,6 +110,7 @@ namespace TheOtherRoles.Patches
                 Deputy.setHandcuffedKnows();
                 return false;
             }
+            if (Trapper.playersOnMap.Contains(CachedPlayer.LocalPlayer.PlayerControl)) return false;
 
             bool canUse;
             bool couldUse;
@@ -117,7 +118,7 @@ namespace TheOtherRoles.Patches
             if (!canUse) return false; // No need to execute the native method as using is disallowed anyways
 
             bool isEnter = !CachedPlayer.LocalPlayer.PlayerControl.inVent;
-            bool canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Spy.spy;
+            bool canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Spy.spy && !Trapper.playersOnMap.Contains(CachedPlayer.LocalPlayer.PlayerControl);
             if (canMoveInVents) canMoveInVents = CachedPlayer.LocalPlayer.PlayerControl != Madmate.madmate;
             if (canMoveInVents)
 			{
@@ -163,6 +164,13 @@ namespace TheOtherRoles.Patches
     {
         public static bool Prefix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc) {
             return pc.AmOwner;
+        }
+    }
+
+    [HarmonyPatch(typeof(Vent), nameof(Vent.MoveToVent))]
+    public static class MoveToVentPatch {
+        public static bool Prefix(Vent otherVent) {
+            return !Trapper.playersOnMap.Contains(CachedPlayer.LocalPlayer.PlayerControl);
         }
     }
 
@@ -213,7 +221,7 @@ namespace TheOtherRoles.Patches
                 }
 
                 // Use an unchecked kill command, to allow shorter kill cooldowns etc. without getting kicked
-                MurderAttemptResult res = Helpers.checkMuderAttemptAndKill(CachedPlayer.LocalPlayer.PlayerControl, __instance.currentTarget);
+                MurderAttemptResult res = Helpers.checkMurderAttemptAndKill(CachedPlayer.LocalPlayer.PlayerControl, __instance.currentTarget);
                 // Handle blank kill
                 if (res == MurderAttemptResult.BlankKill) {
                     CachedPlayer.LocalPlayer.PlayerControl.killTimer = PlayerControl.GameOptions.KillCooldown;
@@ -272,6 +280,12 @@ namespace TheOtherRoles.Patches
             if (Jester.jester != null && Jester.jester == CachedPlayer.LocalPlayer.PlayerControl && !Jester.canCallEmergency) {
                 roleCanCallEmergency = false;
                 statusText = "The Jester can't start an emergency meeting";
+            }
+            // Potentially deactivate emergency button for Lawyer/Prosecutor
+            if (Lawyer.lawyer != null && Lawyer.lawyer == CachedPlayer.LocalPlayer.PlayerControl && !Lawyer.canCallEmergency) {
+                roleCanCallEmergency = false;
+                statusText = "The Lawyer can't start an emergency meeting";
+                if (Lawyer.isProsecutor) statusText = "The Prosecutor can't start an emergency meeting";
             }
 
             if (!roleCanCallEmergency) {
@@ -823,6 +837,9 @@ namespace TheOtherRoles.Patches
     class ShowSabotageMapPatch
     {
         static bool Prefix(MapBehaviour __instance) {
+            if (HideNSeek.isHideNSeekGM)
+                return HideNSeek.canSabotage;
+
             // Task Vs Mode
             if (TaskRacer.isValid()) {
                 if (__instance.IsOpen) {

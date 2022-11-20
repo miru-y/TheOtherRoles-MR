@@ -9,7 +9,7 @@ namespace TheOtherRoles
     {
         public static void Save(string section, Dictionary<ConfigDefinition, string> orphanedEntries, bool isSave = false) {
 
-            var optionData = AmongUsClient.Instance.AmHost ? SaveManager.hostOptionsData : SaveManager.GameHostOptions;
+            var optionData = AmongUsClient.Instance.AmHost ? GameOptionsData.hostOptionsData : GameOptionsData.GameHostOptions;
 
             // Generic options
             mapId.Save(section, orphanedEntries, optionData.MapId);
@@ -73,76 +73,76 @@ namespace TheOtherRoles
         public static void Load(string section, Dictionary<ConfigDefinition, string> orphanedEntries) {
             // Generic options
             if (mapId.Load(section, orphanedEntries, out byte byteValue))
-                SaveManager.hostOptionsData.MapId = byteValue;
+                GameOptionsData.hostOptionsData.MapId = byteValue;
             if (playerSpeedMod.Load(section, orphanedEntries, out float floatValue))
-                SaveManager.hostOptionsData.PlayerSpeedMod = floatValue;
+                GameOptionsData.hostOptionsData.PlayerSpeedMod = floatValue;
             if (crewLightMod.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.CrewLightMod = floatValue;
+                GameOptionsData.hostOptionsData.CrewLightMod = floatValue;
             if (impostorLightMod.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.ImpostorLightMod = floatValue;
+                GameOptionsData.hostOptionsData.ImpostorLightMod = floatValue;
             if (killCooldown.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.KillCooldown = floatValue;
+                GameOptionsData.hostOptionsData.KillCooldown = floatValue;
             if (numCommonTasks.Load(section, orphanedEntries, out int intValue))
-                SaveManager.hostOptionsData.NumCommonTasks = intValue;
+                GameOptionsData.hostOptionsData.NumCommonTasks = intValue;
             if (numLongTasks.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.NumLongTasks = intValue;
+                GameOptionsData.hostOptionsData.NumLongTasks = intValue;
             if (numShortTasks.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.NumShortTasks = intValue;
+                GameOptionsData.hostOptionsData.NumShortTasks = intValue;
             if (numEmergencyMeetings.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.NumEmergencyMeetings = intValue;
+                GameOptionsData.hostOptionsData.NumEmergencyMeetings = intValue;
             if (emergencyCooldown.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.EmergencyCooldown = intValue;
+                GameOptionsData.hostOptionsData.EmergencyCooldown = intValue;
             if (numImpostors.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.NumImpostors = intValue;
+                GameOptionsData.hostOptionsData.NumImpostors = intValue;
             if (ghostsDoTasks.Load(section, orphanedEntries, out bool boolValue))
-                SaveManager.hostOptionsData.GhostsDoTasks = boolValue;
+                GameOptionsData.hostOptionsData.GhostsDoTasks = boolValue;
             if (killDistance.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.KillDistance = intValue;
+                GameOptionsData.hostOptionsData.KillDistance = intValue;
             if (discussionTime.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.DiscussionTime = intValue;
+                GameOptionsData.hostOptionsData.DiscussionTime = intValue;
             if (votingTime.Load(section, orphanedEntries, out intValue))
-                SaveManager.hostOptionsData.VotingTime = intValue;
+                GameOptionsData.hostOptionsData.VotingTime = intValue;
             if (confirmImpostor.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.ConfirmImpostor = boolValue;
+                GameOptionsData.hostOptionsData.ConfirmImpostor = boolValue;
             if (visualTasks.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.VisualTasks = boolValue;
+                GameOptionsData.hostOptionsData.VisualTasks = boolValue;
             if (anonymousVotes.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.AnonymousVotes = boolValue;
+                GameOptionsData.hostOptionsData.AnonymousVotes = boolValue;
             if (taskBarMode.Load(section, orphanedEntries, out TaskBarMode taskBarModeValue))
-                SaveManager.hostOptionsData.TaskBarMode = taskBarModeValue;
+                GameOptionsData.hostOptionsData.TaskBarMode = taskBarModeValue;
             if (isDefaults.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.isDefaults = boolValue;
+                GameOptionsData.hostOptionsData.isDefaults = boolValue;
 
             // Role options
             if (shapeshifterLeaveSkin.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.RoleOptions.ShapeshifterLeaveSkin = boolValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ShapeshifterLeaveSkin = boolValue;
             if (shapeshifterCooldown.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.ShapeshifterCooldown = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ShapeshifterCooldown = floatValue;
             if (shapeshifterDuration.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.ShapeshifterDuration = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ShapeshifterDuration = floatValue;
             if (scientistCooldown.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.ScientistCooldown = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ScientistCooldown = floatValue;
             if (scientistBatteryCharge.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.ScientistBatteryCharge = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ScientistBatteryCharge = floatValue;
             if (guardianAngelCooldown.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.GuardianAngelCooldown = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.GuardianAngelCooldown = floatValue;
             if (impostorsCanSeeProtect.Load(section, orphanedEntries, out boolValue))
-                SaveManager.hostOptionsData.RoleOptions.ImpostorsCanSeeProtect = boolValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ImpostorsCanSeeProtect = boolValue;
             if (protectionDurationSeconds.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.ProtectionDurationSeconds = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.ProtectionDurationSeconds = floatValue;
             if (engineerCooldown.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.EngineerCooldown = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.EngineerCooldown = floatValue;
             if (engineerInVentMaxTime.Load(section, orphanedEntries, out floatValue))
-                SaveManager.hostOptionsData.RoleOptions.EngineerInVentMaxTime = floatValue;
+                GameOptionsData.hostOptionsData.RoleOptions.EngineerInVentMaxTime = floatValue;
 
             if (scientistMaxCount.Load(section, orphanedEntries, out intValue) && scientistChance.Load(section, orphanedEntries, out int intValue2))
-                SaveManager.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Scientist, intValue, intValue2);
+                GameOptionsData.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Scientist, intValue, intValue2);
             if (engineerMaxCount.Load(section, orphanedEntries, out intValue) && engineerChance.Load(section, orphanedEntries, out intValue2))
-                SaveManager.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Engineer, intValue, intValue2);
+                GameOptionsData.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Engineer, intValue, intValue2);
             if (guardianAngelMaxCount.Load(section, orphanedEntries, out intValue) && guardianAngelChance.Load(section, orphanedEntries, out intValue2))
-                SaveManager.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.GuardianAngel, intValue, intValue2);
+                GameOptionsData.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.GuardianAngel, intValue, intValue2);
             if (shapeshifterMaxCount.Load(section, orphanedEntries, out intValue) && shapeshifterChance.Load(section, orphanedEntries, out intValue2))
-                SaveManager.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Shapeshifter, intValue, intValue2);
+                GameOptionsData.hostOptionsData.RoleOptions.SetRoleRate(RoleTypes.Shapeshifter, intValue, intValue2);
         }
 
         public static void Remove(string section, Dictionary<ConfigDefinition, string> orphanedEntries, bool isSave = false) {

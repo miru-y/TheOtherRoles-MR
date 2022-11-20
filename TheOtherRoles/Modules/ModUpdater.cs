@@ -5,10 +5,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using AmongUs.Data;
 using BepInEx;
 using BepInEx.Bootstrap;
-using BepInEx.IL2CPP;
-using BepInEx.IL2CPP.Utils;
+using BepInEx.Unity.IL2CPP;
+using BepInEx.Unity.IL2CPP.Utils;
 using Mono.Cecil;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
@@ -37,7 +38,7 @@ namespace TheOtherRoles.Modules
         {
             public JObject Request;
             public string Version { get { return ver != null ? "v" + ver : Tag; } }
-            public string Content { get { return (SupportedLangs)SaveManager.LastLanguage == SupportedLangs.Japanese ? ContentJp : ContentDefault; } }
+            public string Content { get { return DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese ? ContentJp : ContentDefault; } }
 
             string ContentDefault;
             string ContentJp;
@@ -143,11 +144,28 @@ namespace TheOtherRoles.Modules
             passiveButton.OnMouseOut.AddListener((Action)(() => buttonSprite.color = text.color = Color.red));
 
             var isSubmerged = TORUpdate == null;
+            var mgr = FindObjectOfType<MainMenuManager>(true);
+
+            if (!isSubmerged) {
+                try {
+                    string updateVersion = TORUpdate.Content[^5..];
+                    if (Version.Parse(TheOtherRolesPlugin.VersionString).BaseVersion() < Version.Parse(updateVersion).BaseVersion()) {
+                        passiveButton.OnClick.RemoveAllListeners();
+                        passiveButton.OnClick = new Button.ButtonClickedEvent();
+                        passiveButton.OnClick.AddListener((Action)(() => {
+                            mgr.StartCoroutine(CoShowAnnouncement($"<size=150%><color=#FC0303>A MANUAL UPDATE IS REQUIRED</color></size>"));
+                        }));
+                    }
+                } catch {  
+                    TheOtherRolesPlugin.Logger.LogError("parsing version for auto updater failed :(");
+                }
+
+            }
+
             if (isSubmerged && !SubmergedCompatibility.Loaded) showPopUp = false;
             if (showPopUp) {
                 var data = isSubmerged ? SubmergedUpdate : TORUpdate;
                 var announcement = $"<size=150%>A new <color=#FC0303>{(isSubmerged ? "Submerged" : "THE OTHER ROLES MR")}</color> update to {(data.Version)} is available</size>\n{data.Content}";
-                var mgr = FindObjectOfType<MainMenuManager>(true);
                 mgr.StartCoroutine(CoShowAnnouncement(announcement));
             }
             showPopUp = false;
@@ -183,7 +201,7 @@ namespace TheOtherRoles.Modules
             var popUp = Instantiate(FindObjectOfType<AnnouncementPopUp>(true));
             popUp.gameObject.SetActive(true);
             yield return popUp.Init();
-            var last = SaveManager.LastAnnouncement;
+            var last = DataManager.Announcements.LastViewedAnnouncement;
             last.Id = 1;
             last.Text = announcement;
             SelectableHyperLinkHelper.DestroyGOs(popUp.selectableHyperLinks, name);
