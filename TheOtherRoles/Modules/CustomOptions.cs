@@ -132,7 +132,14 @@ namespace TheOtherRoles {
 
         public bool isRoleHeader() {
             if (this == CustomOptionHolder.modifiersAreHidden) return false;
-            return type != CustomOptionType.General && parent == null;
+            switch (type)
+			{
+                case CustomOptionType.Crewmate:
+                case CustomOptionType.Impostor:
+                case CustomOptionType.Neutral:
+                    return parent == null;
+			}
+            return false;
         }
 
         // Option changes
