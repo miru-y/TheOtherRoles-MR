@@ -17,15 +17,6 @@ namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.FixedUpdate))]
     public static class PlayerPhysicsFixedUpdatePatch
     {
-        public static void Prefix(PlayerPhysics __instance)
-        {
-            if (LeafMinigameBeginPatch.savePos != null && __instance.myPlayer == CachedPlayer.LocalPlayer.PlayerControl)
-            {
-                __instance.transform.position = LeafMinigameBeginPatch.savePos.Value;
-                CachedPlayer.LocalPlayer.PlayerPhysics.body.velocity = Vector2.zero;
-            }
-        }
-
         public static void Postfix(PlayerPhysics __instance)
         {
             if (__instance.AmOwner &&
@@ -35,13 +26,6 @@ namespace TheOtherRoles.Patches {
                 GameData.Instance &&
                 __instance.myPlayer.CanMove)
                 __instance.body.velocity *= -1;
-
-
-            if (LeafMinigameBeginPatch.savePos != null && __instance.myPlayer == CachedPlayer.LocalPlayer.PlayerControl)
-            {
-                __instance.transform.position = LeafMinigameBeginPatch.savePos.Value;
-                CachedPlayer.LocalPlayer.PlayerPhysics.body.velocity = Vector2.zero;
-            }
 
             Kataomoi.fixedUpdate(__instance);
         }

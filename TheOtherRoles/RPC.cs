@@ -209,7 +209,6 @@ namespace TheOtherRoles
             MapBehaviourPatch2.ResetIcons();
             SpawnInMinigamePatch.reset();
             ElectricPatch.reset();
-            LeafMinigameBeginPatch.reset();
             MadmateTaskHelper.Reset();
             GameStartManagerPatch.GameStartManagerUpdatePatch.startingTimer = 0;
         }
