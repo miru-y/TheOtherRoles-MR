@@ -410,7 +410,6 @@ namespace TheOtherRoles.Modules {
         public static bool running = false;
         private static readonly string[] Repos = new string[] {
             "https://raw.githubusercontent.com/miru-y/TheOtherHats-MR/master",
-            "https://raw.githubusercontent.com/haoming37/TheOtherHats-GM-Haoming/master",
             "https://raw.githubusercontent.com/yukinogatari/TheOtherHats-GM/master",
             "https://raw.githubusercontent.com/Eisbison/TheOtherHats/master",
         };
