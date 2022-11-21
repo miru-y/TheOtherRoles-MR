@@ -164,17 +164,23 @@ namespace TheOtherRoles
         private static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
         public static List<PlayerControl> bots = new List<PlayerControl>();
 
-        public static void Postfix(KeyboardJoystick __instance)
-        {
-            // Check if debug mode is active.
-            StringBuilder builder = new StringBuilder();
+        public static bool EnableDebugMode()
+		{
+            var builder = new StringBuilder();
             SHA256 sha = SHA256Managed.Create();
             Byte[] hashed = sha.ComputeHash(Encoding.UTF8.GetBytes(TheOtherRolesPlugin.DebugMode.Value));
-            foreach (var b in hashed) {
+            foreach (var b in hashed)
+            {
                 builder.Append(b.ToString("x2"));
             }
             string enteredHash = builder.ToString();
-            if (enteredHash != passwordHash) return;
+            return enteredHash == passwordHash;
+        }
+
+        public static void Postfix(KeyboardJoystick __instance)
+        {
+            // Check if debug mode is active.
+            if (!EnableDebugMode()) return;
 
             if (Input.GetKey(KeyCode.LeftControl)) {
                 // Spawn dummys
@@ -238,7 +244,7 @@ namespace TheOtherRoles
                             debugText.rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
                         }
 
-                        var builder = new System.Text.StringBuilder();
+                        StringBuilder builder = new();
                         {
                         }
 

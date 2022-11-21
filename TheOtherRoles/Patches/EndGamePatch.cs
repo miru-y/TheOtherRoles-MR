@@ -425,7 +425,7 @@ namespace TheOtherRoles.Patches
             if (MapOptions.gameMode == CustomGamemodes.HideNSeek) ShipStatusPatch.resetVanillaSettings();
             RPCProcedure.resetVariables();
 
-            if (TheOtherRolesPlugin.DebugMode.Value == "true")
+            if (DebugManager.EnableDebugMode())
             {
                 for (int i = 0; i < DebugManager.bots.Count; ++i)
                     PlayerControl.AllPlayerControls.Remove(DebugManager.bots[i]);
