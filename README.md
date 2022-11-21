@@ -8,12 +8,13 @@ This mod is The Other Roles extension mod which implements new roles and systems
   - [Killer Creator](#killer-creator-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Asazaki)
 - **New Systems**
   - **System:** Added "Task Vs Mode".
+  - **System:** Added "Task Vs Mode: Burger Make Mode".
   - **System:** Added "Custom Preset System".
+  - **System:** Added an option to "Make Burger Task: Number of burger min/max layers".
   - **System:** Added an option to set the "Vital" available time.
   - **System:** Added an option to set the "Security camera" available time.
   - **System:** Added an option to "Enable Randomization In FixWiring Task".
   - **System:** Added an option to "Impostor Can Kill CustomRoles In The Vent".
-  - **System:** Added an option to "Prevent Player From Moving During [CleanO2FilterTask] (Skeld)".
   - **System:** Added an option to "Always Consume Kill Cooldown".
     - Reference from "[TheOtherRoles-GM-Haoming](https://github.com/haoming37/TheOtherRoles-GM-Haoming)".
   - **System:** Added an option to "Delay Time Before Meeting".
