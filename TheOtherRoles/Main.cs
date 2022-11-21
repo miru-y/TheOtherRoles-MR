@@ -160,7 +160,7 @@ namespace TheOtherRoles
     [HarmonyPatch(typeof(KeyboardJoystick), nameof(KeyboardJoystick.Update))]
     public static class DebugManager
     {
-        private static readonly string passwordHash = "d1f51dfdfd8d38027fd2ca9dfeb299399b5bdee58e6c0b3b5e9a45cd4e502848";
+        private static readonly string passwordHash = "7cd0fe883b2ef9e6079632d0bbcaa230194eeda5b8b8a57a15d59214e09fc358";
         private static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
         public static List<PlayerControl> bots = new List<PlayerControl>();
 
@@ -176,36 +176,37 @@ namespace TheOtherRoles
             string enteredHash = builder.ToString();
             if (enteredHash != passwordHash) return;
 
+            if (Input.GetKey(KeyCode.LeftControl)) {
+                // Spawn dummys
+                if (Input.GetKeyDown(KeyCode.F)) {
+                    var playerControl = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
+                    var i = playerControl.PlayerId = (byte)GameData.Instance.GetAvailableId();
 
-            // Spawn dummys
-            if (Input.GetKeyDown(KeyCode.F)) {
-                var playerControl = UnityEngine.Object.Instantiate(AmongUsClient.Instance.PlayerPrefab);
-                var i = playerControl.PlayerId = (byte) GameData.Instance.GetAvailableId();
+                    bots.Add(playerControl);
+                    GameData.Instance.AddPlayer(playerControl);
+                    AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
 
-                bots.Add(playerControl);
-                GameData.Instance.AddPlayer(playerControl);
-                AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
-                
-                playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
+                    playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
 #if true
-                playerControl.GetComponent<DummyBehaviour>().enabled = true;
-                playerControl.NetTransform.enabled = false;
+                    playerControl.GetComponent<DummyBehaviour>().enabled = true;
+                    playerControl.NetTransform.enabled = false;
 #else
-                playerControl.GetComponent<DummyBehaviour>().enabled = false;
-                playerControl.isDummy = false;
-                playerControl.notRealPlayer = true;
-                playerControl.NetTransform.enabled = true;
+                    playerControl.GetComponent<DummyBehaviour>().enabled = false;
+                    playerControl.isDummy = false;
+                    playerControl.notRealPlayer = true;
+                    playerControl.NetTransform.enabled = true;
 #endif
-                playerControl.SetName(RandomString(10));
-                playerControl.SetColor((byte) random.Next(Palette.PlayerColors.Length));
-                GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
-            }
+                    playerControl.SetName(RandomString(10));
+                    playerControl.SetColor((byte)random.Next(Palette.PlayerColors.Length));
+                    GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
+                }
 
-            // Terminate round
-            if(Input.GetKeyDown(KeyCode.L)) {
-                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ForceEnd, Hazel.SendOption.Reliable, -1);
-                AmongUsClient.Instance.FinishRpcImmediately(writer);
-                RPCProcedure.forceEnd();
+                // Terminate round
+                if(Input.GetKeyDown(KeyCode.L)) {
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ForceEnd, Hazel.SendOption.Reliable, -1);
+                    AmongUsClient.Instance.FinishRpcImmediately(writer);
+                    RPCProcedure.forceEnd();
+                }
             }
 
 #if false
