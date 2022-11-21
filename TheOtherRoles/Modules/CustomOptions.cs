@@ -275,12 +275,13 @@ namespace TheOtherRoles {
 
             for (int i = 0; i < CustomOption.options.Count; i++) {
                 CustomOption option = CustomOption.options[i];
-                if ((int)option.type > 4) continue;
+                int type = (int)option.type - 1;
+                if (type > 4) continue;
                 if (option.IsSeacretModeOption() && !TheOtherRolesPlugin.ViewSeacretMode.Value)
                     continue;
                 if (option.optionBehaviour == null) {
-                    StringOption stringOption = UnityEngine.Object.Instantiate(template, menus[(int)option.type]);
-                    optionBehaviours[(int)option.type].Add(stringOption);
+                    StringOption stringOption = UnityEngine.Object.Instantiate(template, menus[type]);
+                    optionBehaviours[type].Add(stringOption);
                     stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
@@ -827,7 +828,7 @@ namespace TheOtherRoles {
                         if (isIrrelevant) continue;
                         if (option.isHeader)
                             sb.AppendLine(HEADER_STR);
-                        sb.AppendLine($"\n{option.name}: {option.selections[option.selection].ToString()}");
+                        sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
                     }
                 }
             }
@@ -889,26 +890,30 @@ namespace TheOtherRoles {
         {
             int page = TheOtherRolesPlugin.optionsPage;
             if (Input.GetKeyDown(KeyCode.Tab)) {
-                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % 6;
+                TheOtherRolesPlugin.optionsPage = (TheOtherRolesPlugin.optionsPage + 1) % 7;
             }
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Vanilla;
+                TheOtherRolesPlugin.optionsPage = 0;
             }
             if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.General;
+                TheOtherRolesPlugin.optionsPage = 1;
             }
             if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Impostor;
+                TheOtherRolesPlugin.optionsPage = 2;
             }
             if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Neutral;
+                TheOtherRolesPlugin.optionsPage = 3;
             }
             if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Crewmate;
+                TheOtherRolesPlugin.optionsPage = 4;
             }
             if (Input.GetKeyDown(KeyCode.Alpha6) || Input.GetKeyDown(KeyCode.Keypad6)) {
-                TheOtherRolesPlugin.optionsPage = (int)CustomOption.CustomOptionType.Modifier;
+                TheOtherRolesPlugin.optionsPage = 5;
             }
+            if (Input.GetKeyDown(KeyCode.Alpha7) || Input.GetKeyDown(KeyCode.Keypad7)) {
+                TheOtherRolesPlugin.optionsPage = 6;
+            }
+
             if (page != TheOtherRolesPlugin.optionsPage) {
                 Vector3 position = (Vector3)FastDestroyableSingleton<HudManager>.Instance?.GameSettings?.transform.localPosition;
                 if (position != null) {
