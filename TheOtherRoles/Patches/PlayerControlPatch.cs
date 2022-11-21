@@ -526,6 +526,13 @@ namespace TheOtherRoles.Patches
                     bool isTaskMasterExTask = TaskMaster.isTaskMaster(p.PlayerId) && TaskMaster.isTaskComplete;
                     var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(p.Data, true);
                     var (exTasksCompleted, exTasksTotal) = TasksHandler.taskInfo(p.Data, true, true);
+                    if (TaskRacer.isValid() && CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+                    {
+                        tasksTotal = CustomOptionHolder.taskVsMode_BurgerMakeMode_MakeBurgerNums.getInt();
+                        tasksCompleted = 0;
+                        foreach (var playerInfoTask in p.Data.Tasks.GetFastEnumerator())
+                            if (playerInfoTask.Complete) tasksCompleted++;
+                    }
                     string roleNames = RoleInfo.GetRolesString(p, true, false, false);
                     string roleText = RoleInfo.GetRolesString(p, true, MapOptions.ghostsSeeModifier, CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead);
                     string taskInfo = tasksTotal > 0 ? $"<color=#FAD934FF>({tasksCompleted}/{tasksTotal})</color>" : "";

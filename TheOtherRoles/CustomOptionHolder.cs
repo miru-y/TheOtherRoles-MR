@@ -28,8 +28,11 @@ namespace TheOtherRoles {
 
         // MR ========================================================
         public static CustomOption enabledTaskVsMode;
-        public static CustomOption taskVsModeEnabledMakeItTheSameTaskAsTheHost;
-        public static CustomOption taskVsModeVision;
+        public static CustomOption taskVsMode_EnabledMakeItTheSameTaskAsTheHost;
+        public static CustomOption taskVsMode_Vision;
+        public static CustomOption taskVsMode_EnabledBurgerMakeMode;
+        public static CustomOption taskVsMode_BurgerMakeMode_BurgerLayers;
+        public static CustomOption taskVsMode_BurgerMakeMode_MakeBurgerNums;
 
         public static CustomOption enabledHappyBirthdayMode;
         public static CustomOption happyBirthdayMode_Target;
@@ -484,8 +487,11 @@ namespace TheOtherRoles {
 
             // custom options
             enabledTaskVsMode = CustomOption.Create(900010001, Types.General, cs(TaskRacer.color, "Enable Task Vs Mode"), false, null, true);
-            taskVsModeEnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
-            taskVsModeVision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
+            taskVsMode_EnabledMakeItTheSameTaskAsTheHost = CustomOption.Create(900010002, Types.General, cs(TaskRacer.color, "Make it the same task as the host"), true, enabledTaskVsMode);
+            taskVsMode_Vision = CustomOption.Create(900010003, Types.General, cs(TaskRacer.color, "Task Vs Mode Vision"), 1.5f, 0.25f, 5f, 0.25f, enabledTaskVsMode);
+            taskVsMode_EnabledBurgerMakeMode = CustomOption.Create(900010004, Types.General, cs(TaskRacer.color, "Enabled Burger Make Mode"), false, enabledTaskVsMode);
+            taskVsMode_BurgerMakeMode_BurgerLayers = CustomOption.Create(900010005, Types.General, cs(TaskRacer.color, "Burger Layers"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, taskVsMode_EnabledBurgerMakeMode);
+            taskVsMode_BurgerMakeMode_MakeBurgerNums = CustomOption.Create(900010006, Types.General, cs(TaskRacer.color, "Make Burger Nums"), 5f, 1f, 100f, 1f, taskVsMode_EnabledBurgerMakeMode);
 
             burgerMinigameBurgerMinLayers = CustomOption.Create(900000006, Types.General, cs(BurgerMinigameColor, "Make Burger Task: Number of burger min layers(Default = 5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null, true);
             burgerMinigameBurgerMaxLayers = CustomOption.Create(900000007, Types.General, cs(BurgerMinigameColor, "Make Burger Task: Number of burger max layers(Default = 5)"), Patches.BurgerMinigameBeginPatch.DefaultBurgerLayers, Patches.BurgerMinigameBeginPatch.MinBurgerLayers, Patches.BurgerMinigameBeginPatch.MaxBurgerLayers, 1f, null);

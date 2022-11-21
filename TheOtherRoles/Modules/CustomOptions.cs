@@ -87,7 +87,7 @@ namespace TheOtherRoles {
                 option.selection = Mathf.Clamp(option.entry.Value, 0, option.selections.Length - 1);
                 if (option.optionBehaviour != null && option.optionBehaviour is StringOption stringOption) {
                     stringOption.oldValue = stringOption.Value = option.selection;
-                    stringOption.ValueText.text = option.selections[option.selection].ToString();
+                    stringOption.ValueText.text = option.getString();
                 }
             }
         }
@@ -134,6 +134,24 @@ namespace TheOtherRoles {
             return selection + 1;
         }
 
+        public string getString(bool is_exclude_extra_text = true) {
+            string extraText = "";
+            if (!is_exclude_extra_text)
+            {
+                if (this == CustomOptionHolder.enabledTaskVsMode && getBool())
+                {
+                    ulong recordTime = TaskVsMode.GetRecordTime();
+                    if (recordTime != ulong.MaxValue)
+                        extraText = Helpers.cs(Color.green, string.Format(" (RECORD TIME {0:D2}:{1:D2}:{2:D3})", recordTime / 60000, (recordTime / 1000) % 60, recordTime % 1000));
+                    else
+                        extraText = Helpers.cs(Color.green, " (RECORD TIME xx:xx:xxx)");
+                }
+            }
+
+            string text = selections[selection].ToString(); 
+            return text + extraText;
+        }
+
         public bool isRoleHeader() {
             if (this == CustomOptionHolder.modifiersAreHidden) return false;
             switch (type)
@@ -152,7 +170,7 @@ namespace TheOtherRoles {
             selection = Mathf.Clamp((newSelection + selections.Length) % selections.Length, 0, selections.Length - 1);
             if (optionBehaviour != null && optionBehaviour is StringOption stringOption) {
                 stringOption.oldValue = stringOption.Value = selection;
-                stringOption.ValueText.text = selections[selection].ToString();
+                stringOption.ValueText.text = getString();
                 if (this == CustomOptionHolder.happyBirthdayMode_Target)
                 {
                     var p = Helpers.playerById((byte)getFloat());
@@ -296,7 +314,7 @@ namespace TheOtherRoles {
                     stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
-                    stringOption.ValueText.text = option.selections[option.selection].ToString();
+                    stringOption.ValueText.text = option.getString();
 
                     if (option == CustomOptionHolder.happyBirthdayMode_Target)
 					{
@@ -439,7 +457,7 @@ namespace TheOtherRoles {
                     stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
-                    stringOption.ValueText.text = option.selections[option.selection].ToString();
+                    stringOption.ValueText.text = option.getString();
 
                     option.optionBehaviour = stringOption;
                 }
@@ -528,7 +546,7 @@ namespace TheOtherRoles {
                     stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
                     stringOption.TitleText.text = option.name;
                     stringOption.Value = stringOption.oldValue = option.selection;
-                    stringOption.ValueText.text = option.selections[option.selection].ToString();
+                    stringOption.ValueText.text = option.getString();
 
                     option.optionBehaviour = stringOption;
                 }
@@ -633,7 +651,7 @@ namespace TheOtherRoles {
             __instance.OnValueChanged = new Action<OptionBehaviour>((o) => {});
             __instance.TitleText.text = option.name;
             __instance.Value = __instance.oldValue = option.selection;
-            __instance.ValueText.text = option.selections[option.selection].ToString();
+            __instance.ValueText.text = option.getString();
             if (option == CustomOptionHolder.happyBirthdayMode_Target)
             {
                 byte id = (byte)option.getFloat();
@@ -768,17 +786,17 @@ namespace TheOtherRoles {
 
             foreach (var option in options) {
                 if (option.parent == null) {
-                    string line = $"{option.name}: {option.selections[option.selection].ToString()}";
+                    string line = $"{option.name}: {option.getString(false)}";
                     if (type == CustomOption.CustomOptionType.Modifier) line += buildModifierExtras(option);
                     sb.AppendLine(line);
                 }
                 else if (option.parent.getSelection() > 0) {
                     if (option.id == 103) //Deputy
-                        sb.AppendLine($"- {Helpers.cs(Deputy.color, "Deputy")}: {option.selections[option.selection].ToString()}");
+                        sb.AppendLine($"- {Helpers.cs(Deputy.color, "Deputy")}: {option.getString()}");
                     else if (option.id == 224) //Sidekick
-                        sb.AppendLine($"- {Helpers.cs(Sidekick.color, "Sidekick")}: {option.selections[option.selection].ToString()}");
+                        sb.AppendLine($"- {Helpers.cs(Sidekick.color, "Sidekick")}: {option.getString()}");
                     else if (option.id == 358) //Prosecutor
-                        sb.AppendLine($"- {Helpers.cs(Lawyer.color, "Prosecutor")}: {option.selections[option.selection].ToString()}");
+                        sb.AppendLine($"- {Helpers.cs(Lawyer.color, "Prosecutor")}: {option.getString()}");
                 }
             }
             if (headerOnly) return sb.ToString();
@@ -793,7 +811,7 @@ namespace TheOtherRoles {
                         if (isIrrelevant) continue;
                         if (option.isHeader)
                             sb.AppendLine(HEADER_STR);
-                        sb.AppendLine(Helpers.cs(c, $"{option.name}: {option.selections[option.selection].ToString()}"));
+                        sb.AppendLine(Helpers.cs(c, $"{option.name}: {option.getString(false)}"));
                     }
                 } else {
                     if (option == CustomOptionHolder.crewmateRolesCountMin) {
@@ -839,7 +857,7 @@ namespace TheOtherRoles {
                         if (isIrrelevant) continue;
                         if (option.isHeader)
                             sb.AppendLine(HEADER_STR);
-                        sb.AppendLine($"{option.name}: {option.selections[option.selection].ToString()}");
+                        sb.AppendLine($"{option.name}: {option.getString(false)}");
                     }
                 }
             }

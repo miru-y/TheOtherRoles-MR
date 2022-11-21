@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -2052,8 +2053,8 @@ namespace TheOtherRoles
         public static TMPro.TextMeshPro startText = null;
         public static TMPro.TextMeshPro timerText = null;
         public static bool triggerTaskVsModeEnd = false;
-        public static List<Vector3> rankUIPositions = new List<Vector3>();
-        public static Dictionary<byte, GameObject> taskFinishedMarkTable = new Dictionary<byte, GameObject>();
+        public static List<Vector3> rankUIPositions = new();
+        public static Dictionary<byte, GameObject> taskFinishedMarkTable = new();
 
         public static List<Info> taskRacers = new List<Info>();
         public static SpriteRenderer[] rankGameSpriteRenderer = new SpriteRenderer[3];
@@ -2061,8 +2062,9 @@ namespace TheOtherRoles
         public static float coolTime = 0;
         public static float effectDuration = 3.0f;
         public static float vision = 2.0f;
+        public static ulong recordTime = ulong.MaxValue;
 
-        static List<MoveInfo> moveInfoList = new List<MoveInfo>();
+        static List<MoveInfo> moveInfoList = new();
         static float startTime = 0.0f;
         static float fadeTime = 0.0f;
         static bool _canMove = false;
@@ -2072,7 +2074,7 @@ namespace TheOtherRoles
         static DateTime selfStartDateTime = default;
         static DateTime selfEndDateTime = default;
         static byte[] hostTaskTypeIds = null;
-        static Dictionary<uint, byte[]> hostTaskIdDataTable = new Dictionary<uint, byte[]>();
+        static Dictionary<uint, byte[]> hostTaskIdDataTable = new();
         static Vector2 retireStartPos = Vector2.zero;
 
         public class Info
@@ -2099,6 +2101,11 @@ namespace TheOtherRoles
             }
             public bool isTaskComplete() {
                 return player.isDead() || player.isDummy || player.notRealPlayer || (taskCompleteCount != -1 && taskCount == taskCompleteCount);
+            }
+
+            public bool isSelf()
+            {
+                return self == this;
             }
         }
 
@@ -2172,8 +2179,10 @@ namespace TheOtherRoles
         }
 
         public static void startGame() {
+            recordTime = TaskVsMode.GetRecordTime();
             startTime = 3.0f;
             _canMove = false;
+            timerText.gameObject.SetActive(true);
             sortTaskRacers();
         }
 
@@ -2192,7 +2201,6 @@ namespace TheOtherRoles
             // All task completed
             if (self.player == pc && self.isTaskComplete()) {
                 selfEndDateTime = DateTime.Now;
-                timerText.color = color;
                 ulong completeTime = (ulong)(selfEndDateTime - selfStartDateTime).TotalMilliseconds;
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
                     CachedPlayer.LocalPlayer.PlayerControl.NetId,
@@ -2203,6 +2211,10 @@ namespace TheOtherRoles
                 writer.Write(completeTime);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.taskVsModeAllTaskCompleted(self.player.PlayerId, completeTime);
+
+                // Set record time
+                if (self.taskCompleteTime < recordTime)
+                    TaskVsMode.SetRecordTime(self.taskCompleteTime);
             }
 
             updateControl();
@@ -2227,7 +2239,7 @@ namespace TheOtherRoles
         public static void update() {
             if (!isValid()) return;
 
-            if (hostTaskTypeIds != null && CustomOptionHolder.taskVsModeEnabledMakeItTheSameTaskAsTheHost.getBool()) {
+            if (hostTaskTypeIds != null && CustomOptionHolder.taskVsMode_EnabledMakeItTheSameTaskAsTheHost.getBool()) {
                 applyHostTasks();
             }
 
@@ -2247,7 +2259,6 @@ namespace TheOtherRoles
                     _canMove = true;
                     fadeTime = 1.5f;
                     SoundManager.Instance.PlaySound(DestroyableSingleton<HudManager>.Instance.TaskCompleteSound, false, 0.8f);
-                    timerText.gameObject.SetActive(true);
                     selfStartDateTime = DateTime.Now;
                 }
             } else if (fadeTime > 0.0f) {
@@ -2259,13 +2270,48 @@ namespace TheOtherRoles
             }
 
             // Timer
-            if (_canMove) {
-                if (self.taskCompleteTime != ulong.MaxValue) {
-                    timerText.text = string.Format("TIME {0:D2}:{1:D2}:{2:D3}", self.taskCompleteTime / 60000, (self.taskCompleteTime / 1000) % 60, self.taskCompleteTime % 1000);
-                } else {
-                    var timeSpan = (self.isTaskComplete() ? selfEndDateTime : DateTime.Now) - selfStartDateTime;
-                    timerText.text = string.Format("TIME {0:D2}:{1:D2}:{2:D3}", (int)timeSpan.TotalMinutes, (int)timeSpan.TotalSeconds % 60, (int)timeSpan.TotalMilliseconds % 1000);
+            //if (_canMove)
+            {
+                var builder = new StringBuilder();
+
+                if (self.taskCompleteTime != ulong.MaxValue)
+                {
+                    builder.AppendFormat(Helpers.cs(color, "TIME<pos=0.7%>{0:D2}:{1:D2}:{2:D3}"), self.taskCompleteTime / 60000, (self.taskCompleteTime / 1000) % 60, self.taskCompleteTime % 1000);
                 }
+                else
+                {
+                    if (startTime > 0.0f)
+                    {
+                        builder.AppendFormat(Helpers.cs(color, "TIME<pos=0.7%>00:00:000"), self.taskCompleteTime / 60000, (self.taskCompleteTime / 1000) % 60, self.taskCompleteTime % 1000);
+                    }
+                    else if (self.player.isDead())
+                    {
+                        builder.AppendFormat(Helpers.cs(Color.gray, "TIME<pos=0.7%>xx:xx:xxx"));
+                    }
+                    else
+                    {
+                        var timeSpan = (self.isTaskComplete() ? selfEndDateTime : DateTime.Now) - selfStartDateTime;
+                        builder.AppendFormat(Helpers.cs(Color.white, "TIME<pos=0.7%>{0:D2}:{1:D2}:{2:D3}"), (int)timeSpan.TotalMinutes, (int)timeSpan.TotalSeconds % 60, (int)timeSpan.TotalMilliseconds % 1000);
+                    }
+                }
+
+                ulong recordTime_ = recordTime;
+                bool isNewRecord = false;
+                if (self.taskCompleteTime != ulong.MaxValue && self.taskCompleteTime < recordTime_)
+                {
+                    recordTime_ = self.taskCompleteTime;
+                    isNewRecord = true;
+                }
+
+                if (recordTime_ != ulong.MaxValue)
+                    builder.AppendFormat(Helpers.cs(Color.green, "\nRECORD TIME<pos=0.7%>{0:D2}:{1:D2}:{2:D3}"), recordTime_ / 60000, (recordTime_ / 1000) % 60, recordTime_ % 1000);
+                else
+                    builder.AppendFormat(Helpers.cs(Color.gray, "\nRECORD TIME<pos=0.7%>xx:xx:xxx"));
+
+                if (isNewRecord)
+                    builder.AppendFormat("\n{0}", Helpers.cs(Color.yellow, "*NEW RECORD*"));
+
+                timerText.text = builder.ToString();
             }
 
             // Move
@@ -2339,6 +2385,7 @@ namespace TheOtherRoles
             timerText = null;
             startTime = 0.0f;
             fadeTime = 0.0f;
+            recordTime = ulong.MaxValue;
             timeSecOld = -1;
             _canMove = false;
             triggerTaskVsModeEnd = false;
@@ -2360,7 +2407,7 @@ namespace TheOtherRoles
                     UnityEngine.Object.Destroy(mark.Value);
             }
             taskFinishedMarkTable.Clear();
-            vision = CustomOptionHolder.taskVsModeVision.getFloat();
+            vision = CustomOptionHolder.taskVsMode_Vision.getFloat();
         }
 
         public static void onReady(Info taskRacer) {
@@ -2386,6 +2433,21 @@ namespace TheOtherRoles
                 onReady(taskRacer);
 
             updateControl();
+        }
+
+        public static List<byte> generateBurgerTasks(int numBurgerTasks)
+        {
+            var task = MapUtilities.CachedShipStatus.NormalTasks.FirstOrDefault((t) => t.TaskType == TaskTypes.MakeBurger);
+            if (task == null) return null;
+            numBurgerTasks = Mathf.Min(numBurgerTasks, 1);
+            var tasks = new Il2CppSystem.Collections.Generic.List<byte>();
+            var hashSet = new Il2CppSystem.Collections.Generic.HashSet<TaskTypes>();
+            var shortTasks = new Il2CppSystem.Collections.Generic.List<NormalPlayerTask>();
+            for (int i = 0; i < numBurgerTasks; ++i)
+                shortTasks.Add(task);
+            int start = 0;
+            MapUtilities.CachedShipStatus.AddTasksFromList(ref start, numBurgerTasks, tasks, hashSet, shortTasks);
+            return tasks.ToArray().ToList();
         }
 
         static void updateVisible() {

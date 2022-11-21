@@ -90,6 +90,7 @@ namespace TheOtherRoles.Patches
         {
             public string PlayerName { get; set; }
             public ulong Time { get; set; } = ulong.MaxValue;
+            public bool IsNewRecord { get; set; } = false;
         }
     }
 
@@ -134,6 +135,7 @@ namespace TheOtherRoles.Patches
                     {
                         PlayerName = taskRacer.player.Data.PlayerName,
                         Time = taskRacer.taskCompleteTime,
+                        IsNewRecord = taskRacer.isSelf() && taskRacer.taskCompleteTime < TaskRacer.recordTime,
                     });
                 }
             }
@@ -646,14 +648,18 @@ namespace TheOtherRoles.Patches
                     // Task Vs Mode
                     if (CustomOptionHolder.enabledTaskVsMode.getBool())
                     {
-                        roleSummaryText.AppendLine("Task Vs Mode Result:");
+                        if (CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+                            roleSummaryText.AppendLine(string.Format("Burger Make Mode Result: ({0} Layers, {1} Tasks)", CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt(), CustomOptionHolder.taskVsMode_BurgerMakeMode_MakeBurgerNums.getInt()));
+                        else
+                            roleSummaryText.AppendLine("Task Vs Mode Result:");
+
                         int rank = 1;
                         foreach (var data in AdditionalTempData.taskVsModeInfos)
                         {
                             string rankText = TaskRacer.getRankText(rank);
                             Color color = TaskRacer.getRankTextColor(rank);
                             if (data.Time != ulong.MaxValue)
-                                roleSummaryText.AppendLine(Helpers.cs(color, $"{rankText}.{data.PlayerName} - {string.Format("{0:D2}:{1:D2}:{2:D3}", data.Time / 60000, (data.Time / 1000) % 60, data.Time % 1000)}"));
+                                roleSummaryText.AppendLine(Helpers.cs(color, $"{rankText}.{data.PlayerName} - {string.Format("{0:D2}:{1:D2}:{2:D3} <color=yellow>{3}</color>", data.Time / 60000, (data.Time / 1000) % 60, data.Time % 1000, data.IsNewRecord ? "*NEW RECORD" : "")}"));
                             else
                                 roleSummaryText.AppendLine(Helpers.cs(color, $"{rankText}.{data.PlayerName} - --:--:---"));
                             ++rank;

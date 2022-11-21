@@ -1360,7 +1360,7 @@ namespace TheOtherRoles
         }
 
         public static void synchronize(byte playerId, int tag) {
-            SpawnInMinigamePatch.SynchronizeData((SpawnInMinigamePatch.SynchronizeTag)tag, playerId);
+            SpawnInMinigamePatch.synchronizeData.Synchronize((SpawnInMinigamePatch.SynchronizeTag)tag, playerId);
         }
 
         public static void killerCreatorCreatesMadmateKiller(byte targetId) {

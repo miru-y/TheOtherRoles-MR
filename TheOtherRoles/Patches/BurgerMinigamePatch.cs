@@ -13,13 +13,27 @@ namespace TheOtherRoles.Patches
 
         public static void Postfix(BurgerMinigame __instance, [HarmonyArgument(0)] PlayerTask task)
         {
-            int minLayers = CustomOptionHolder.burgerMinigameBurgerMinLayers.getInt();
-            int maxLayers = CustomOptionHolder.burgerMinigameBurgerMaxLayers.getInt();
-            if (minLayers > maxLayers) maxLayers = minLayers;
-            int layers = minLayers + (minLayers < maxLayers ? UnityEngine.Random.Range(0, maxLayers - minLayers + 1) : 0);
+            int layers = 0;
+            if (CustomOptionHolder.enabledTaskVsMode.getBool() && CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+            {
+                layers = CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt();
+            }
+            else
+            {
+                int minLayers = CustomOptionHolder.burgerMinigameBurgerMinLayers.getInt();
+                int maxLayers = CustomOptionHolder.burgerMinigameBurgerMaxLayers.getInt();
+                if (minLayers > maxLayers) maxLayers = minLayers;
+                layers = minLayers + (minLayers < maxLayers ? UnityEngine.Random.Range(0, maxLayers - minLayers + 1) : 0);
+            }
+
+            layers = UnityEngine.Mathf.Clamp(layers, MinBurgerLayers, MaxBurgerLayers);
             if (DefaultBurgerLayers == layers)
                 return;
+            MakeBurgers(__instance, layers);
+        }
 
+        static void MakeBurgers(BurgerMinigame __instance, int layers)
+        {
             var expectedToppings = new Il2CppStructArray<BurgerToppingTypes>(layers + 1); // + 1(Plate)
 
             expectedToppings[0] = BurgerToppingTypes.Plate;

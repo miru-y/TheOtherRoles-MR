@@ -216,13 +216,15 @@ namespace TheOtherRoles.Patches {
             // Task Vs Mode
             if (TaskRacer.isValid()) {
                 TaskRacer.startText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
-                TaskRacer.startText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y);
+                TaskRacer.startText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
                 TaskRacer.startText.name = "TaskVsMode_Start";
 
                 TaskRacer.timerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
-                TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
+                //TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y * 2);
+                //TaskRacer.timerText.alignment = TMPro.TextAlignmentOptions.BaselineLeft;
+                TaskRacer.timerText.rectTransform.sizeDelta = new Vector2(600, TaskRacer.startText.rectTransform.sizeDelta.y);
                 TaskRacer.timerText.transform.localPosition = new Vector3(-4.0f, 2.76f, TaskRacer.timerText.transform.localPosition.z);
-                TaskRacer.timerText.transform.localScale *= 0.4f;
+                TaskRacer.timerText.transform.localScale *= 0.3f;
                 TaskRacer.timerText.name = "TaskVsMode_Timer";
                 TaskRacer.timerText.gameObject.SetActive(false);
 
@@ -429,15 +431,28 @@ namespace TheOtherRoles.Patches {
         {
             public static void CheckTaskRacer() {
                 // Task Vs Mode
-                if (!TaskRacer.isValid() || !CustomOptionHolder.taskVsModeEnabledMakeItTheSameTaskAsTheHost.getBool())
+                if (!TaskRacer.isValid())
                     return;
 
                 if (AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost) {
+                    List<byte> taskTypeIdList = null;
+                    if (CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+                    {
+                        int num = CustomOptionHolder.taskVsMode_BurgerMakeMode_MakeBurgerNums.getInt();
+                        taskTypeIdList = TaskRacer.generateBurgerTasks(num);
+                        for (int i = taskTypeIdList.Count; i < num; ++i)
+                            taskTypeIdList.Add(taskTypeIdList[0]);
+                    }
 
                     // Init host's tasks.
-                    List<byte> taskTypeIdList = new List<byte>();
-                    for (int i = 0; i < CachedPlayer.LocalPlayer.PlayerControl.Data.Tasks.Count; ++i)
-                        taskTypeIdList.Add(CachedPlayer.LocalPlayer.PlayerControl.Data.Tasks[i].TypeId);
+                    if (taskTypeIdList == null && CustomOptionHolder.taskVsMode_EnabledMakeItTheSameTaskAsTheHost.getBool())
+                    {
+                        taskTypeIdList = new List<byte>();
+                        for (int i = 0; i < PlayerControl.LocalPlayer.Data.Tasks.Count; ++i)
+                            taskTypeIdList.Add(PlayerControl.LocalPlayer.Data.Tasks[i].TypeId);
+                    }
+
+                    if (taskTypeIdList == null) return;
 
                     var taskIdDataTable = new Dictionary<uint, byte[]>();
                     var playerData = CachedPlayer.LocalPlayer.PlayerControl.Data;

@@ -256,6 +256,14 @@ namespace TheOtherRoles.Patches {
                 if (continueStart) {
                     // Task Vs Mode
                     if (CustomOptionHolder.enabledTaskVsMode.getBool()) {
+                        // AirShip : 4
+                        if (CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+                        {
+                            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.DynamicMapOption, Hazel.SendOption.Reliable, -1);
+                            writer.Write(4);
+                            AmongUsClient.Instance.FinishRpcImmediately(writer);
+                            RPCProcedure.dynamicMapOption(4);
+                        }
                         __instance.ReallyBegin(false);
                         return false;
                     }
