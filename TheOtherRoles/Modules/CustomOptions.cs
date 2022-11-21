@@ -126,6 +126,10 @@ namespace TheOtherRoles {
             return (float)selections[selection];
         }
 
+        public int getInt() {
+            return (int)getFloat();
+        }
+
         public int getQuantity() {
             return selection + 1;
         }

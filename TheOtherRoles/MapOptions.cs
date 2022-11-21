@@ -85,6 +85,7 @@ namespace TheOtherRoles{
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
             adminTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
+            adminTimerText.color = CustomOptionHolder.AdminColor;
             adminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (adminTimer > 0)
                 adminTimerText.text = $"Admin: {adminTimer.ToString("#0.0")} sec remaining";
@@ -109,7 +110,7 @@ namespace TheOtherRoles{
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
             vitalsTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
-            vitalsTimerText.color = Color.green;
+            vitalsTimerText.color = CustomOptionHolder.VitalColor;
             vitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (vitalsTimer > 0)
                 vitalsTimerText.text = $"Vitals: {vitalsTimer.ToString("#0.0")} sec remaining";
@@ -134,7 +135,7 @@ namespace TheOtherRoles{
             if (FastDestroyableSingleton<HudManager>.Instance == null)
                 return viewIndex;
             securityCameraTimerText = UnityEngine.Object.Instantiate(FastDestroyableSingleton<HudManager>.Instance.TaskText, FastDestroyableSingleton<HudManager>.Instance.transform);
-            securityCameraTimerText.color = Color.red;
+            securityCameraTimerText.color = CustomOptionHolder.SecurityCameraColor;
             securityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (securityCameraTimer > 0)
                 securityCameraTimerText.text = $"Camera: {securityCameraTimer.ToString("#0.0")} sec remaining";
