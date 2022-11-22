@@ -40,7 +40,7 @@ namespace TheOtherRoles
         public Harmony Harmony { get; } = new Harmony(Id);
         public static TheOtherRolesPlugin Instance;
 
-        public static int optionsPage = 2;
+        public static int optionsPage = 1;
         public static int optionsPageMax = optionsPage + 1;
 
         public static ConfigEntry<string> DebugMode { get; private set; }
