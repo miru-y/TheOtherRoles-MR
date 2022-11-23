@@ -10,6 +10,7 @@ using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using Hazel;
 using TheOtherRoles.CustomGameModes;
+using AmongUs.Data;
 
 namespace TheOtherRoles.Patches
 {
@@ -24,6 +25,7 @@ namespace TheOtherRoles.Patches
         ProsecutorWin = 16,
         KataomoiWin = 80,
         TaskMasterWin = 100,
+        ForceEnd = 101,
 
         // Task Vs Mode
         TaskVsModeEnd = 130,
@@ -48,6 +50,7 @@ namespace TheOtherRoles.Patches
         ProsecutorWin,
         TaskMasterTeamWin,
         KataomoiWin,
+        ForceEnd,
 
         // Task Vs Mode
         TaskVsModeEnd,
@@ -110,6 +113,7 @@ namespace TheOtherRoles.Patches
             {
                 switch ((CustomGameOverReason)endGameResult.GameOverReason)
                 {
+                    case CustomGameOverReason.ForceEnd:
                     case CustomGameOverReason.TaskMasterWin:
                     case CustomGameOverReason.TaskVsModeEnd:
                     case CustomGameOverReason.HappyBirthdayModeEnd:
@@ -206,6 +210,7 @@ namespace TheOtherRoles.Patches
             bool taskMasterTeamWin = TaskMaster.taskMaster != null && gameOverReason == (GameOverReason)CustomGameOverReason.TaskMasterWin;
             bool kataomoiWin = Kataomoi.kataomoi != null && gameOverReason == (GameOverReason)CustomGameOverReason.KataomoiWin;
             bool taskVsModeEnd = TaskRacer.isValid() && gameOverReason == (GameOverReason)CustomGameOverReason.TaskVsModeEnd;
+            bool forceEnd = gameOverReason == (GameOverReason)CustomGameOverReason.ForceEnd;
             bool happyBirthdayModeEnd = CustomOptionHolder.enabledHappyBirthdayMode.getBool() && gameOverReason == (GameOverReason)CustomGameOverReason.HappyBirthdayModeEnd;
             if (happyBirthdayModeEnd)
 			{
@@ -361,6 +366,11 @@ namespace TheOtherRoles.Patches
                     if (TempData.winners.Count >= 3) break;
                 }
             }
+            else if (forceEnd)
+            {
+                TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+                AdditionalTempData.winCondition = WinCondition.ForceEnd;
+            }
             else
             {
                 bool isImpostor = false;
@@ -444,6 +454,8 @@ namespace TheOtherRoles.Patches
                     UnityEngine.Object.Destroy(pb.gameObject);
                 }
                 int num = Mathf.CeilToInt(7.5f);
+
+                bool isForceEnd = AdditionalTempData.winCondition == WinCondition.ForceEnd;
 
                 // Task Vs Mode
                 bool isTaskVsMode = AdditionalTempData.winCondition == WinCondition.TaskVsModeEnd;
@@ -536,6 +548,11 @@ namespace TheOtherRoles.Patches
                     else
                         __instance.WinText.text = "";
                 }
+                else if (isForceEnd)
+				{
+                    __instance.WinText.text = DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese ? "廃村" : "No Game";
+                    __instance.WinText.color = Palette.DisabledGrey;
+                }
 
                 // Additional code
                 GameObject bonusText = UnityEngine.Object.Instantiate(__instance.WinText.gameObject);
@@ -610,6 +627,10 @@ namespace TheOtherRoles.Patches
                     textRenderer.text = "Congratulations!";
                     textRenderer.color = TaskMaster.color;
                     __instance.BackgroundBar.material.SetColor("_Color", TaskRacer.color);
+                }
+                else if (AdditionalTempData.winCondition == WinCondition.ForceEnd)
+                {
+                    __instance.BackgroundBar.material.SetColor("_Color", Palette.DisabledGrey);
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.HappyBirthdayModeEnd)
 				{
