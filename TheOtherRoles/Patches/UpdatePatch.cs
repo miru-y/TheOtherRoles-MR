@@ -175,7 +175,8 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Lawyer.lawyer, Lawyer.color);
             } else if (Pursuer.pursuer != null && Pursuer.pursuer == localPlayer) {
                 setPlayerNameColor(Pursuer.pursuer, Pursuer.color);
-            } else if (Yasuna.yasuna != null && Yasuna.yasuna == localPlayer) {
+            }*/
+            else if (Yasuna.yasuna != null && Yasuna.yasuna == localPlayer) {
                 setPlayerNameColor(Yasuna.yasuna, localPlayer.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color);
             } else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == localPlayer) {
                 setPlayerNameColor(TaskMaster.taskMaster, !TaskMaster.becomeATaskMasterWhenCompleteAllTasks || TaskMaster.isTaskComplete ? TaskMaster.color : RoleInfo.crewmate.color);
@@ -183,7 +184,7 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Kataomoi.kataomoi, Kataomoi.color);
                 if (Kataomoi.target != null)
                     setPlayerNameColor(Kataomoi.target, Kataomoi.color);
-            }*/
+            }
             else if (TaskRacer.isValid()) {
                 for (int i = 0; i < TaskRacer.taskRacers.Count; ++i)
                     setPlayerNameColor(TaskRacer.taskRacers[i].player, TaskRacer.getRankTextColor(i + 1));
