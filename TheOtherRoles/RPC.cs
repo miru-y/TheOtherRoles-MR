@@ -208,6 +208,7 @@ namespace TheOtherRoles
             Helpers.toggleZoom(reset: true);
             MapBehaviourPatch2.ResetIcons();
             SpawnInMinigamePatch.reset();
+            BurgerMinigameBeginPatch.reset();
             ElectricPatch.reset();
             MadmateTaskHelper.Reset();
             GameStartManagerPatch.GameStartManagerUpdatePatch.startingTimer = 0;

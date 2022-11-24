@@ -10,23 +10,31 @@ namespace TheOtherRoles.Patches
         public const int DefaultBurgerLayers = 5;
         public const int MinBurgerLayers = 3;
         public const int MaxBurgerLayers = 30;
+        static int layers = -1;
+
+        public static void reset()
+		{
+            layers = -1;
+        }
 
         public static void Postfix(BurgerMinigame __instance, [HarmonyArgument(0)] PlayerTask task)
         {
-            int layers = 0;
-            if (CustomOptionHolder.enabledTaskVsMode.getBool() && CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
-            {
-                layers = CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt();
-            }
-            else
-            {
-                int minLayers = CustomOptionHolder.burgerMinigameBurgerMinLayers.getInt();
-                int maxLayers = CustomOptionHolder.burgerMinigameBurgerMaxLayers.getInt();
-                if (minLayers > maxLayers) maxLayers = minLayers;
-                layers = minLayers + (minLayers < maxLayers ? UnityEngine.Random.Range(0, maxLayers - minLayers + 1) : 0);
+            if (layers == -1)
+			{
+                if (CustomOptionHolder.enabledTaskVsMode.getBool() && CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
+                {
+                    layers = CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt();
+                }
+                else
+                {
+                    int minLayers = CustomOptionHolder.burgerMinigameBurgerMinLayers.getInt();
+                    int maxLayers = CustomOptionHolder.burgerMinigameBurgerMaxLayers.getInt();
+                    if (minLayers > maxLayers) maxLayers = minLayers;
+                    layers = minLayers + (minLayers < maxLayers ? UnityEngine.Random.Range(0, maxLayers - minLayers + 1) : 0);
+                }
+                layers = UnityEngine.Mathf.Clamp(layers, MinBurgerLayers, MaxBurgerLayers);
             }
 
-            layers = UnityEngine.Mathf.Clamp(layers, MinBurgerLayers, MaxBurgerLayers);
             if (DefaultBurgerLayers == layers)
                 return;
             MakeBurgers(__instance, layers);
