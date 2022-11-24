@@ -309,6 +309,7 @@ namespace TheOtherRoles {
         public static CustomOption yasunaSpawnRate;
         public static CustomOption yasunaIsImpYasunaRate;
         public static CustomOption yasunaNumberOfSpecialVotes;
+        public static CustomOption yasunaSpecificMessageMode;
 
         public static CustomOption taskMasterSpawnRate;
         public static CustomOption taskMasterBecomeATaskMasterWhenCompleteAllTasks;
@@ -541,6 +542,8 @@ namespace TheOtherRoles {
             yasunaSpawnRate = CustomOption.Create(910000000, Types.Crewmate, cs(Yasuna.color, "Yasuna"), rates, null, true);
             yasunaIsImpYasunaRate = CustomOption.Create(910000002, Types.Crewmate, "Chance That The Yasuna Is An Impostor", rates, yasunaSpawnRate);
             yasunaNumberOfSpecialVotes = CustomOption.Create(910000001, Types.Crewmate, "Yasuna Number Of Special Votes", 1f, 1f, 15, 1f, yasunaSpawnRate);
+            // Change the message when the target is exiled by Yasuna's system to Yasuna-specific message (Japanese-only)
+            yasunaSpecificMessageMode = CustomOption.Create(910000003, Types.Crewmate, "Yasuna-specific Message Mode", false, yasunaSpawnRate);
 
             // TASK MASTER (Crewmate)
             taskMasterSpawnRate = CustomOption.Create(910000100, Types.Crewmate, cs(TaskMaster.color, "TaskMaster"), rates, null, true);

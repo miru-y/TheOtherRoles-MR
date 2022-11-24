@@ -325,7 +325,7 @@ namespace TheOtherRoles.Patches {
                         if (Jester.jester != null && player.PlayerId == Jester.jester.PlayerId) __result = "";
                     }
 
-                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue) {
+                    if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue && CustomOptionHolder.yasunaSpecificMessageMode.getBool()) {
                         int index = __result.IndexOf("Ç™í«ï˙Ç≥ÇÍÇΩ");
                         if (index != -1) {
                             __result = player.Data.PlayerName + "Ç≥ÇÒÅIÇ‚ÇËÇ‹ÇµÇΩÇÀÇ•Å`ÅI";
