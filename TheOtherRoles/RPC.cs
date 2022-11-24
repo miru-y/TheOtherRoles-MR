@@ -65,6 +65,7 @@ namespace TheOtherRoles
         Thief,
         EvilYasuna,
         Yasuna,
+        YasunaJr,
         TaskMaster,
         DoorHacker,
         Kataomoi,
@@ -168,6 +169,7 @@ namespace TheOtherRoles
         TriggerTrap,
 
         YasunaSpecialVote,
+        YasunaJrSpecialVote,
         YasunaSpecialVote_DoCastVote,
         TaskMasterSetExTasks,
         TaskMasterUpdateExTasks,
@@ -412,6 +414,9 @@ namespace TheOtherRoles
                         case RoleId.Yasuna:
                         case RoleId.EvilYasuna:
                             Yasuna.yasuna = player;
+                            break;
+                        case RoleId.YasunaJr:
+                            YasunaJr.yasunaJr = player;
                             break;
                         case RoleId.TaskMaster:
                             TaskMaster.taskMaster = player;
@@ -860,6 +865,7 @@ namespace TheOtherRoles
             if (player == Trapper.trapper) Trapper.clearAndReload();
             if (player == Madmate.madmate) Madmate.clearAndReload();
             if (player == Yasuna.yasuna) Yasuna.clearAndReload();
+            if (player == YasunaJr.yasunaJr) YasunaJr.clearAndReload();
             if (player == TaskMaster.taskMaster) TaskMaster.clearAndReload();
 
             // Impostor roles
@@ -1287,6 +1293,14 @@ namespace TheOtherRoles
             Yasuna.remainingSpecialVotes(true);
         }
 
+        public static void yasunaJrSpecialVote(byte playerid, byte targetid) {
+            if (!MeetingHud.Instance) return;
+            if (!YasunaJr.isYasunaJr(playerid)) return;
+            PlayerControl target = Helpers.playerById(targetid);
+            if (target == null) return;
+            YasunaJr.specialVoteTargetPlayerId = targetid;
+        }
+
         public static void yasunaSpecialVote_DoCastVote() {
             if (!MeetingHud.Instance) return;
             if (!Yasuna.isYasuna(CachedPlayer.LocalPlayer.PlayerControl.PlayerId)) return;
@@ -1672,6 +1686,11 @@ namespace TheOtherRoles
                         MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.YasunaSpecialVote_DoCastVote, Hazel.SendOption.Reliable, clientId);
                         AmongUsClient.Instance.FinishRpcImmediately(writer);
                     }
+                    break;
+                case (byte)CustomRPC.YasunaJrSpecialVote:
+                    id = reader.ReadByte();
+                    targetId = reader.ReadByte();
+                    RPCProcedure.yasunaSpecialVote(id, targetId);
                     break;
                 case (byte)CustomRPC.YasunaSpecialVote_DoCastVote:
                     RPCProcedure.yasunaSpecialVote_DoCastVote();

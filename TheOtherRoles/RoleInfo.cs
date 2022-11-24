@@ -79,6 +79,7 @@ namespace TheOtherRoles
         public static RoleInfo hunted = new RoleInfo("Hunted", Color.white, "Hide", "Hide", RoleId.Crewmate);
 
         public static RoleInfo yasuna = new RoleInfo("Yasuna", Yasuna.color, "Exile suspicious crewmates.", "Exile suspicious crewmates.", RoleId.Yasuna);
+        public static RoleInfo yasunaJr = new RoleInfo("Yasuna Jr.", YasunaJr.color, "Take away the votes of the suspicious crewmates.", "Take away the votes of the suspicious crewmates.", RoleId.YasunaJr);
         public static RoleInfo evilYasuna = new RoleInfo("Evil Yasuna", Palette.ImpostorRed, "Exile smart crewmates.", "Exile smart crewmates.", RoleId.EvilYasuna);
         public static RoleInfo taskMaster = new RoleInfo("Task Master", TaskMaster.color, "Complete all extra tasks to lead\ncrewmate's team to victory.", "Complete all extra tasks to lead\ncrewmate's team to victory.", RoleId.TaskMaster);
         public static RoleInfo doorHacker = new RoleInfo("DoorHacker", DoorHacker.color, "Slip through the door and cover your tracks.", "Slip through the door and cover your tracks.", RoleId.DoorHacker);
@@ -162,6 +163,7 @@ namespace TheOtherRoles
             chameleon,
             shifter,
             yasuna,
+            yasunaJr,
             evilYasuna,
             taskMaster,
             doorHacker,
@@ -244,6 +246,7 @@ namespace TheOtherRoles
             if (p == Pursuer.pursuer) infos.Add(pursuer);
             if (p == Thief.thief) infos.Add(thief);
             if (p == Yasuna.yasuna) infos.Add(p.Data.Role.IsImpostor ? evilYasuna : yasuna);
+            if (p == YasunaJr.yasunaJr) infos.Add(yasunaJr);
             if (p == TaskMaster.taskMaster) infos.Add(taskMaster);
             if (p == DoorHacker.doorHacker) infos.Add(doorHacker);
             if (p == Kataomoi.kataomoi) infos.Add(kataomoi);

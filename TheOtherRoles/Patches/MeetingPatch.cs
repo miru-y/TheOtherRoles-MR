@@ -12,6 +12,7 @@ using UnityEngine;
 using Assets.CoreScripts;
 using System.Collections;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using TheOtherRoles.Modules;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]
@@ -62,8 +63,6 @@ namespace TheOtherRoles.Patches {
                     }
                 }
 
-
-
                 return dictionary;
             }
 
@@ -74,6 +73,28 @@ namespace TheOtherRoles.Patches {
                     if (target == null && blockSkippingInEmergencyMeetings && noVoteIsSelfVote) {
                         foreach (PlayerVoteArea playerVoteArea in __instance.playerStates) {
                             if (playerVoteArea.VotedFor == byte.MaxValue - 1) playerVoteArea.VotedFor = playerVoteArea.TargetPlayerId; // TargetPlayerId
+                        }
+                    }
+
+                    if (YasunaJr.yasunaJr != null && !YasunaJr.yasunaJr.Data.IsDead && YasunaJr.specialVoteTargetPlayerId != byte.MaxValue)
+					{
+                        byte takeAwayTheVoteTargetPlayerId = YasunaJr.specialVoteTargetPlayerId;
+                        for (int i = 0; i < __instance.playerStates.Length; i++)
+                        {
+                            PlayerVoteArea playerVoteArea = __instance.playerStates[i];
+                            if (playerVoteArea.TargetPlayerId == YasunaJr.specialVoteTargetPlayerId)
+                            {
+                                byte selfVotedFor = byte.MaxValue;
+                                for (int j = 0; j < __instance.playerStates.Length; j++)
+                                {
+                                    if (__instance.playerStates[j].TargetPlayerId == CachedPlayer.LocalPlayer.PlayerId)
+                                    {
+                                        selfVotedFor = __instance.playerStates[j].VotedFor;
+                                        break;
+                                    }
+                                }
+                                playerVoteArea.VotedFor = selfVotedFor;
+                            }
                         }
                     }
 
@@ -112,6 +133,7 @@ namespace TheOtherRoles.Patches {
                         PlayerVoteArea playerVoteArea = __instance.playerStates[i];
                         if (forceTargetPlayerId != byte.MaxValue)
                             playerVoteArea.VotedFor = forceTargetPlayerId;
+
                         array[i] = new MeetingHud.VoterState {
                             VoterId = playerVoteArea.TargetPlayerId,
                             VotedForId = playerVoteArea.VotedFor
@@ -226,6 +248,14 @@ namespace TheOtherRoles.Patches {
                     for (int i = 0; i < __instance.playerStates.Length; i++) {
                         PlayerVoteArea voteArea = __instance.playerStates[i];
                         Transform t = voteArea.transform.FindChild("SpecialVoteButton");
+                        if (t != null)
+                            t.gameObject.SetActive(false);
+                    }
+                }
+                if (YasunaJr.isYasunaJr(CachedPlayer.LocalPlayer.PlayerControl.PlayerId) && YasunaJr.specialVoteTargetPlayerId == byte.MaxValue) {
+                    for (int i = 0; i < __instance.playerStates.Length; i++) {
+                        PlayerVoteArea voteArea = __instance.playerStates[i];
+                        Transform t = voteArea.transform.FindChild("SpecialVoteButton2");
                         if (t != null)
                             t.gameObject.SetActive(false);
                     }
@@ -465,6 +495,53 @@ namespace TheOtherRoles.Patches {
             }
         }
 
+        static void yasunaJrOnClick(int buttonTarget, MeetingHud __instance) {
+            if (YasunaJr.yasunaJr != null && YasunaJr.yasunaJr.Data.IsDead) return;
+            if (!(__instance.state == MeetingHud.VoteStates.Voted || __instance.state == MeetingHud.VoteStates.NotVoted)) return;
+            if (__instance.playerStates[buttonTarget].AmDead) return;
+
+            SoundManager.Instance.PlaySound(ModUpdateBehaviour.selectSfx, false, 1f, null).volume = 0.8f;
+            for (int i = 0; i < __instance.playerStates.Length; i++)
+            {
+                PlayerVoteArea voteArea = __instance.playerStates[i];
+                Transform t = voteArea.transform.FindChild("SpecialVoteButton2");
+                if (t != null)
+				{
+                    var s = t.gameObject.GetComponent<SpriteRenderer>();
+                    if (s != null)
+                        s.color = new Color(s.color.r, s.color.g, s.color.b, i == buttonTarget ? 1.0f : 0.5f);
+                }
+            }
+
+            byte targetId = __instance.playerStates[buttonTarget].TargetPlayerId;
+            RPCProcedure.yasunaJrSpecialVote(CachedPlayer.LocalPlayer.PlayerControl.PlayerId, targetId);
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.YasunaJrSpecialVote, Hazel.SendOption.Reliable, -1);
+            writer.Write(CachedPlayer.LocalPlayer.PlayerControl.PlayerId);
+            writer.Write(targetId);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+
+            /*
+            __instance.SkipVoteButton.gameObject.SetActive(false);
+            for (int i = 0; i < __instance.playerStates.Length; i++)
+            {
+                PlayerVoteArea voteArea = __instance.playerStates[i];
+                voteArea.ClearButtons();
+                Transform t = voteArea.transform.FindChild("SpecialVoteButton2");
+                if (t != null && voteArea.TargetPlayerId != targetId)
+                    t.gameObject.SetActive(false);
+            }
+            */
+
+            /*
+            if (AmongUsClient.Instance.AmHost)
+            {
+                PlayerControl target = Helpers.playerById(targetId);
+                if (target != null)
+                    MeetingHud.Instance.CmdCastVote(CachedPlayer.LocalPlayer.PlayerControl.PlayerId, target.PlayerId);
+            }
+            */
+        }
+
         [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.Select))]
         class PlayerVoteAreaSelectPatch {
             static bool Prefix(MeetingHud __instance) {
@@ -475,7 +552,7 @@ namespace TheOtherRoles.Patches {
                         return false;
                 }
 
-                return !(CachedPlayer.LocalPlayer != null && HandleGuesser.isGuesser(CachedPlayer.LocalPlayer.PlayerId) && guesserUI != null);
+                return true;
             }
         }
 
@@ -614,6 +691,33 @@ namespace TheOtherRoles.Patches {
                     TMPro.TextMeshPro targetBoxRemainText = UnityEngine.Object.Instantiate(__instance.playerStates[0].NameText, targetBox.transform);
                     targetBoxRemainText.text = Yasuna.remainingSpecialVotes().ToString();
                     targetBoxRemainText.color = CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor ? Palette.ImpostorRed : Yasuna.color;
+                    targetBoxRemainText.alignment = TMPro.TextAlignmentOptions.Center;
+                    targetBoxRemainText.transform.localPosition = new Vector3(0.2f, -0.3f, targetBoxRemainText.transform.localPosition.z);
+                    targetBoxRemainText.transform.localScale *= 1.7f;
+                }
+            }
+
+            // Add Yasuna Jr. Special Buttons
+            if (YasunaJr.isYasunaJr(CachedPlayer.LocalPlayer.PlayerControl.PlayerId) && !YasunaJr.yasunaJr.Data.IsDead && YasunaJr.remainingSpecialVotes() > 0) {
+                for (int i = 0; i < __instance.playerStates.Length; i++) {
+                    PlayerVoteArea playerVoteArea = __instance.playerStates[i];
+                    if (playerVoteArea.AmDead || playerVoteArea.TargetPlayerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId) continue;
+
+                    GameObject template = playerVoteArea.Buttons.transform.Find("CancelButton").gameObject;
+                    GameObject targetBox = UnityEngine.Object.Instantiate(template, playerVoteArea.transform);
+                    targetBox.name = "SpecialVoteButton2";
+                    targetBox.transform.localPosition = new Vector3(-0.95f, 0.03f, -2.5f);
+                    SpriteRenderer renderer = targetBox.GetComponent<SpriteRenderer>();
+                    renderer.sprite = YasunaJr.getTargetSprite(CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor);
+                    renderer.color = new Color(renderer.color.r, renderer.color.g, renderer.color.b, 0.5f);
+                    PassiveButton button = targetBox.GetComponent<PassiveButton>();
+                    button.OnClick.RemoveAllListeners();
+                    int copiedIndex = i;
+                    button.OnClick.AddListener((UnityEngine.Events.UnityAction)(() => yasunaJrOnClick(copiedIndex, __instance)));
+
+                    TMPro.TextMeshPro targetBoxRemainText = UnityEngine.Object.Instantiate(__instance.playerStates[0].NameText, targetBox.transform);
+                    targetBoxRemainText.text = YasunaJr.remainingSpecialVotes().ToString();
+                    targetBoxRemainText.color = YasunaJr.color;
                     targetBoxRemainText.alignment = TMPro.TextAlignmentOptions.Center;
                     targetBoxRemainText.transform.localPosition = new Vector3(0.2f, -0.3f, targetBoxRemainText.transform.localPosition.z);
                     targetBoxRemainText.transform.localScale *= 1.7f;

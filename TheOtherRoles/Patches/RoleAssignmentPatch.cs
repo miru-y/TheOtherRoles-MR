@@ -150,6 +150,7 @@ namespace TheOtherRoles.Patches {
             crewSettings.Add((byte)RoleId.Snitch, CustomOptionHolder.snitchSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Medium, CustomOptionHolder.mediumSpawnRate.getSelection());
             crewSettings.Add((byte)RoleId.Trapper, CustomOptionHolder.trapperSpawnRate.getSelection());
+            crewSettings.Add((byte)RoleId.YasunaJr, CustomOptionHolder.yasunaJrSpawnRate.getSelection());
 
             if (Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraCommonTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraLongTasks.getFloat()) > 0 || Mathf.RoundToInt(CustomOptionHolder.taskMasterExtraShortTasks.getFloat()) > 0)
                 crewSettings.Add((byte)RoleId.TaskMaster, CustomOptionHolder.taskMasterSpawnRate.getSelection());

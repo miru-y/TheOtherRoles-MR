@@ -64,6 +64,7 @@ namespace TheOtherRoles
             Thief.clearAndReload();
             Trapper.clearAndReload();
             Yasuna.clearAndReload();
+            YasunaJr.clearAndReload();
             DoorHacker.clearAndReload();
             Kataomoi.clearAndReload();
             KillerCreator.clearAndReload();
@@ -1716,6 +1717,44 @@ namespace TheOtherRoles
         }
     }
 
+    public static class YasunaJr
+    {
+        public static PlayerControl yasunaJr;
+        public static Color color = new Color32(182, 255, 153, byte.MaxValue);
+        public static byte specialVoteTargetPlayerId = byte.MaxValue;
+        private static int _remainingSpecialVotes = 1;
+        private static Sprite targetSprite;
+
+        public static void clearAndReload()
+        {
+            yasunaJr = null;
+            _remainingSpecialVotes = Mathf.RoundToInt(CustomOptionHolder.yasunaJrNumberOfSpecialVotes.getFloat());
+            specialVoteTargetPlayerId = byte.MaxValue;
+        }
+
+        public static Sprite getTargetSprite(bool isImpostor)
+        {
+            if (targetSprite) return targetSprite;
+            targetSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.YasunaTargetIcon.png", 150f);
+            return targetSprite;
+        }
+
+        public static int remainingSpecialVotes(bool isVote = false)
+        {
+            if (yasunaJr == null)
+                return 0;
+
+            if (isVote)
+                _remainingSpecialVotes = Mathf.Max(0, _remainingSpecialVotes - 1);
+            return _remainingSpecialVotes;
+        }
+
+        public static bool isYasunaJr(byte playerId)
+        {
+            return yasunaJr != null && yasunaJr.PlayerId == playerId;
+        }
+    }
+
     public static class TaskMaster
     {
         public static PlayerControl taskMaster = null;
@@ -2929,6 +2968,11 @@ namespace TheOtherRoles
             {
                 if (repeat) shiftRole(player2, player1, false);
                 Yasuna.yasuna = player1;
+            }
+            else if (YasunaJr.yasunaJr != null && YasunaJr.yasunaJr == player2)
+            {
+                if (repeat) shiftRole(player2, player1, false);
+                YasunaJr.yasunaJr = player1;
             }
             else if (TaskMaster.taskMaster != null && TaskMaster.taskMaster == player2)
             {

@@ -203,6 +203,13 @@ namespace TheOtherRoles.Patches {
             if (Yasuna.yasuna != null)
                 Yasuna.specialVoteTargetPlayerId = byte.MaxValue;
 
+            // Reset Yasuna Jr. settings.
+            if (YasunaJr.yasunaJr != null && YasunaJr.specialVoteTargetPlayerId != byte.MaxValue)
+			{
+                YasunaJr.remainingSpecialVotes(true);
+                YasunaJr.specialVoteTargetPlayerId = byte.MaxValue;
+            }
+
             // Mini set adapted cooldown
             if (Mini.mini != null && CachedPlayer.LocalPlayer.PlayerControl == Mini.mini && Mini.mini.Data.Role.IsImpostor) {
                 var multiplier = Mini.isGrownUp() ? 0.66f : 2f;
