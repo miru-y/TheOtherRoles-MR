@@ -2,6 +2,7 @@
 This mod is The Other Roles extension mod which implements new roles and systems based on [The Other Roles](https://github.com/Eisbison/TheOtherRoles)/[The Other Roles+](https://github.com/tomarai/TheOtherRoles).
 - **New Roles**
   - [Yasuna](#yasuna-mr-edition-only)/[Evil Yasuna](#yasuna-mr-edition-only) by [miru-y](https://github.com/miru-y)
+  - [Yasuna Jr.](#yasuna-jr-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Asazaki)
   - [Task Master](#task-master-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Door Hacker](#door-hacker-mr-edition-only) by [miru-y](https://github.com/miru-y)
   - [Kataomoi](#kataomoi-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Pepper, Tsunaarare)
@@ -32,6 +33,7 @@ This mod is not affiliated with Among Us or Innersloth LLC, and the content cont
 # Releases
 | Mod Version | Among Us - Version | The Other Roles/The Other Roles+ - Version | Link |
 |----------|-------------|-----------------|-----------------|
+| [v2.6.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.6.0) | 2022.10.25s | [TheOtherRoles v4.2.0](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.2.0)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.6.0/TheOtherRolesMR.zip)
 | [v2.5.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.5.0) | 2022.10.25s | [TheOtherRoles v4.2.0](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.2.0)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.5.0/TheOtherRolesMR.zip)
 | [v2.4.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.4.0) | 2022.8.24s | [TheOtherRoles v4.1.7](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.7)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.4.0/TheOtherRolesMR.zip)
 | [v2.3.0](https://github.com/miru-y/TheOtherRoles-MR/releases/tag/MR_v2.3.0) | 2022.8.24s | [TheOtherRoles v4.1.7](https://github.com/Eisbison/TheOtherRoles/releases/tag/v4.1.7)/[v4.1.1.1+](https://github.com/tomarai/TheOtherRoles/releases/tag/v4.1.1.1%2B) |[Download](https://github.com/miru-y/TheOtherRoles-MR/releases/download/MR_v2.3.0/TheOtherRolesMR.zip)
@@ -94,6 +96,7 @@ Even more roles are coming soon. :)
 |  | [Trapper](#trapper) |  |  |
 |  | [Nice Guesser](#guesser) |  |  |
 |  | [Yasuna (MR Edition only)](#yasuna-mr-edition-only) |  |
+|  | [Yasuna Jr. (MR Edition only)](#yasuna-jr-mr-edition-only) |  |
 |  | [Task Master (MR Edition only)](#task-master-mr-edition-only) |  |
 
 The [Role Assignment](#role-assignment) sections explains how the roles are being distributed among the players.
@@ -1673,7 +1676,20 @@ When you click on the target icon of the player you want to exile, it will be tr
 | Name | Description |
 |----------|:-------------:|
 |Yasuna Number Of Special Votes|Number of times compulsory voting can be used.|
-|Chance That The Yasuna Is An Impostor|Probability of becoming Evil Yasuna (Imposter).|
+|Chance That The Yasuna Is An Impostor|Probability of becoming Evil Yasuna. (Imposter)|
+|Yasuna-specific Message Mode| -
+-----------------------
+## Yasuna Jr. (MR Edition only)
+### **Team: Crewmates**
+This is a crew position where can forcibly take away the votes of certain players at his/her discretion.\
+In the Meeting Phase, a green target icon (+ number of times available) will be displayed for players other than yourself.\
+Clicking on the target icon of the player whose vote you wish to take away will cause the player to become selected, thus allowing you to treat the selected player's vote as your own.\
+***This role is very powerful and must be used properly.
+
+### Game Options
+| Name | Description |
+|----------|:-------------:|
+|Yasuna Jr. Number Of Special Votes|Number of times the function of taking away the votes of the target can be used.|
 -----------------------
 
 ## Task Master (MR Edition only)
