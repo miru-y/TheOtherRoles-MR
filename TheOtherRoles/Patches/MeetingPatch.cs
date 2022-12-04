@@ -87,7 +87,7 @@ namespace TheOtherRoles.Patches {
                                 byte selfVotedFor = byte.MaxValue;
                                 for (int j = 0; j < __instance.playerStates.Length; j++)
                                 {
-                                    if (__instance.playerStates[j].TargetPlayerId == CachedPlayer.LocalPlayer.PlayerId)
+                                    if (__instance.playerStates[j].TargetPlayerId == YasunaJr.yasunaJr.PlayerId)
                                     {
                                         selfVotedFor = __instance.playerStates[j].VotedFor;
                                         break;

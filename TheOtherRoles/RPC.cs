@@ -1690,7 +1690,7 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.YasunaJrSpecialVote:
                     id = reader.ReadByte();
                     targetId = reader.ReadByte();
-                    RPCProcedure.yasunaSpecialVote(id, targetId);
+                    RPCProcedure.yasunaJrSpecialVote(id, targetId);
                     break;
                 case (byte)CustomRPC.YasunaSpecialVote_DoCastVote:
                     RPCProcedure.yasunaSpecialVote_DoCastVote();
