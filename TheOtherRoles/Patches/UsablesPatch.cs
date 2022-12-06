@@ -170,17 +170,15 @@ namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(Vent), nameof(Vent.MoveToVent))]
     public static class MoveToVentPatch {
         public static bool Prefix(Vent otherVent) {
-            return !Trapper.playersOnMap.Contains(CachedPlayer.LocalPlayer.PlayerControl);
-        }
-
-        public static void Postfix(Vent otherVent) {
-            if (CachedPlayer.LocalPlayer.PlayerControl.cosmetics.Visible)
-			{
+            bool b = !Trapper.playersOnMap.Contains(CachedPlayer.LocalPlayer.PlayerControl);
+            if (b && CachedPlayer.LocalPlayer.PlayerControl.cosmetics.Visible)
+            {
                 RPCProcedure.ventMoveInvisible(CachedPlayer.LocalPlayer.PlayerId);
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.VentMoveInvisible, Hazel.SendOption.Reliable, -1);
                 writer.Write(CachedPlayer.LocalPlayer.PlayerId);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
             }
+            return b;
         }
     }
 
