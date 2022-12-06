@@ -896,12 +896,12 @@ namespace TheOtherRoles.Patches {
                     greyscreen.enabled = true;
                     TMPro.TMP_Text text;
                     RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance?.roomTracker;
-                    GameObject gameObject = UnityEngine.Object.Instantiate(roomTracker.gameObject);
-                    UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<RoomTracker>());
-                    gameObject.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
-                    gameObject.transform.localPosition = new Vector3(0, 0, -930f);
-                    gameObject.transform.localScale = Vector3.one * 5f;
-                    text = gameObject.GetComponent<TMPro.TMP_Text>();
+                    var textObj = UnityEngine.Object.Instantiate(roomTracker.gameObject);
+                    UnityEngine.Object.DestroyImmediate(textObj.GetComponent<RoomTracker>());
+                    textObj.transform.SetParent(FastDestroyableSingleton<HudManager>.Instance.transform);
+                    textObj.transform.localPosition = new Vector3(0, 0, -930f);
+                    textObj.transform.localScale = Vector3.one * 5f;
+                    text = textObj.GetComponent<TMPro.TMP_Text>();
                     yield return Effects.Lerp(delay, new Action<float>((p) =>
                     { // Delayed action
                         greyscreen.color = new Color(1.0f, 1.0f, 1.0f, 0.5f - p / 2);
@@ -911,10 +911,23 @@ namespace TheOtherRoles.Patches {
                         text.text = ModTranslation.GetString("Game-General", 13) + prefix + message + "</color>";
                         if (text != null) text.color = Color.white;
                     }));
+
+                    text.enabled = false;
+                    blackscreen.transform.SetParent(MeetingHud.Instance.transform);
+                    blackscreen.transform.position = Vector3.zero;
+                    blackscreen.transform.localPosition = new Vector3(0f, 0f, 9f);
+                    blackscreen.transform.localScale = new Vector3(200f, 100f, 1f);
+                    blackscreen.transform.SetAsFirstSibling();
+                    greyscreen.transform.SetParent(MeetingHud.Instance.transform);
+                    greyscreen.transform.position = Vector3.zero;
+                    greyscreen.transform.localPosition = new Vector3(0f, 0f, 9f);
+                    greyscreen.transform.localScale = new Vector3(200f, 100f, 1f);
+                    greyscreen.transform.SetAsFirstSibling();
                     // yield return new WaitForSeconds(2f);
-                    UnityEngine.Object.Destroy(text.gameObject);
-                    UnityEngine.Object.Destroy(blackscreen);
-                    UnityEngine.Object.Destroy(greyscreen);
+
+                    //UnityEngine.Object.Destroy(textObj);
+                    //UnityEngine.Object.Destroy(blackscreen);
+                    //UnityEngine.Object.Destroy(greyscreen);
 
                     // ミーティング画面の並び替えを直す
                     //populateButtons(MeetingHud.Instance, reporter.Data.PlayerId);
