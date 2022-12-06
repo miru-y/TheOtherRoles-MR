@@ -108,6 +108,7 @@ namespace TheOtherRoles
         UseUncheckedVent,
         UncheckedMurderPlayer,
         UncheckedCmdReportDeadBody,
+        VentMoveInvisible,
         ConsumeAdminTime,
         UncheckedExilePlayer,
         DynamicMapOption,
@@ -529,6 +530,12 @@ namespace TheOtherRoles
             PlayerControl source = Helpers.playerById(sourceId);
             var t = targetId == Byte.MaxValue ? null : Helpers.playerById(targetId).Data;
             if (source != null) source.ReportDeadBody(t);
+        }
+
+        public static void ventMoveInvisible(byte playerId) {
+            PlayerControl p = Helpers.playerById(playerId);
+            if (p == null || !p.cosmetics.Visible) return;
+            p.cosmetics.Visible = false;
         }
 
         public static void consumeAdminTime(float delta) {
@@ -1480,6 +1487,9 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.UncheckedExilePlayer:
                     byte exileTarget = reader.ReadByte();
                     RPCProcedure.uncheckedExilePlayer(exileTarget);
+                    break;
+                case (byte)CustomRPC.VentMoveInvisible:
+                    RPCProcedure.ventMoveInvisible(reader.ReadByte());
                     break;
                 case (byte)CustomRPC.UncheckedCmdReportDeadBody:
                     byte reportSource = reader.ReadByte();
