@@ -21,6 +21,7 @@ using Il2CppSystem.Text;
 using Reactor.Networking.Attributes;
 using AmongUs.Data;
 using TheOtherRoles.Patches;
+using static TheOtherRoles.Patches.OnGameEndPatch;
 
 namespace TheOtherRoles
 {
@@ -183,8 +184,8 @@ namespace TheOtherRoles
         {
             if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
             {
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.F5))
-                    ShipStatus.RpcEndGame((GameOverReason)CustomGameOverReason.ForceEnd, false);
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.F5))
+                    CheckEndCriteriaPatch.UncheckedEndGame((GameOverReason)CustomGameOverReason.ForceEnd, false);
             }
 
             // Check if debug mode is active.
