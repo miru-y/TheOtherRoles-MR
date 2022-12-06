@@ -728,7 +728,7 @@ namespace TheOtherRoles.Patches
         }
 
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.CheckEndCriteria))]
-        class CheckEndCriteriaPatch
+        public class CheckEndCriteriaPatch
         {
             public static bool Prefix(ShipStatus __instance)
             {
@@ -758,6 +758,15 @@ namespace TheOtherRoles.Patches
                 if (CheckAndEndGameForImpostorWin(__instance, statistics)) return false;
                 if (CheckAndEndGameForCrewmateWin(__instance, statistics)) return false;
                 return false;
+            }
+
+            public static void UncheckedEndGame(GameOverReason reason, bool never_used)
+            {
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId,
+                    (byte)CustomRPC.UncheckedEndGame, Hazel.SendOption.Reliable, -1);
+                writer.Write((byte)reason);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                RPCProcedure.uncheckedEndGame((byte)reason);
             }
 
             // Task Vs Mode
@@ -966,15 +975,6 @@ namespace TheOtherRoles.Patches
                 __instance.enabled = false;
                 ShipStatus.RpcEndGame(CheckGameOverReason(GameOverReason.ImpostorBySabotage), false);
                 return;
-            }
-
-            private static void UncheckedEndGame(GameOverReason reason, bool never_used)
-            {
-                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId,
-                    (byte)CustomRPC.UncheckedEndGame, Hazel.SendOption.Reliable, -1);
-                writer.Write((byte)reason);
-                AmongUsClient.Instance.FinishRpcImmediately(writer);
-                RPCProcedure.uncheckedEndGame((byte)reason);
             }
 
             private static void UncheckedEndGame(CustomGameOverReason reason)
