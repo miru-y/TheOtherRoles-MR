@@ -40,6 +40,8 @@ namespace TheOtherRoles{
         const float TimerUIMoveX = 2.5f;
 
         public static void clearAndReloadMapOptions() {
+            reloadPluginOptions();
+
             meetingsCount = 0;
             camerasToAdd = new List<SurvCamera>();
             ventsToSeal = new List<Vent>();
