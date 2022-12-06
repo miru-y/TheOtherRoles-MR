@@ -697,7 +697,7 @@ namespace TheOtherRoles {
 
             mayorSpawnRate = CustomOption.Create(80, Types.Crewmate, new TranslationInfo(RoleId.Mayor, Mayor.color), rates, null, true);
             mayorCanSeeVoteColors = CustomOption.Create(81, Types.Crewmate, new TranslationInfo("Opt-Mayor", 1), false, mayorSpawnRate);
-            mayorTasksNeededToSeeVoteColors = CustomOption.Create(82, Types.Crewmate, new TranslationInfo("Opt - Mayor", 2), 5f, 0f, 20f, 1f, mayorCanSeeVoteColors);
+            mayorTasksNeededToSeeVoteColors = CustomOption.Create(82, Types.Crewmate, new TranslationInfo("Opt-Mayor", 2), 5f, 0f, 20f, 1f, mayorCanSeeVoteColors);
             mayorMeetingButton = CustomOption.Create(83, Types.Crewmate, new TranslationInfo("Opt-Mayor", 3), true, mayorSpawnRate);
             mayorMaxRemoteMeetings = CustomOption.Create(84, Types.Crewmate, new TranslationInfo("Opt-Mayor", 4), 1f, 1f, 5f, 1f, mayorMeetingButton);
 
