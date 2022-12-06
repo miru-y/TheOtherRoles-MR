@@ -74,18 +74,18 @@ namespace TheOtherRoles.Patches {
                         continue;
                     else if (!playerVersions.ContainsKey(client.Id))  {
                         versionMismatch = true;
-                        message += $"<color=#FF0000FF>{client.Character.Data.PlayerName} has a different or no version of The Other Roles\n</color>";
+                        message += string.Format(ModTranslation.GetString("GameStart", 1), client.Character.Data.PlayerName);
                     } else {
                         PlayerVersion PV = playerVersions[client.Id];
                         int diff = TheOtherRolesPlugin.Version.CompareTo(PV.version);
                         if (diff > 0) {
-                            message += $"<color=#FF0000FF>{client.Character.Data.PlayerName} has an older version of The Other Roles (v{playerVersions[client.Id].version.ToString()})\n</color>";
+                            message += string.Format(ModTranslation.GetString("GameStart", 2), client.Character.Data.PlayerName, playerVersions[client.Id].version);
                             versionMismatch = true;
                         } else if (diff < 0) {
-                            message += $"<color=#FF0000FF>{client.Character.Data.PlayerName} has a newer version of The Other Roles (v{playerVersions[client.Id].version.ToString()})\n</color>";
+                            message += string.Format(ModTranslation.GetString("GameStart", 3), client.Character.Data.PlayerName, playerVersions[client.Id].version);
                             versionMismatch = true;
                         } else if (!PV.GuidMatches()) { // version presumably matches, check if Guid matches
-                            message += $"<color=#FF0000FF>{client.Character.Data.PlayerName} has a modified version of TOR v{playerVersions[client.Id].version.ToString()} <size=30%>({PV.guid.ToString()})</size>\n</color>";
+                            message += string.Format(ModTranslation.GetString("GameStart", 4), client.Character.Data.PlayerName, playerVersions[client.Id].version, PV.guid);
                             versionMismatch = true;
                         }
                     }
@@ -119,11 +119,10 @@ namespace TheOtherRoles.Patches {
 			                AmongUsClient.Instance.ExitGame(DisconnectReasons.ExitGame);
                             SceneChanger.ChangeScene("MainMenu");
                         }
-
-                        __instance.GameStartText.text = $"<color=#FF0000FF>The host has no or a different version of The Other Roles\nYou will be kicked in {Math.Round(10 - kickingTimer)}s</color>";
+                        __instance.GameStartText.text = string.Format(ModTranslation.GetString("GameStart", 5), Math.Round(10 - kickingTimer));
                         __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 2;
                     } else if (versionMismatch) {
-                        __instance.GameStartText.text = $"<color=#FF0000FF>Players With Different Versions:\n</color>" + message;
+                        __instance.GameStartText.text = ModTranslation.GetString("GameStart", 6) + message;
                         __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 2;
                     } else {
                         __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition;
@@ -131,7 +130,7 @@ namespace TheOtherRoles.Patches {
                             __instance.GameStartText.text = String.Empty;
                         }
                         else {
-                            __instance.GameStartText.text = $"Starting in {(int)startingTimer + 1}";
+                            __instance.GameStartText.text = string.Format(ModTranslation.GetString("GameStart", 7), (int)startingTimer + 1);
                             if (startingTimer <= 0) {
                                 __instance.GameStartText.text = String.Empty;
                             }

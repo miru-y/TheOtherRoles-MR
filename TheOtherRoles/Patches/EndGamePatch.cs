@@ -80,6 +80,7 @@ namespace TheOtherRoles.Patches
         {
             public string PlayerName { get; set; }
             public List<RoleInfo> Roles { get; set; }
+            public string RoleString { get; set; }
             public int TasksCompleted { get; set; }
             public int TasksTotal { get; set; }
             public int ExTasksCompleted { get; set; }
@@ -161,7 +162,6 @@ namespace TheOtherRoles.Patches
                     string extraInfo = "";
                     if (Kataomoi.kataomoi != null && Kataomoi.target == playerControl.PlayerControl)
                         extraInfo = Helpers.cs(Kataomoi.color, "♥");
-
                     AdditionalTempData.playerRoles.Add(new AdditionalTempData.PlayerRoleInfo()
                     {
                         PlayerName = playerControl.Data.PlayerName,
@@ -172,7 +172,7 @@ namespace TheOtherRoles.Patches
                         ExTasksCompleted = isTaskMasterExTasks ? TaskMaster.clearExTasks : 0,
                         ExtraInfo = extraInfo,
                         IsGuesser = isGuesser,
-                        Kills = killCount
+                        Kills = killCount,
                     });
                 }
             }
@@ -537,7 +537,7 @@ namespace TheOtherRoles.Patches
 
                 if (isTaskVsMode)
                 {
-                    __instance.WinText.text = "Result";
+                    __instance.WinText.text = ModTranslation.GetString("EndGame", 1);
                 }
                 else if (isHappyBirthdayMode)
 				{
@@ -550,7 +550,7 @@ namespace TheOtherRoles.Patches
                 }
                 else if (isForceEnd)
 				{
-                    __instance.WinText.text = DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese ? "廃村" : "No Game";
+                    __instance.WinText.text = ModTranslation.GetString("EndGame", 2);
                     __instance.WinText.color = Palette.DisabledGrey;
                 }
 
@@ -563,22 +563,22 @@ namespace TheOtherRoles.Patches
 
                 if (AdditionalTempData.winCondition == WinCondition.JesterWin)
                 {
-                    textRenderer.text = "Jester Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 3);
                     textRenderer.color = Jester.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.ArsonistWin)
                 {
-                    textRenderer.text = "Arsonist Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 4);
                     textRenderer.color = Arsonist.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.KataomoiWin)
                 {
-                    textRenderer.text = "Kataomoi Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 5);
                     foreach (var data in AdditionalTempData.playerRoles)
                     {
-                        if (data.ExtraInfo.Contains("?"))
+                        if (data.ExtraInfo.Contains("♥"))
                         {
-                            textRenderer.text += $"\nI want you to see and touch love more...";
+                            textRenderer.text += ModTranslation.GetString("EndGame", 6);
                             break;
                         }
                     }
@@ -587,44 +587,44 @@ namespace TheOtherRoles.Patches
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.VultureWin)
                 {
-                    textRenderer.text = "Vulture Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 7);
                     textRenderer.color = Vulture.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.ProsecutorWin)
                 {
-                    textRenderer.text = "Prosecutor Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 8);
                     textRenderer.color = Lawyer.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.LoversTeamWin)
                 {
-                    textRenderer.text = "Lovers And Crewmates Win";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 9);
                     textRenderer.color = Lovers.color;
                     __instance.BackgroundBar.material.SetColor("_Color", Lovers.color);
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.LoversSoloWin)
                 {
-                    textRenderer.text = "Lovers Win";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 10);
                     textRenderer.color = Lovers.color;
                     __instance.BackgroundBar.material.SetColor("_Color", Lovers.color);
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.JackalWin)
                 {
-                    textRenderer.text = "Team Jackal Wins";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 11);
                     textRenderer.color = Jackal.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.MiniLose)
                 {
-                    textRenderer.text = "Mini died";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 12);
                     textRenderer.color = Mini.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.TaskMasterTeamWin)
                 {
-                    textRenderer.text = "Task Master And Crewmates Win";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 13);
                     textRenderer.color = TaskMaster.color;
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.TaskVsModeEnd)
                 {
-                    textRenderer.text = "Congratulations!";
+                    textRenderer.text = ModTranslation.GetString("EndGame", 14);
                     textRenderer.color = TaskMaster.color;
                     __instance.BackgroundBar.material.SetColor("_Color", TaskRacer.color);
                 }
@@ -634,7 +634,7 @@ namespace TheOtherRoles.Patches
                 }
                 else if (AdditionalTempData.winCondition == WinCondition.HappyBirthdayModeEnd)
 				{
-                    textRenderer.text = string.Format("HAPPY BIRTHDAY {0}!!", list[0].PlayerName);
+                    textRenderer.text = string.Format(ModTranslation.GetString("EndGame", 15), list[0].PlayerName);
                     textRenderer.color = Color.green;
                     __instance.BackgroundBar.material.SetColor("_Color", Color.green);
                 }
@@ -643,11 +643,11 @@ namespace TheOtherRoles.Patches
                 {
                     if (cond == WinCondition.AdditionalLawyerBonusWin)
                     {
-                        textRenderer.text += $"\n{Helpers.cs(Lawyer.color, "The Lawyer wins with the client")}";
+                        textRenderer.text += $"\n{Helpers.cs(Lawyer.color, ModTranslation.GetString("EndGame", 16))}";
                     }
                     else if (cond == WinCondition.AdditionalAlivePursuerWin)
                     {
-                        textRenderer.text += $"\n{Helpers.cs(Pursuer.color, "The Pursuer survived")}";
+                        textRenderer.text += $"\n{Helpers.cs(Pursuer.color, ModTranslation.GetString("EndGame", 17))}";
                     }
                 }
 
@@ -670,9 +670,9 @@ namespace TheOtherRoles.Patches
                     if (CustomOptionHolder.enabledTaskVsMode.getBool())
                     {
                         if (CustomOptionHolder.taskVsMode_EnabledBurgerMakeMode.getBool())
-                            roleSummaryText.AppendLine(string.Format("Burger Make Mode Result: ({0} Layers, {1} Tasks)", CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt(), CustomOptionHolder.taskVsMode_BurgerMakeMode_MakeBurgerNums.getInt()));
+                            roleSummaryText.AppendLine(string.Format(ModTranslation.GetString("EndGame", 18), CustomOptionHolder.taskVsMode_BurgerMakeMode_BurgerLayers.getInt(), CustomOptionHolder.taskVsMode_BurgerMakeMode_MakeBurgerNums.getInt()));
                         else
-                            roleSummaryText.AppendLine("Task Vs Mode Result:");
+                            roleSummaryText.AppendLine(ModTranslation.GetString("EndGame", 19));
 
                         int rank = 1;
                         foreach (var data in AdditionalTempData.taskVsModeInfos)
@@ -688,24 +688,25 @@ namespace TheOtherRoles.Patches
                     }
                     else
                     {
-                        roleSummaryText.AppendLine("Players and roles at the end of the game:");
+                        roleSummaryText.AppendLine(ModTranslation.GetString("EndGame", 20));
                         foreach (var data in AdditionalTempData.playerRoles)
                         {
                             var roles = string.Join(" ", data.Roles.Select(x => Helpers.cs(x.color, x.name)));
-                            if (data.IsGuesser) roles += " (Guesser)";
-                            var taskInfo = data.TasksTotal > 0 ? $" - <color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
-                            if (data.Kills != null) taskInfo += $" - <color=#FF0000FF>(Kills: {data.Kills})</color>";
-                            var taskInfo2 = data.ExTasksTotal > 0 ? $" Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
-                            roleSummaryText.AppendLine($"{data.ExtraInfo}{data.PlayerName} - {roles}{taskInfo}{taskInfo2}");
+                            if (data.IsGuesser) roles += ModTranslation.GetString("EndGame", 21);
+                            var taskInfo = data.TasksTotal > 0 ? $"<color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
+                            if (data.Kills != null) taskInfo += string.Format(ModTranslation.GetString("EndGame", 22), data.Kills);
+                            var taskInfo2 = data.ExTasksTotal > 0 ? $"Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
+                            roleSummaryText.AppendLine($"{data.ExtraInfo}<pos=2%>{data.PlayerName}<pos=22%>{taskInfo}<pos=30%>{"- " + roles + " " + taskInfo2}");
                         }
                     }
 
                     TMPro.TMP_Text roleSummaryTextMesh = roleSummary.GetComponent<TMPro.TMP_Text>();
                     roleSummaryTextMesh.alignment = TMPro.TextAlignmentOptions.TopLeft;
                     roleSummaryTextMesh.color = Color.white;
-                    roleSummaryTextMesh.fontSizeMin = 1.5f;
-                    roleSummaryTextMesh.fontSizeMax = 1.5f;
-                    roleSummaryTextMesh.fontSize = 1.5f;
+                    roleSummaryTextMesh.outlineWidth *= 1.2f;
+                    roleSummaryTextMesh.fontSizeMin = 1.25f;
+                    roleSummaryTextMesh.fontSizeMax = 1.25f;
+                    roleSummaryTextMesh.fontSize = 1.25f;
 
                     var roleSummaryTextMeshRectTransform = roleSummaryTextMesh.GetComponent<RectTransform>();
                     roleSummaryTextMeshRectTransform.anchoredPosition = new Vector2(position.x + 3.5f, position.y - 0.1f);

@@ -541,7 +541,7 @@ namespace TheOtherRoles.Patches
                     string meetingInfoText = "";                    
                     string extraInfoText = "";
                     if (isKataomoiTarget)
-                        extraInfoText = Helpers.cs(Kataomoi.color, "Kataomoi Target");
+                        extraInfoText = Helpers.cs(Kataomoi.color, ModTranslation.GetString("Game-Kataomoi", 1));
 
                     if (p == CachedPlayer.LocalPlayer.PlayerControl || TaskRacer.isValid()) {
                         if (p.Data.IsDead) roleNames = roleText;
@@ -549,7 +549,7 @@ namespace TheOtherRoles.Patches
                         if (p == Swapper.swapper) playerInfoText = $"{roleNames}" + Helpers.cs(Swapper.color, $" ({Swapper.charges})");
                         if (TaskPanelBehaviour.InstanceExists) {
                             TMPro.TextMeshPro tabText = TaskPanelBehaviour.Instance.tab.transform.FindChild("TabText_TMP").GetComponent<TMPro.TextMeshPro>();
-                            tabText.SetText(string.Format("{0} {1}", isTaskMasterExTask ? "Ex Tasks" : "Tasks", isTaskMasterExTask ? exTaskInfo : taskInfo));
+                            tabText.SetText(string.Format("{0} {1}", ModTranslation.GetString("Game-General", isTaskMasterExTask ? 12 : 11), isTaskMasterExTask ? exTaskInfo : taskInfo));
                         }
                         if (!isTaskMasterExTask)
                             meetingInfoText = $"{roleNames} {taskInfo}".Trim();
@@ -1236,15 +1236,15 @@ namespace TheOtherRoles.Patches
                     string msg = "";
 
                     if (isMedicReport) {
-                        msg = $"Body Report: Killed {Math.Round(timeSinceDeath / 1000)}s ago!";
+                        msg = string.Format(ModTranslation.GetString("Game-Medic", 1), Math.Round(timeSinceDeath / 1000));
                     } else if (isDetectiveReport) {
                         if (timeSinceDeath < Detective.reportNameDuration * 1000) {
-                            msg =  $"Body Report: The killer appears to be {deadPlayer.killerIfExisting.Data.PlayerName}!";
+                            msg = string.Format(ModTranslation.GetString("Game-Detective", 1), deadPlayer.killerIfExisting.Data.PlayerName);
                         } else if (timeSinceDeath < Detective.reportColorDuration * 1000) {
-                            var typeOfColor = Helpers.isLighterColor(deadPlayer.killerIfExisting.Data.DefaultOutfit.ColorId) ? "lighter" : "darker";
-                            msg =  $"Body Report: The killer appears to be a {typeOfColor} color!";
+                            var typeOfColor = ModTranslation.GetString("Button", Helpers.isLighterColor(deadPlayer.killerIfExisting.Data.DefaultOutfit.ColorId) ? 5 : 6);
+                            msg = string.Format(ModTranslation.GetString("Game-Detective", 2), typeOfColor);
                         } else {
-                            msg = $"Body Report: The corpse is too old to gain information from!";
+                            msg = ModTranslation.GetString("Game-Detective", 3);
                         }
                     }
 

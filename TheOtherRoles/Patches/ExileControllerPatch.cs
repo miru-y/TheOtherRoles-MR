@@ -325,7 +325,7 @@ namespace TheOtherRoles.Patches {
                     if (player == null) return;
                     // Exile role text
                     if (id == StringNames.ExileTextPN || id == StringNames.ExileTextSN || id == StringNames.ExileTextPP || id == StringNames.ExileTextSP) {
-                        __result = player.Data.PlayerName + " was The " + String.Join(" ", RoleInfo.getRoleInfoForPlayer(player, false).Select(x => x.name).ToArray());
+                        __result = string.Format(ModTranslation.GetString("Exile", 1), player.Data.PlayerName, String.Join(" ", RoleInfo.getRoleInfoForPlayer(player, false).Select(x => x.name).ToArray()));
                     }
                     // Hide number of remaining impostors on Jester win
                     if (id == StringNames.ImpostorsRemainP || id == StringNames.ImpostorsRemainS) {
@@ -333,13 +333,10 @@ namespace TheOtherRoles.Patches {
                     }
 
                     if (id == StringNames.ExileTextNonConfirm && Yasuna.specialVoteTargetPlayerId != byte.MaxValue && CustomOptionHolder.yasunaSpecificMessageMode.getBool()) {
-                        int index = __result.IndexOf("Ç™í«ï˙Ç≥ÇÍÇΩ");
-                        if (index != -1) {
-                            __result = player.Data.PlayerName + "Ç≥ÇÒÅIÇ‚ÇËÇ‹ÇµÇΩÇÀÇ•Å`ÅI";
-                        }
+                        __result = string.Format(ModTranslation.GetString("Exile", 2), player.Data.PlayerName);
                     }
 
-                    if (Tiebreaker.isTiebreak) __result += " (Tiebreaker)";
+                    if (Tiebreaker.isTiebreak) __result += ModTranslation.GetString("Exile", 3);
                     Tiebreaker.isTiebreak = false;
                 }
             } catch {

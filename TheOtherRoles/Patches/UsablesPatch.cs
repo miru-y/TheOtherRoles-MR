@@ -274,18 +274,18 @@ namespace TheOtherRoles.Patches {
             // Deactivate emergency button for Swapper
             if (Swapper.swapper != null && Swapper.swapper == CachedPlayer.LocalPlayer.PlayerControl && !Swapper.canCallEmergency) {
                 roleCanCallEmergency = false;
-                statusText = "The Swapper can't start an emergency meeting";
+                statusText = ModTranslation.GetString("Game-Swapper", 1);
             }
             // Potentially deactivate emergency button for Jester
             if (Jester.jester != null && Jester.jester == CachedPlayer.LocalPlayer.PlayerControl && !Jester.canCallEmergency) {
                 roleCanCallEmergency = false;
-                statusText = "The Jester can't start an emergency meeting";
+                statusText = ModTranslation.GetString("Game-Jester", 1);
             }
             // Potentially deactivate emergency button for Lawyer/Prosecutor
             if (Lawyer.lawyer != null && Lawyer.lawyer == CachedPlayer.LocalPlayer.PlayerControl && !Lawyer.canCallEmergency) {
                 roleCanCallEmergency = false;
-                statusText = "The Lawyer can't start an emergency meeting";
-                if (Lawyer.isProsecutor) statusText = "The Prosecutor can't start an emergency meeting";
+                statusText = ModTranslation.GetString("Game-Lawer", 1);
+                if (Lawyer.isProsecutor) statusText = ModTranslation.GetString("Game-Lawer", 2);
             }
 
             if (!roleCanCallEmergency) {
@@ -302,7 +302,7 @@ namespace TheOtherRoles.Patches {
                 int localRemaining = CachedPlayer.LocalPlayer.PlayerControl.RemainingEmergencies;
                 int teamRemaining = Mathf.Max(0, maxNumberOfMeetings - meetingsCount);
                 int remaining = Mathf.Min(localRemaining, (Mayor.mayor != null && Mayor.mayor == CachedPlayer.LocalPlayer.PlayerControl) ? 1 : teamRemaining);
-                __instance.NumberText.text = $"{localRemaining.ToString()} and the ship has {teamRemaining.ToString()}";
+                __instance.NumberText.text = string.Format(ModTranslation.GetString("Game-General", 7), localRemaining, teamRemaining);
                 __instance.ButtonActive = remaining > 0;
                 __instance.ClosedLid.gameObject.SetActive(!__instance.ButtonActive);
                 __instance.OpenLid.gameObject.SetActive(__instance.ButtonActive);
@@ -417,7 +417,7 @@ namespace TheOtherRoles.Patches {
                     if (CustomOptionHolder.enabledVitalsTimer.getBool()) {
                         if (MapOptions.vitalsTimer <= 0) {
                             __instance.SabText.gameObject.SetActive(true);
-                            __instance.SabText.text = "[VITALS DESTROYED]";
+                            __instance.SabText.text = ModTranslation.GetString("Game-General", 8);
                             for (int k = 0; k < __instance.vitals.Length; k++) {
                                 VitalsPanel vitalsPanel = __instance.vitals[k];
                                 vitalsPanel.gameObject.SetActive(false);
@@ -451,7 +451,7 @@ namespace TheOtherRoles.Patches {
                             if (deadPlayer != null && deadPlayer.timeOfDeath != null && k < hackerTexts.Count && hackerTexts[k] != null) {
                                 float timeSinceDeath = ((float)(DateTime.UtcNow - deadPlayer.timeOfDeath).TotalMilliseconds);
                                 hackerTexts[k].gameObject.SetActive(true);
-                                hackerTexts[k].text = Math.Round(timeSinceDeath / 1000) + "s";
+                                hackerTexts[k].text = string.Format(ModTranslation.GetString("Game-Hacker", 1), Math.Round(timeSinceDeath / 1000));
                             }
                         }
                     }
@@ -708,7 +708,7 @@ namespace TheOtherRoles.Patches {
                     if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
                         if (MapOptions.securityCameraTimer <= 0) {
                             for (int i = 0; i < __instance.SabText.Length; i++) {
-                                __instance.SabText[i].text = "[SECURITY CAMERA DESTROYED]";
+                                __instance.SabText[i].text = ModTranslation.GetString("Game-General", 9);
                                 __instance.SabText[i].gameObject.SetActive(true);
                             }
                             for (int i = 0; i < __instance.ViewPorts.Length; i++)
@@ -799,7 +799,7 @@ namespace TheOtherRoles.Patches {
                 if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                     if (CustomOptionHolder.enabledSecurityCameraTimer.getBool()) {
                         if (!commsActive && MapOptions.securityCameraTimer <= 0) {
-                            __instance.SabText.text = "[SECURITY CAMERA DESTROYED]";
+                            __instance.SabText.text = ModTranslation.GetString("Game-General", 9);
                             __instance.SabText.gameObject.SetActive(true);
                             __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
                             return false;

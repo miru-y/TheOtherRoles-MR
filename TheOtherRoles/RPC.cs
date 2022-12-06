@@ -18,7 +18,7 @@ using AmongUs.Data;
 
 namespace TheOtherRoles
 {
-    enum RoleId {
+     public enum RoleId {
         Jester,
         Mayor,
         Portalmaker,
@@ -87,9 +87,14 @@ namespace TheOtherRoles
         Shifter,
         // Task Vs Mode ---
         TaskRacer,
+
+        Max = byte.MaxValue,
+
+        Hunter = 10000,
+        Hunted = 10001,
     }
 
-    enum CustomRPC
+    public enum CustomRPC
     {
         // Main Controls
 
@@ -998,7 +1003,7 @@ namespace TheOtherRoles
             Trickster.lightsOutTimer = Trickster.lightsOutDuration;
             // If the local player is impostor indicate lights out
             if (Helpers.hasImpVision(GameData.Instance.GetPlayerById(CachedPlayer.LocalPlayer.PlayerId))) {
-                new CustomMessage("Lights are out", Trickster.lightsOutDuration);
+                new CustomMessage(ModTranslation.GetString("Game-Trickster", 1), Trickster.lightsOutDuration);
             }
         }
 
@@ -1015,7 +1020,7 @@ namespace TheOtherRoles
 
             var camera = UnityEngine.Object.Instantiate<SurvCamera>(referenceCamera);
             camera.transform.position = new Vector3(position.x, position.y, referenceCamera.transform.position.z - 1f);
-            camera.CamName = $"Security Camera {SecurityGuard.placedCameras}";
+            camera.CamName = string.Format(ModTranslation.GetString("Game-SecurityGuard", 1), SecurityGuard.placedCameras);;
             camera.Offset = new Vector3(0f, 0f, camera.Offset.z);
             if (PlayerControl.GameOptions.MapId == 2 || PlayerControl.GameOptions.MapId == 4) camera.transform.localRotation = new Quaternion(0, 0, 1, 1); // Polus and Airship 
 
@@ -1149,7 +1154,7 @@ namespace TheOtherRoles
             PlayerControl guessedTarget = Helpers.playerById(guessedTargetId);
             if (CachedPlayer.LocalPlayer.Data.IsDead && guessedTarget != null && guesser != null) {
                 RoleInfo roleInfo = RoleInfo.allRoleInfos.FirstOrDefault(x => (byte)x.roleId == guessedRoleId);
-                string msg = $"{guesser.Data.PlayerName} guessed the role {roleInfo?.name ?? ""} for {guessedTarget.Data.PlayerName}!";
+                string msg = string.Format(ModTranslation.GetString("Game-Guesser", 2), guesser.Data.PlayerName, roleInfo?.name ?? "", guessedTarget.Data.PlayerName);
                 if (AmongUsClient.Instance.AmClient && FastDestroyableSingleton<HudManager>.Instance)
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(guesser, msg);
                 if (msg.IndexOf("who", StringComparison.OrdinalIgnoreCase) >= 0)

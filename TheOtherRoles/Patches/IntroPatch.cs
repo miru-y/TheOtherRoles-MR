@@ -42,7 +42,7 @@ namespace TheOtherRoles.Patches {
                         if (HideNSeek.isHunted() && p.Data.Role.IsImpostor) {
                             player.transform.localPosition = bottomLeft + new Vector3(-0.25f, 0.4f, 0) + Vector3.right * playerCounter++ * 0.6f;
                             player.transform.localScale = Vector3.one * 0.3f;
-                            player.cosmetics.nameText.text += $"{Helpers.cs(Color.red, " (Hunter)")}";
+                            player.cosmetics.nameText.text += $"{Helpers.cs(Color.red, ModTranslation.GetString("HideNSeek", 1))}";
                             player.gameObject.SetActive(true);
                         } else if (!p.Data.Role.IsImpostor) {
                             player.transform.localPosition = bottomLeft + new Vector3(-0.35f, -0.25f, 0) + Vector3.right * hideNSeekCounter++ * 0.35f;
@@ -301,20 +301,20 @@ namespace TheOtherRoles.Patches {
             if (roleInfo == null) return;
             if (roleInfo.roleId == RoleId.TaskRacer) {
                 __instance.BackgroundBar.material.color = roleInfo.color;
-                __instance.TeamTitle.text = "Task Vs Mode";
+                __instance.TeamTitle.text = ModTranslation.GetString("Intro", 1);
                 __instance.TeamTitle.color = roleInfo.color;
                 __instance.ImpostorText.gameObject.SetActive(false);
             } else if (roleInfo.isNeutral) {
                 var neutralColor = new Color32(76, 84, 78, 255);
                 __instance.BackgroundBar.material.color = neutralColor;
-                __instance.TeamTitle.text = "Neutral";
+                __instance.TeamTitle.text = ModTranslation.GetString("Intro", 2);
                 __instance.TeamTitle.color = neutralColor;
             } else if (roleInfo.roleId == RoleId.Madmate) {
                 __instance.BackgroundBar.material.color = roleInfo.color;
                 __instance.TeamTitle.text = roleInfo.name;
                 __instance.TeamTitle.color = roleInfo.color;
                 __instance.ImpostorText.gameObject.SetActive(true);
-                __instance.ImpostorText.text = "Team Impostor";
+                __instance.ImpostorText.text = ModTranslation.GetString("Intro", 3);
             }
         }
 
@@ -366,18 +366,20 @@ namespace TheOtherRoles.Patches {
                     if (modifierInfo.roleId != RoleId.Lover)
                         introCutscene.RoleBlurbText.text += Helpers.cs(modifierInfo.color, $"\n{modifierInfo.introDescription}");
                     else {
+
+                        
                         PlayerControl otherLover = CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 ? Lovers.lover2 : Lovers.lover1;
-                        introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ You are in love with {otherLover?.Data?.PlayerName ?? ""} ♥");
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, string.Format(ModTranslation.GetString("Intro", 4), otherLover?.Data?.PlayerName ?? ""));
                     }
                 }
                 if (infos.Any(info => info.roleId == RoleId.Kataomoi)) {
-                    introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, $"\n♥ Your unrequited love target is {Kataomoi.target?.Data?.PlayerName ?? ""} ♥");
+                    introCutscene.RoleBlurbText.text += Helpers.cs(Lovers.color, string.Format(ModTranslation.GetString("Intro", 5), Kataomoi.target?.Data?.PlayerName ?? ""));
                 }
                 if (Deputy.knowsSheriff && Deputy.deputy != null && Sheriff.sheriff != null) {
                     if (infos.Any(info => info.roleId == RoleId.Sheriff))
-                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Deputy is {Deputy.deputy?.Data?.PlayerName ?? ""}");
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, string.Format(ModTranslation.GetString("Intro", 6), Deputy.deputy?.Data?.PlayerName ?? ""));
                     else if (infos.Any(info => info.roleId == RoleId.Deputy))
-                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Sheriff is {Sheriff.sheriff?.Data?.PlayerName ?? ""}");
+                        introCutscene.RoleBlurbText.text += Helpers.cs(Sheriff.color, string.Format(ModTranslation.GetString("Intro", 7), Sheriff.sheriff?.Data?.PlayerName ?? ""));
                 }
             }
         }

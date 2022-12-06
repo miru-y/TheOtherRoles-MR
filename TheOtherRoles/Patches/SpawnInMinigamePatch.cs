@@ -289,8 +289,7 @@ namespace TheOtherRoles.Patches
         {
             if (!CustomOptionHolder.airshipSynchronizedSpawning.getBool() || CustomOptionHolder.airshipRandomSpawn.getBool()) return;
             if (selected != null)
-                __instance.__4__this.Text.text = "Waiting Other Players.";
-
+                __instance.__4__this.Text.text = ModTranslation.GetString("Game-General", 10);
         }
 
         public static void Synchronize(SynchronizeTag tag, byte playerId)

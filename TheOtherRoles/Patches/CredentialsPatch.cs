@@ -90,8 +90,8 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
                 __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
                 if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) {
                     string gameModeText = $"";
-                    if (HideNSeek.isHideNSeekGM) gameModeText = $"Hide 'N Seek";
-                    else if (HandleGuesser.isGuesserGm) gameModeText = $"Guesser";
+                    if (HideNSeek.isHideNSeekGM) gameModeText = ModTranslation.GetString("Credentials", 1);
+                    else if (HandleGuesser.isGuesserGm) gameModeText = ModTranslation.GetString("Credentials", 2);
                     if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
                     __instance.text.text = $"<size=130%><color=#ff351f>TheOtherRoles MR</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n{gameModeText}" + __instance.text.text;
                     if (CachedPlayer.LocalPlayer.Data.IsDead || (!(CachedPlayer.LocalPlayer.PlayerControl == null) && (CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 || CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover2))) {
@@ -101,8 +101,8 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to K3ndo & Smeggy</color></size>";
                     }
                 } else {
                     string gameModeText = $"";
-                    if (MapOptions.gameMode == CustomGamemodes.HideNSeek) gameModeText = $"Hide 'N Seek";
-                    else if (MapOptions.gameMode == CustomGamemodes.Guesser) gameModeText = $"Guesser";
+                    if (MapOptions.gameMode == CustomGamemodes.HideNSeek) gameModeText = ModTranslation.GetString("Credentials", 1);
+                    else if (MapOptions.gameMode == CustomGamemodes.Guesser) gameModeText = ModTranslation.GetString("Credentials", 2);
                     if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
 
                     __instance.text.text = $"{fullCredentialsVersion}\n  {gameModeText + fullCredentials}\n {__instance.text.text}";

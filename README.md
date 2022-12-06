@@ -8,6 +8,7 @@ This mod is The Other Roles extension mod which implements new roles and systems
   - [Kataomoi](#kataomoi-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Pepper, Tsunaarare)
   - [Killer Creator](#killer-creator-mr-edition-only) by [miru-y](https://github.com/miru-y) (Special Thanks: Asazaki)
 - **New Systems**
+  - Support for **Japanese language**.
   - **System:** Added "Task Vs Mode".
   - **System:** Added "Task Vs Mode: Burger Make Mode".
   - **System:** Added "Custom Preset System".

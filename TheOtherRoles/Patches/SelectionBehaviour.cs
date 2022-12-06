@@ -18,7 +18,7 @@ namespace TheOtherRoles.Patches
 
     public class SelectionBehaviour : IObserver<SelectionBehaviour>
     {
-        public string title { get; private set; }
+        public TranslationInfo title { get; private set; }
         public GameObject contents { get; private set; }
         public bool defaultValue { get; private set; }
         public Transform _transform { get; private set; }
@@ -35,6 +35,7 @@ namespace TheOtherRoles.Patches
             public Color mouseOverColor = new Color32(34, 139, 34, byte.MaxValue);
             public TMPro.TMP_FontAsset font = null;
             public float fontSize = 2.5f;
+            public float buttonScale = 1.0f;
             public Vector2 buttonSize = new Vector2(2f, 2f);
             public Vector2 colliderButtonSize = new Vector2(2.2f, .7f);
             public string buttonName = "";
@@ -48,9 +49,9 @@ namespace TheOtherRoles.Patches
         SelectionBehaviourObservable observable;
         ToggleButtonBehaviour button;
         ButtonClickedEvent onButtonClick;
+        string buttonName;
 
-
-        public SelectionBehaviour(string title, Func<bool> onClick, bool defaultValue = false, GameObject contents = null) {
+        public SelectionBehaviour(TranslationInfo title, Func<bool> onClick, bool defaultValue = false, GameObject contents = null) {
             this.title = title;
             this.onClick = onClick;
             this.contents = contents;
@@ -58,7 +59,9 @@ namespace TheOtherRoles.Patches
         }
 
         public void Initialize(InitDesc desc) {
-            button = UnityEngine.Object.Instantiate(desc.buttonPrefab, desc.parent);
+            if (button == null)
+                button = UnityEngine.Object.Instantiate(desc.buttonPrefab, desc.parent);
+
             _transform = button.transform;
             _transform.localPosition = desc.pos;
             _transform.localScale = Vector3.one;
@@ -71,20 +74,21 @@ namespace TheOtherRoles.Patches
             button.onState = defaultValue;
             button.Background.color = GetBackgroundColor();
 
-            button.Text.text = string.IsNullOrEmpty(desc.buttonName) ? title : desc.buttonName;
+            buttonName = desc.buttonName;
+            UpdateText();
             button.Text.fontSizeMin = button.Text.fontSizeMax = desc.fontSize;
             button.Text.font = UnityEngine.Object.Instantiate(desc.font);
             button.Text.alignment = desc.textAlignment;
             button.Text.GetComponent<RectTransform>().sizeDelta = desc.buttonSize;
             button.Text.lineSpacing = -20f;
             button.Text.gameObject.transform.localPosition = new Vector3(button.Text.gameObject.transform.localPosition.x + desc.textOffset.x, button.Text.gameObject.transform.localPosition.y + desc.textOffset.y, button.Text.gameObject.transform.localPosition.z);
-            button.name = title.Replace(" ", "") + "Toggle";
+            button.name = title.GetString().Replace(" ", "") + "Toggle";
             button.gameObject.SetActive(true);
 
             var passiveButton = button.GetComponent<PassiveButton>();
             var colliderButton = button.GetComponent<BoxCollider2D>();
 
-            colliderButton.size = desc.colliderButtonSize;
+            colliderButton.size = desc.colliderButtonSize * desc.buttonScale;
 
             passiveButton.OnClick = new ButtonClickedEvent();
             passiveButton.OnMouseOut = new UnityEvent();
@@ -129,6 +133,10 @@ namespace TheOtherRoles.Patches
             if (_transform == null) return;
             if (_transform.gameObject == null) return;
             _transform.gameObject.SetActive(isActive);
+        }
+
+        public void UpdateText() {
+            button.Text.text = string.IsNullOrEmpty(buttonName) ? title.GetString() : buttonName;
         }
 
         void UpdateUI() {

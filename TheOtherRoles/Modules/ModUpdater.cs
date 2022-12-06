@@ -11,7 +11,6 @@ using BepInEx.Bootstrap;
 using BepInEx.Unity.IL2CPP;
 using BepInEx.Unity.IL2CPP.Utils;
 using Mono.Cecil;
-using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using Twitch;
@@ -135,8 +134,8 @@ namespace TheOtherRoles.Modules
             }));
 
             var text = button.transform.GetChild(0).GetComponent<TMP_Text>();
-            string t = "Update\nThe Other Roles MR";
-            if (TORUpdate is null && SubmergedUpdate is not null) t = SubmergedCompatibility.Loaded ? $"Update\nSubmerged" : $"Download\nSubmerged";
+            string t = ModTranslation.GetString("Mod-Updater", 1);
+            if (TORUpdate is null && SubmergedUpdate is not null) t = SubmergedCompatibility.Loaded ? ModTranslation.GetString("Mod-Updater", 2) : ModTranslation.GetString("Mod-Updater", 3);
 
             StartCoroutine(Effects.Lerp(0.1f, (System.Action<float>)(p => text.SetText(t))));
 
@@ -153,7 +152,7 @@ namespace TheOtherRoles.Modules
                         passiveButton.OnClick.RemoveAllListeners();
                         passiveButton.OnClick = new Button.ButtonClickedEvent();
                         passiveButton.OnClick.AddListener((Action)(() => {
-                            mgr.StartCoroutine(CoShowAnnouncement($"<size=150%><color=#FC0303>A MANUAL UPDATE IS REQUIRED</color></size>"));
+                            mgr.StartCoroutine(CoShowAnnouncement(ModTranslation.GetString("Mod-Updater", 4)));
                         }));
                     }
                 } catch {  
@@ -165,7 +164,8 @@ namespace TheOtherRoles.Modules
             if (isSubmerged && !SubmergedCompatibility.Loaded) showPopUp = false;
             if (showPopUp) {
                 var data = isSubmerged ? SubmergedUpdate : TORUpdate;
-                var announcement = $"<size=150%>A new <color=#FC0303>{(isSubmerged ? "Submerged" : "THE OTHER ROLES MR")}</color> update to {(data.Version)} is available</size>\n{data.Content}";
+
+                var announcement = string.Format(ModTranslation.GetString("Mod-Updater", 5), isSubmerged ? ModTranslation.GetString("Opt-General", 68) : "THE OTHER ROLES MR", data.Version, data.Content);
                 mgr.StartCoroutine(CoShowAnnouncement(announcement));
             }
             showPopUp = false;
@@ -176,7 +176,7 @@ namespace TheOtherRoles.Modules
         {
             updateInProgress = true;
             var isSubmerged = TORUpdate is null;
-            var updateName = (isSubmerged ? "Submerged" : "The Other Roles MR");
+            var updateName = (isSubmerged ? ModTranslation.GetString("Opt-General", 68) : "The Other Roles MR");
             
             var popup = Instantiate(TwitchManager.Instance.TwitchPopup);
             popup.TextAreaTMP.fontSize *= 0.7f;
@@ -186,13 +186,13 @@ namespace TheOtherRoles.Modules
 
             var button = popup.transform.GetChild(2).gameObject;
             button.SetActive(false);
-            popup.TextAreaTMP.text = $"Updating {updateName}\nPlease wait...";
+            popup.TextAreaTMP.text = string.Format(ModTranslation.GetString("Mod-Updater", 6), updateName);
             
             var download = Task.Run(DownloadUpdate);
             while (!download.IsCompleted) yield return null;
             
             button.SetActive(true);
-            popup.TextAreaTMP.text = download.Result ? $"{updateName}\nupdated successfully\nPlease restart the game." : "Update wasn't successful\nTry again later,\nor update manually.";
+            popup.TextAreaTMP.text = download.Result ? string.Format(ModTranslation.GetString("Mod-Updater", 7), updateName) : ModTranslation.GetString("Mod-Updater", 8);
         }
 
         [HideFromIl2Cpp]

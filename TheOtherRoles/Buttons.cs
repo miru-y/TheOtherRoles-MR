@@ -597,7 +597,7 @@ namespace TheOtherRoles
                 __instance,
                 KeyCode.F,
                 false,
-                "ADMIN"
+                ModTranslation.GetString("Button", 1)
             );
 
             // EvilHacker creates madmate button
@@ -678,7 +678,7 @@ namespace TheOtherRoles
                    if (MapBehaviour.Instance && MapBehaviour.Instance.isActiveAndEnabled) MapBehaviour.Instance.Close();
                },
                PlayerControl.GameOptions.MapId == 3,
-               "ADMIN"
+               ModTranslation.GetString("Button", 1)
            );
 
             // Hacker Admin Table Charges
@@ -719,7 +719,7 @@ namespace TheOtherRoles
                () => {
                    if (hackerVitalsChargesText != null) hackerVitalsChargesText.text = $"{Hacker.chargesVitals} / {Hacker.toolsNumber}";
                    hackerVitalsButton.actionButton.graphic.sprite = PlayerControl.GameOptions.MapId == 1 ? Hacker.getLogSprite() : Hacker.getVitalsSprite();
-                   hackerVitalsButton.actionButton.OverrideText(PlayerControl.GameOptions.MapId == 1 ? "DOORLOG" : "VITALS");
+                   hackerVitalsButton.actionButton.OverrideText(PlayerControl.GameOptions.MapId == 1 ? ModTranslation.GetString("Button", 2) : ModTranslation.GetString("Button", 3));
                    return Hacker.chargesVitals > 0;
                },
                () => {
@@ -742,7 +742,7 @@ namespace TheOtherRoles
                    }
                },
                false,
-               PlayerControl.GameOptions.MapId == 1 ? "DOORLOG" : "VITALS"
+               PlayerControl.GameOptions.MapId == 1 ? ModTranslation.GetString("Button", 2) : ModTranslation.GetString("Button", 3)
            );
 
             // Hacker Vitals Charges
@@ -1263,7 +1263,7 @@ namespace TheOtherRoles
                 () => {
                     if (securityGuardChargesText != null) securityGuardChargesText.text = $"{SecurityGuard.charges} / {SecurityGuard.maxCharges}";
                     securityGuardCamButton.actionButton.graphic.sprite = PlayerControl.GameOptions.MapId == 1 ? SecurityGuard.getLogSprite() : SecurityGuard.getCamSprite();
-                    securityGuardCamButton.actionButton.OverrideText(PlayerControl.GameOptions.MapId == 1 ? "DOORLOG" : "SECURITY");
+                    securityGuardCamButton.actionButton.OverrideText(PlayerControl.GameOptions.MapId == 1 ? ModTranslation.GetString("Button", 2) : ModTranslation.GetString("Button", 4));
                     return CachedPlayer.LocalPlayer.PlayerControl.CanMove && SecurityGuard.charges > 0;
                 },
                 () => {
@@ -1285,7 +1285,7 @@ namespace TheOtherRoles
                     CachedPlayer.LocalPlayer.PlayerControl.moveable = true;
                 },
                 false,
-                PlayerControl.GameOptions.MapId == 1 ? "DOORLOG" : "SECURITY"
+                PlayerControl.GameOptions.MapId == 1 ? ModTranslation.GetString("Button", 2) : ModTranslation.GetString("Button", 4)
             );
 
             // Security Guard cam button charges
@@ -1534,15 +1534,17 @@ namespace TheOtherRoles
                     string msg = "";
 
                     int randomNumber = TheOtherRoles.rnd.Next(4);
-                    string typeOfColor = Helpers.isLighterColor(Medium.target.killerIfExisting.Data.DefaultOutfit.ColorId) ? "lighter" : "darker";
+                    string typeOfColor = Helpers.isLighterColor(Medium.target.killerIfExisting.Data.DefaultOutfit.ColorId) ? ModTranslation.GetString("Button", 5) : ModTranslation.GetString("Button", 6);
                     float timeSinceDeath = ((float)(Medium.meetingStartTime - Medium.target.timeOfDeath).TotalMilliseconds);
                     string name = " (" + Medium.target.player.Data.PlayerName + ")";
 
 
-                    if (randomNumber == 0) msg = "What is your role? My role is " + RoleInfo.GetRolesString(Medium.target.player, false, true, false) + name;
-                    else if (randomNumber == 1) msg = "What is your killer`s color type? My killer is a " + typeOfColor + " color" + name;
-                    else if (randomNumber == 2) msg = "When did you die? I have died " + Math.Round(timeSinceDeath / 1000) + "s before meeting started" + name;
-                    else msg = "What is your killer`s role? My killer is " + RoleInfo.GetRolesString(Medium.target.killerIfExisting, false, false, false) + name;
+                    
+
+                    if (randomNumber == 0) msg = string.Format(ModTranslation.GetString("Button", 7), RoleInfo.GetRolesString(Medium.target.player, false, true, false), name);
+                    else if (randomNumber == 1) msg = string.Format(ModTranslation.GetString("Button", 8), typeOfColor, name);
+                    else if (randomNumber == 2) msg = string.Format(ModTranslation.GetString("Button", 9), Math.Round(timeSinceDeath / 1000), name);
+                    else msg = string.Format(ModTranslation.GetString("Button", 10), RoleInfo.GetRolesString(Medium.target.killerIfExisting, false, false, false), name);
 
                     FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"{msg}");
 
@@ -1766,7 +1768,7 @@ namespace TheOtherRoles
                },
                () => { return Mayor.mayor != null && Mayor.mayor == CachedPlayer.LocalPlayer.PlayerControl && Mayor.meetingButton && !CachedPlayer.LocalPlayer.Data.IsDead; },
                () => {
-                   mayorMeetingButton.actionButton.OverrideText("Emergency ("+ Mayor.remoteMeetingsLeft + ")");
+                   mayorMeetingButton.actionButton.OverrideText(string.Format(ModTranslation.GetString("Button", 11), Mayor.remoteMeetingsLeft));
                    bool sabotageActive = false;
                    foreach (PlayerTask task in CachedPlayer.LocalPlayer.PlayerControl.myTasks.GetFastEnumerator())
                        if (task.TaskType == TaskTypes.FixLights || task.TaskType == TaskTypes.RestoreOxy || task.TaskType == TaskTypes.ResetReactor || task.TaskType == TaskTypes.ResetSeismic || task.TaskType == TaskTypes.FixComms || task.TaskType == TaskTypes.StopCharles
@@ -1783,7 +1785,7 @@ namespace TheOtherRoles
                0f,
                () => {},
                false,
-               "Meeting"
+               ModTranslation.GetString("Button", 12)
            );
 
 
@@ -2047,7 +2049,7 @@ namespace TheOtherRoles
                    if (MapBehaviour.Instance && MapBehaviour.Instance.isActiveAndEnabled) MapBehaviour.Instance.Close();
                },
                false,
-               "ADMIN"
+               ModTranslation.GetString("Button", 1)
             );
 
             hunterArrowButton = new CustomButton(

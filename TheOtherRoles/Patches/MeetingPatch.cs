@@ -296,13 +296,13 @@ namespace TheOtherRoles.Patches {
                 } else {
                     selections[i] = true;
                     renderer.color = Color.yellow;
-                    swapperConfirmButtonLabel.text = Helpers.cs(Color.yellow, "Confirm Swap");
+                    swapperConfirmButtonLabel.text = Helpers.cs(Color.yellow, ModTranslation.GetString("Game-Swapper", 2));
                 }
             } else if (selectedCount == 2) {
                 if (selections[i]) {
                     renderer.color = Color.red;
                     selections[i] = false;
-                    swapperConfirmButtonLabel.text = Helpers.cs(Color.red, "Confirm Swap");
+                    swapperConfirmButtonLabel.text = Helpers.cs(Color.red, ModTranslation.GetString("Game-Swapper", 2));
                 }
             }
         }
@@ -335,9 +335,9 @@ namespace TheOtherRoles.Patches {
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
 
                 RPCProcedure.swapperSwap((byte)firstPlayer.TargetPlayerId, (byte)secondPlayer.TargetPlayerId);
-                swapperConfirmButtonLabel.text = Helpers.cs(Color.green, "Swapping!");
+                swapperConfirmButtonLabel.text = Helpers.cs(Color.green, ModTranslation.GetString("Game-Swapper", 3));
                 Swapper.charges--;
-                swapperChargesText.text = $"Swaps: {Swapper.charges}";
+                swapperChargesText.text = string.Format(ModTranslation.GetString("Game-Swapper", 4), Swapper.charges);
             }
         }
 
@@ -499,7 +499,6 @@ namespace TheOtherRoles.Patches {
             if (YasunaJr.yasunaJr != null && YasunaJr.yasunaJr.Data.IsDead) return;
             if (!(__instance.state == MeetingHud.VoteStates.Voted || __instance.state == MeetingHud.VoteStates.NotVoted)) return;
             if (__instance.playerStates[buttonTarget].AmDead) return;
-
             SoundManager.Instance.PlaySound(ModUpdateBehaviour.selectSfx, false, 1f, null).volume = 0.8f;
             for (int i = 0; i < __instance.playerStates.Length; i++)
             {
@@ -601,7 +600,7 @@ namespace TheOtherRoles.Patches {
                 Transform infoTransform = __instance.playerStates[0].NameText.transform.parent.FindChild("Info");
                 TMPro.TextMeshPro meetingInfo = infoTransform != null ? infoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                 swapperChargesText = UnityEngine.Object.Instantiate(__instance.playerStates[0].NameText, confirmSwapButtonParent);
-                swapperChargesText.text = $"Swaps: {Swapper.charges}";
+                swapperChargesText.text = string.Format(ModTranslation.GetString("Game-Swapper", 4), Swapper.charges);
                 swapperChargesText.enableWordWrapping = false;
                 swapperChargesText.transform.localScale = Vector3.one * 1.7f;
                 swapperChargesText.transform.localPosition = new Vector3(-2.5f, 0f, 0f);
@@ -611,7 +610,7 @@ namespace TheOtherRoles.Patches {
                 confirmSwapButton.GetComponent<SpriteRenderer>().sprite = FastDestroyableSingleton<HatManager>.Instance.GetNamePlateById("nameplate_NoPlate")?.viewData?.viewData?.Image;
                 confirmSwapButtonParent.localPosition = new Vector3(0, -2.225f, -5);
                 confirmSwapButtonParent.localScale = new Vector3(0.55f, 0.55f, 1f);
-                swapperConfirmButtonLabel.text = Helpers.cs(Color.red, "Confirm Swap");
+                swapperConfirmButtonLabel.text = Helpers.cs(Color.red, ModTranslation.GetString("Game-Swapper", 2));
                 swapperConfirmButtonLabel.alignment = TMPro.TextAlignmentOptions.Center;
                 swapperConfirmButtonLabel.transform.localPosition = new Vector3(0, 0, swapperConfirmButtonLabel.transform.localPosition.z);
                 swapperConfirmButtonLabel.transform.localScale *= 1.7f;
@@ -777,8 +776,8 @@ namespace TheOtherRoles.Patches {
                         foreach (var entry in Portal.teleportedPlayers)
                         {
                             float timeBeforeMeeting = ((float)(DateTime.UtcNow - entry.time).TotalMilliseconds) / 1000;
-                            string msg = Portalmaker.logShowsTime ? $"{(int)timeBeforeMeeting}s ago: " : "";
-                            msg = msg + $"{entry.name} used the teleporter";
+                            string msg = Portalmaker.logShowsTime ? string.Format(ModTranslation.GetString("Game-Portalmaker", 1), (int)timeBeforeMeeting) : "";
+                            msg = msg + string.Format(ModTranslation.GetString("Game-Portalmaker", 2), entry.name);
                             FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"{msg}");
                         }
                     }
@@ -789,15 +788,15 @@ namespace TheOtherRoles.Patches {
                         foreach (Trap trap in Trap.traps)
                         {
                             if (!trap.revealed) continue;
-                            string message = $"Trap {trap.instanceId}: \n";
+                            string message = string.Format(ModTranslation.GetString("Game-Trapper", 1), trap.instanceId);
                             trap.trappedPlayer = trap.trappedPlayer.OrderBy(x => rnd.Next()).ToList();
                             foreach (PlayerControl p in trap.trappedPlayer)
                             {
                                 if (Trapper.infoType == 0) message += RoleInfo.GetRolesString(p, false, false, false) + "\n";
                                 else if (Trapper.infoType == 1)
                                 {
-                                    if (Helpers.isNeutral(p) || p.Data.Role.IsImpostor) message += "Evil Role \n";
-                                    else message += "Good Role \n";
+                                    if (Helpers.isNeutral(p) || p.Data.Role.IsImpostor) message += ModTranslation.GetString("Game-Trapper", 2);
+                                    else message += ModTranslation.GetString("Game-Trapper", 3);
                                 }
                                 else message += p.Data.PlayerName + "\n";
                             }
@@ -909,7 +908,7 @@ namespace TheOtherRoles.Patches {
                         string message = (delay - (p * delay)).ToString("0.00");
                         if (message == "0") return;
                         string prefix = "<color=#FFFF00FF>";
-                        text.text = "Please wait a moment.\n" + prefix + message + "</color>";
+                        text.text = ModTranslation.GetString("Game-General", 13) + prefix + message + "</color>";
                         if (text != null) text.color = Color.white;
                     }));
                     // yield return new WaitForSeconds(2f);

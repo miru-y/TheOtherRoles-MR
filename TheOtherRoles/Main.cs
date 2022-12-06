@@ -96,6 +96,7 @@ namespace TheOtherRoles
 #if false
             Helpers.checkBeta(); // Exit if running an expired beta
 #endif
+            ModTranslation.Load();
             DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
             ViewSeacretMode = Config.Bind("Custom", "View Seacret Mode", false);
             GhostsSeeTasks = Config.Bind("Custom", "Ghosts See Remaining Tasks", true);

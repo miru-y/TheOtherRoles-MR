@@ -47,14 +47,15 @@ namespace TheOtherRoles.Objects {
             firstPortal.animationFgRenderer.flipX = flip;
             secondPortal.animationFgRenderer.flipX = flip;
             if (Morphling.morphling != null && Morphling.morphTimer > 0) playerControl = Morphling.morphTarget;  // Will output info of morph-target instead
-            string playerNameDisplay = Portalmaker.logOnlyHasColors ? "A player (" + (Helpers.isLighterColor(playerControl.Data.DefaultOutfit.ColorId) ? "L" : "D") + ")" : playerControl.Data.PlayerName;
+            string playerNameDisplay = Portalmaker.logOnlyHasColors ? string.Format(ModTranslation.GetString("Game-Obj-Portal", 1), Helpers.isLighterColor(playerControl.Data.DefaultOutfit.ColorId) ? "L" : "D") : playerControl.Data.PlayerName;
 
             int colorId = playerControl.Data.DefaultOutfit.ColorId;
 
             if (Camouflager.camouflageTimer > 0) {
-                playerNameDisplay = "A camouflaged player";
+                playerNameDisplay = ModTranslation.GetString("Game-Obj-Portal", 2);
                 colorId = 6;
             }
+
             teleportedPlayers.Add(new tpLogEntry(playerId, playerNameDisplay, DateTime.UtcNow));
             
             FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(teleportDuration, new Action<float>((p) => {

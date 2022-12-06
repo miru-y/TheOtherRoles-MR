@@ -2194,16 +2194,12 @@ namespace TheOtherRoles
             string rankText = "";
             switch (rank) {
                 case 1:
-                    rankText = "1st";
-                    break;
                 case 2:
-                    rankText = "2nd";
-                    break;
                 case 3:
-                    rankText = "3rd";
+                    rankText = ModTranslation.GetString("TaskVsMode", rank);
                     break;
                 default:
-                    rankText = string.Format("{0}st", rank);
+                    rankText = string.Format(ModTranslation.GetString("TaskVsMode", 4), rank);
                     break;
             }
             return is_deco ? Helpers.cs(getRankTextColor(rank), rankText) : rankText;
@@ -2453,7 +2449,7 @@ namespace TheOtherRoles
             if (taskRacer == null) return;
             taskRacer.isReady = true;
             if (startText != null)
-                startText.text = string.Format("Waiting for participants...({0}/{1})", getTaskRacerReadyCount(), getTaskRacerMaxCount());
+                startText.text = string.Format(ModTranslation.GetString("TaskVsMode", 5), getTaskRacerReadyCount(), getTaskRacerMaxCount());
 
             if (AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost && isReadyAll()) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(

@@ -88,9 +88,9 @@ namespace TheOtherRoles{
             adminTimerText.color = CustomOptionHolder.AdminColor;
             adminTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (adminTimer > 0)
-                adminTimerText.text = $"Admin: {adminTimer.ToString("#0.0")} sec remaining";
+                adminTimerText.text = string.Format(ModTranslation.GetString("Game-General", 1), adminTimer);
             else
-                adminTimerText.text = "Admin: ran out of time";
+                adminTimerText.text = ModTranslation.GetString("Game-General", 2);
             adminTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;
@@ -113,9 +113,9 @@ namespace TheOtherRoles{
             vitalsTimerText.color = CustomOptionHolder.VitalColor;
             vitalsTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (vitalsTimer > 0)
-                vitalsTimerText.text = $"Vitals: {vitalsTimer.ToString("#0.0")} sec remaining";
+                vitalsTimerText.text = string.Format(ModTranslation.GetString("Game-General", 3), vitalsTimer);
             else
-                vitalsTimerText.text = "Vitals: ran out of time";
+                vitalsTimerText.text = ModTranslation.GetString("Game-General", 4);
             vitalsTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;
@@ -138,9 +138,9 @@ namespace TheOtherRoles{
             securityCameraTimerText.color = CustomOptionHolder.SecurityCameraColor;
             securityCameraTimerText.transform.localPosition = new Vector3(TimerUIBaseX + TimerUIMoveX * viewIndex, -4.0f, 0);
             if (securityCameraTimer > 0)
-                securityCameraTimerText.text = $"Camera: {securityCameraTimer.ToString("#0.0")} sec remaining";
+                securityCameraTimerText.text = string.Format(ModTranslation.GetString("Game-General", 5), securityCameraTimer);
             else
-                securityCameraTimerText.text = "Camera: ran out of time";
+                securityCameraTimerText.text = ModTranslation.GetString("Game-General", 6);
             securityCameraTimerText.gameObject.SetActive(true);
 
             return viewIndex + 1;

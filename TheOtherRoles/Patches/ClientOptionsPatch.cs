@@ -10,6 +10,7 @@ using static UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 using System.Reflection;
 using TheOtherRoles.Players;
+using System.Text.RegularExpressions;
 
 namespace TheOtherRoles.Patches 
 {
@@ -17,13 +18,13 @@ namespace TheOtherRoles.Patches
     public static class ClientOptionsPatch
     {
         static SelectionBehaviour[] AllOptions = {
-            new SelectionBehaviour("Ghosts See Remaining Tasks", () => MapOptions.ghostsSeeTasks = TheOtherRolesPlugin.GhostsSeeTasks.Value = !TheOtherRolesPlugin.GhostsSeeTasks.Value, TheOtherRolesPlugin.GhostsSeeTasks.Value),
-            new SelectionBehaviour("Ghosts Can See Votes", () => MapOptions.ghostsSeeVotes = TheOtherRolesPlugin.GhostsSeeVotes.Value = !TheOtherRolesPlugin.GhostsSeeVotes.Value, TheOtherRolesPlugin.GhostsSeeVotes.Value),
-            new SelectionBehaviour("Ghosts Can See Roles", () => MapOptions.ghostsSeeRoles = TheOtherRolesPlugin.GhostsSeeRoles.Value = !TheOtherRolesPlugin.GhostsSeeRoles.Value, TheOtherRolesPlugin.GhostsSeeRoles.Value),
-            new SelectionBehaviour("Ghosts Can Additionally See Modifier", () => MapOptions.ghostsSeeModifier = TheOtherRolesPlugin.GhostsSeeModifier.Value = !TheOtherRolesPlugin.GhostsSeeModifier.Value, TheOtherRolesPlugin.GhostsSeeModifier.Value),
-            new SelectionBehaviour("Show Role Summary", () => MapOptions.showRoleSummary = TheOtherRolesPlugin.ShowRoleSummary.Value = !TheOtherRolesPlugin.ShowRoleSummary.Value, TheOtherRolesPlugin.ShowRoleSummary.Value),
-            new SelectionBehaviour("Show Lighter / Darker", () => MapOptions.showLighterDarker = TheOtherRolesPlugin.ShowLighterDarker.Value = !TheOtherRolesPlugin.ShowLighterDarker.Value, TheOtherRolesPlugin.ShowLighterDarker.Value),
-            new SelectionBehaviour("Enable Sound Effects", () => MapOptions.enableSoundEffects = TheOtherRolesPlugin.EnableSoundEffects.Value = !TheOtherRolesPlugin.EnableSoundEffects.Value, TheOtherRolesPlugin.EnableSoundEffects.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 2), () => MapOptions.ghostsSeeTasks = TheOtherRolesPlugin.GhostsSeeTasks.Value = !TheOtherRolesPlugin.GhostsSeeTasks.Value, TheOtherRolesPlugin.GhostsSeeTasks.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 3), () => MapOptions.ghostsSeeVotes = TheOtherRolesPlugin.GhostsSeeVotes.Value = !TheOtherRolesPlugin.GhostsSeeVotes.Value, TheOtherRolesPlugin.GhostsSeeVotes.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 4), () => MapOptions.ghostsSeeRoles = TheOtherRolesPlugin.GhostsSeeRoles.Value = !TheOtherRolesPlugin.GhostsSeeRoles.Value, TheOtherRolesPlugin.GhostsSeeRoles.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 5), () => MapOptions.ghostsSeeModifier = TheOtherRolesPlugin.GhostsSeeModifier.Value = !TheOtherRolesPlugin.GhostsSeeModifier.Value, TheOtherRolesPlugin.GhostsSeeModifier.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 6), () => MapOptions.showRoleSummary = TheOtherRolesPlugin.ShowRoleSummary.Value = !TheOtherRolesPlugin.ShowRoleSummary.Value, TheOtherRolesPlugin.ShowRoleSummary.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 7), () => MapOptions.showLighterDarker = TheOtherRolesPlugin.ShowLighterDarker.Value = !TheOtherRolesPlugin.ShowLighterDarker.Value, TheOtherRolesPlugin.ShowLighterDarker.Value),
+            new SelectionBehaviour(new TranslationInfo("MainMenu", 8), () => MapOptions.enableSoundEffects = TheOtherRolesPlugin.EnableSoundEffects.Value = !TheOtherRolesPlugin.EnableSoundEffects.Value, TheOtherRolesPlugin.EnableSoundEffects.Value),
         };
 
         public static bool isOpenPreset = false;
@@ -31,6 +32,9 @@ namespace TheOtherRoles.Patches
         static TextMeshPro titleText;
         static ToggleButtonBehaviour buttonPrefab;
         static Vector3? _origin;
+
+        static ToggleButtonBehaviour moreOptions;
+        static TextMeshPro optionTitle;
 
 
         class PresetInfo
@@ -47,9 +51,11 @@ namespace TheOtherRoles.Patches
                 registTime = time;
             }
 
-            public string GetDescription() {
+            public string GetDescription(int newlineCount = -1) {
                 string description = "";
                 int roleCount = 0;
+                bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
+                int roleCountMax = isJapanese ? 6 : 8;
                 foreach (var option in CustomOption.options) {
                     if (option.id == 0) continue;
                     var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
@@ -58,15 +64,34 @@ namespace TheOtherRoles.Patches
                         int.TryParse(value, out v);
                     if (option.isRoleHeader() && v > 0) {
                         ++roleCount;
-                        if (roleCount <= 8) {
-                            if (roleCount > 1) description += "/";
-                            description += option.name;
+                        if (roleCount <= roleCountMax) {
+                            if (roleCount > 1 && !(newlineCount > 0 && (roleCount - 1) % newlineCount == 0)) description += "/";
+                            description += option.getTitle();
+                            if (roleCount != roleCountMax && newlineCount > 0 && roleCount % newlineCount == 0) description += "\n";
                         }
                     }
                 }
-                if (roleCount > 8)
-                    description += string.Format(" +{0}Roles", roleCount - 8);
+                if (roleCount > roleCountMax)
+                {
+                    int addCount = roleCount - roleCountMax;
+                    string text = addCount.ToString();
+                    if (isJapanese)
+                        text = Regex.Replace(text, "[0-9]", p => ((char)(p.Value[0] - '0' + '‚O')).ToString());
+                    description += string.Format(ModTranslation.GetString("MainMenu", 17), text);
+                }
+                else if (roleCount == 0)
+                {
+                    description += ModTranslation.GetString("MainMenu", 28);
+                }
 
+                if (newlineCount != -1)
+				{
+                    int count = Mathf.Min(roleCount, roleCountMax);
+                    if (count > newlineCount)
+                        description = "\n" + description;
+                    else
+                        description = "\n\n" + description;
+                }
                 return description;
             }
 
@@ -142,7 +167,7 @@ namespace TheOtherRoles.Patches
         static int presetInfoPageMax = 0;
         static TextMeshPro presetTitle = null;
         static GameObject presetRoot = null;
-        static SelectionBehaviour prevPresetPageInfo = null; 
+        static SelectionBehaviour prevPresetPageInfo = null;
         static SelectionBehaviour nextPresetPageInfo = null;
         static SelectionBehaviour createNewPresetInfo = null;
         static GameObject createNewPresetPopUp = null;
@@ -154,6 +179,9 @@ namespace TheOtherRoles.Patches
         static SelectionBehaviour optionTabInfo = null;
         static SelectionBehaviour presetTabInfo = null;
 
+        static SelectionBehaviour.InitDesc optionButtonDesc;
+        static SelectionBehaviour.InitDesc presetButtonDesc;
+        static SelectionBehaviour.InitDesc tabDesc;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
@@ -200,6 +228,19 @@ namespace TheOtherRoles.Patches
             }
         }
 
+        public static void UpdateTranslations() {
+            if (moreOptions != null)
+                moreOptions.Text.text = ModTranslation.GetString("MainMenu", 18);
+            if (optionTitle != null)
+                optionTitle.text = ModTranslation.GetString("MainMenu", 18);
+
+            tabObservable.Clear();
+            UpdateOptionContents();
+            UpdatePresetButtons();
+            UpdateOptionTabs();
+            UpdatePresetInfo();
+        }
+
         static void CreateCustom(OptionsMenuBehaviour prefab) {
             popUp = Object.Instantiate(prefab.gameObject);
             Object.DontDestroyOnLoad(popUp);
@@ -212,11 +253,11 @@ namespace TheOtherRoles.Patches
             foreach (var gObj in popUp.gameObject.GetAllChilds()) {
                 switch (gObj.name) {
                     case "Background":
-                    case "CloseButton": 
+                    case "CloseButton":
                         {
                         }
                         break;
-                    default: 
+                    default:
                         {
                             Object.Destroy(gObj);
                         }
@@ -228,7 +269,7 @@ namespace TheOtherRoles.Patches
         }
 
         static void InitializeMoreButton(OptionsMenuBehaviour __instance) {
-            var moreOptions = Object.Instantiate(buttonPrefab, __instance.CensorChatButton.transform.parent);
+            moreOptions = Object.Instantiate(buttonPrefab, __instance.CensorChatButton.transform.parent);
             var transform = __instance.CensorChatButton.transform;
             __instance.CensorChatButton.Text.transform.localScale = new Vector3(1 / 0.66f, 1, 1);
             _origin ??= transform.localPosition;
@@ -241,9 +282,8 @@ namespace TheOtherRoles.Patches
 
             moreOptions.transform.localPosition = _origin.Value + Vector3.right * 4f / 3f;
             moreOptions.transform.localScale = new Vector3(0.66f, 1, 1);
-
             moreOptions.gameObject.SetActive(true);
-            moreOptions.Text.text = "Mod Options...";
+            moreOptions.Text.text = ModTranslation.GetString("MainMenu", 18);
             moreOptions.Text.transform.localScale = new Vector3(1 / 0.66f, 1, 1);
             var moreOptionsButton = moreOptions.GetComponent<PassiveButton>();
             moreOptionsButton.OnClick = new ButtonClickedEvent();
@@ -286,8 +326,10 @@ namespace TheOtherRoles.Patches
             }
             tabObservable.Clear();
 
+            bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
+
             // Tab
-            SelectionBehaviour.InitDesc tabDesc = new SelectionBehaviour.InitDesc();
+            tabDesc = new SelectionBehaviour.InitDesc();
             tabDesc.buttonPrefab = buttonPrefab;
             tabDesc.parent = popUp.transform;
             tabDesc.observable = tabObservable;
@@ -303,36 +345,31 @@ namespace TheOtherRoles.Patches
             optionRoot.transform.SetParent(popUp.transform);
             optionRoot.transform.localPosition = Vector3.zero;
             optionRoot.transform.localScale = Vector3.one;
-            optionTabInfo = new SelectionBehaviour("Option", () => { return true; }, true, optionRoot);
-            tabDesc.pos = new Vector3(-.7f, 2.35f, -.5f);
-            optionTabInfo.Initialize(tabDesc);
-
-            // Option Title
-            var optionTitle = Object.Instantiate(titleText, optionRoot.transform);
-            optionTitle.GetComponent<RectTransform>().localPosition = new Vector3(0, 1.8f, -.5f);
-            optionTitle.gameObject.SetActive(true);
-            optionTitle.text = "More Options...";
-            optionTitle.name = "OptionTitleText";
-
-            // Option Contents
-            SelectionBehaviour.InitDesc optionButtonDesc = new SelectionBehaviour.InitDesc();
-            optionButtonDesc.buttonPrefab = buttonPrefab;
-            optionButtonDesc.parent = optionRoot.transform;
-            optionButtonDesc.font = titleText.font;
-            for (var i = 0; i < AllOptions.Length; i++) {
-                optionButtonDesc.pos = new Vector3(i % 2 == 0 ? -1.17f : 1.17f, 0.8f - i / 2 * 0.8f, -.5f);
-                AllOptions[i].Initialize(optionButtonDesc);
-            }
+            optionTabInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 9), () => { return true; }, true, optionRoot);
 
             // Preset Tab
             presetRoot = new GameObject("PresetRoot");
             presetRoot.transform.SetParent(popUp.transform);
             presetRoot.transform.localPosition = Vector3.zero;
             presetRoot.transform.localScale = Vector3.one;
-            presetTabInfo = new SelectionBehaviour("Preset", () => { return true; }, false, presetRoot);
-            tabDesc.pos = new Vector3(.7f, 2.35f, -.5f);
-            presetTabInfo.Initialize(tabDesc);
+            presetTabInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 10), () => { return true; }, false, presetRoot);
+
+            UpdateOptionTabs();
             presetTabInfo.ChangeButtonState(false);
+
+            // Option Title
+            optionTitle = Object.Instantiate(titleText, optionRoot.transform);
+            optionTitle.GetComponent<RectTransform>().localPosition = new Vector3(0, 1.8f, -.5f);
+            optionTitle.gameObject.SetActive(true);
+            optionTitle.text = ModTranslation.GetString("MainMenu", 18);
+            optionTitle.name = "OptionTitleText";
+
+            // Option Contents
+            optionButtonDesc = new SelectionBehaviour.InitDesc();
+            optionButtonDesc.buttonPrefab = buttonPrefab;
+            optionButtonDesc.parent = optionRoot.transform;
+            optionButtonDesc.font = titleText.font;
+            UpdateOptionContents();
 
             // Preset Title
             presetTitle = Object.Instantiate(titleText, presetRoot.transform);
@@ -367,6 +404,7 @@ namespace TheOtherRoles.Patches
             }
             for (int i = 0; i < presetInfoList.Count; ++i)
                 presetInfoList[i].Initialize();
+
             presetInfoList.Sort((l, r) => {
                 long c = l.registTime - r.registTime;
                 if (c > 0) return 1;
@@ -375,28 +413,17 @@ namespace TheOtherRoles.Patches
             });
 
             // Buttons
-            SelectionBehaviour.InitDesc presetButtonDesc = new SelectionBehaviour.InitDesc();
+            presetButtonDesc = new SelectionBehaviour.InitDesc();
             presetButtonDesc.buttonPrefab = buttonPrefab;
             presetButtonDesc.parent = presetRoot.transform;
             presetButtonDesc.font = titleText.font;
             presetButtonDesc.selectColor = Color.white;
             presetButtonDesc.unselectColor = Color.white;
-            presetButtonDesc.pos = new Vector3(0f, -2.3f, -.5f);
-            presetButtonDesc.buttonSize = new Vector2(2f, .5f);
-            presetButtonDesc.colliderButtonSize = new Vector2(2f, .5f);
-            createNewPresetInfo = new SelectionBehaviour("Create New Preset", () => { return OnCreateNewPreset(); });
-            createNewPresetInfo.Initialize(presetButtonDesc);
-            createNewPresetInfo.SetActive(AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started);
+            createNewPresetInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 11), () => { return OnCreateNewPreset(); });
+            prevPresetPageInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 12), () => { return OnPrevPresetPage(); });
+            nextPresetPageInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 13), () => { return OnNextPresetPage(); });
 
-            prevPresetPageInfo = new SelectionBehaviour("Prev", () => { return OnPrevPresetPage(); });
-            presetButtonDesc.buttonSize = new Vector2(1f, .5f);
-            presetButtonDesc.colliderButtonSize = new Vector2(1f, .5f);
-            presetButtonDesc.pos = new Vector3(-.7f, -1.7f, -.5f);
-            prevPresetPageInfo.Initialize(presetButtonDesc);
-
-            nextPresetPageInfo = new SelectionBehaviour("Next", () => { return OnNextPresetPage(); });
-            presetButtonDesc.pos = new Vector3(.7f, -1.7f, -.5f);
-            nextPresetPageInfo.Initialize(presetButtonDesc);
+            UpdatePresetButtons();
 
             presetInfoPageNow = 1;
             presetInfoPageMax = ((presetInfoList.Count - 1) / PresetInfoOnePageViewMax) + 1;
@@ -407,6 +434,52 @@ namespace TheOtherRoles.Patches
                 isOpenPreset = false;
                 presetTabInfo.Select();
             }
+        }
+
+        static void UpdateOptionContents() {
+            if (optionButtonDesc == null)
+                return;
+            bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
+            optionButtonDesc.fontSize = isJapanese ? 1.5f : 2.5f;
+            optionButtonDesc.buttonScale = isJapanese ? 0.9f : 1.0f;
+            for (var i = 0; i < AllOptions.Length; i++)
+            {
+                optionButtonDesc.pos = new Vector3(i % 2 == 0 ? -1.17f : 1.17f, 1.2f - i / 2 * 0.8f, -.5f);
+                AllOptions[i].Initialize(optionButtonDesc);
+            }
+        }
+
+        static void UpdateOptionTabs() {
+            if (tabDesc == null)
+                return;
+            bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
+            tabDesc.fontSize = isJapanese ? 1.5f : 2.5f;
+
+            tabDesc.pos = new Vector3(-.7f, 2.35f, -.5f);
+            optionTabInfo.Initialize(tabDesc);
+            tabDesc.pos = new Vector3(.7f, 2.35f, -.5f);
+            presetTabInfo.Initialize(tabDesc);
+        }
+
+        static void UpdatePresetButtons() {
+            if (presetButtonDesc == null)
+                return;
+
+            bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
+            presetButtonDesc.fontSize = isJapanese ? 2f : 2.5f;
+            presetButtonDesc.pos = new Vector3(0f, -2.3f, -.5f);
+            presetButtonDesc.buttonSize = new Vector2(2f, .5f);
+            presetButtonDesc.colliderButtonSize = new Vector2(2f, .5f);
+            createNewPresetInfo.Initialize(presetButtonDesc);
+            createNewPresetInfo.SetActive(AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started);
+
+            presetButtonDesc.buttonSize = new Vector2(1f, .5f);
+            presetButtonDesc.colliderButtonSize = new Vector2(1f, .5f);
+            presetButtonDesc.pos = new Vector3(-.7f, -1.7f, -.5f);
+            prevPresetPageInfo.Initialize(presetButtonDesc);
+
+            presetButtonDesc.pos = new Vector3(.7f, -1.7f, -.5f);
+            nextPresetPageInfo.Initialize(presetButtonDesc);
         }
 
         static bool OnCreateNewPreset() {
@@ -431,14 +504,15 @@ namespace TheOtherRoles.Patches
             _instance.StartCoroutine(Effects.Lerp(0.1f, new Action<float>((p) => { 
                 createNewPresetEditName = createNewPresetPopUp.GetComponentInChildren<EditName>();
                 createNewPresetEditName.nameText.nameSource.SetText("");
+                createNewPresetEditName.nameText.nameSource.characterLimit = 18;
                 var titleText = createNewPresetPopUp.transform.FindChild("TitleText_TMP").GetComponent<TextMeshPro>();
-                titleText.SetText("Create a preset with the current settings.");
+                titleText.SetText(ModTranslation.GetString("MainMenu", 19));
                 var nameText = createNewPresetPopUp.transform.FindChild("ChangeNameTitle_TMP").GetComponent<TextMeshPro>();
-                nameText.SetText("Preset Name");
+                nameText.SetText(ModTranslation.GetString("MainMenu", 20));
                 var submitText = createNewPresetPopUp.transform.FindChild("SubmitButton").GetComponentInChildren<TextMeshPro>();
-                submitText.SetText("Create");
+                submitText.SetText(ModTranslation.GetString("MainMenu", 21));
                 var backText = createNewPresetPopUp.transform.FindChild("BackButton").GetComponentInChildren<TextMeshPro>();
-                backText.SetText("Back");
+                backText.SetText(ModTranslation.GetString("MainMenu", 22));
                 var submitButton = createNewPresetPopUp.transform.FindChild("SubmitButton").GetComponentInChildren<PassiveButton>();
                 submitButton.OnClick = new ButtonClickedEvent();
                 submitButton.OnClick.AddListener((Action)(() => {
@@ -461,6 +535,16 @@ namespace TheOtherRoles.Patches
                     renamePresetEditName.nameText.nameSource.SetText(info.presetName);
                     renamePresetPopUp.gameObject.SetLayerRecursively(button.gameObject.layer);
                 })));
+                button.OnClick = new ButtonClickedEvent();
+                button.OnClick.AddListener((Action)(() => {
+                    if (!renamePresetPopUp) return;
+                    if (presetInfoList.Find((info) => info.presetName == renamePresetEditName.nameText.nameSource.text) == null)
+                    {
+                        info.OnRename(renamePresetEditName.nameText.nameSource.text);
+                        UpdatePresetInfo();
+                    }
+                    renamePresetEditName.Close();
+                }));
                 renamePresetPopUp.SetActive(true);
                 return false;
             }
@@ -476,14 +560,15 @@ namespace TheOtherRoles.Patches
             _instance.StartCoroutine(Effects.Lerp(0.1f, new Action<float>((p) => {
                 renamePresetEditName = renamePresetPopUp.GetComponentInChildren<EditName>();
                 renamePresetEditName.nameText.nameSource.SetText(info.presetName);
+                renamePresetEditName.nameText.nameSource.characterLimit = 18;
                 var titleText = renamePresetPopUp.transform.FindChild("TitleText_TMP").GetComponent<TextMeshPro>();
-                titleText.SetText("Rename a preset.");
+                titleText.SetText(ModTranslation.GetString("MainMenu", 23));
                 var nameText = renamePresetPopUp.transform.FindChild("ChangeNameTitle_TMP").GetComponent<TextMeshPro>();
-                nameText.SetText("Preset Name");
+                nameText.SetText(ModTranslation.GetString("MainMenu", 24));
                 var submitText = renamePresetPopUp.transform.FindChild("SubmitButton").GetComponentInChildren<TextMeshPro>();
-                submitText.SetText("Rename");
+                submitText.SetText(ModTranslation.GetString("MainMenu", 25));
                 var backText = renamePresetPopUp.transform.FindChild("BackButton").GetComponentInChildren<TextMeshPro>();
-                backText.SetText("Back");
+                backText.SetText(ModTranslation.GetString("MainMenu", 26));
                 var submitButton = renamePresetPopUp.transform.FindChild("SubmitButton").GetComponentInChildren<PassiveButton>();
                 submitButton.OnClick = new ButtonClickedEvent();
                 submitButton.OnClick.AddListener((Action)(() => {
@@ -564,11 +649,14 @@ namespace TheOtherRoles.Patches
                     GameObject.Destroy(presetInfoObjList[i]);
             }
             presetInfoObjList.Clear();
+            bool isJapanese = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage == SupportedLangs.Japanese;
 
             SelectionBehaviour.InitDesc desc = new SelectionBehaviour.InitDesc();
             desc.buttonPrefab = buttonPrefab;
             desc.parent = presetRoot.transform;
             desc.font = titleText.font;
+            if (isJapanese)
+                desc.fontSize = 1.5f;
             desc.selectColor = Color.white;
             desc.unselectColor = Color.white;
             desc.mouseOverColor = Color.white;
@@ -589,9 +677,12 @@ namespace TheOtherRoles.Patches
                 if (idx >= presetInfoList.Count)
                     break;
                 var info = presetInfoList[idx];
-                var presetInfo = new SelectionBehaviour(info.presetName, () => { return false; });
+                var presetInfo = new SelectionBehaviour(new TranslationInfo(info.presetName), () => { return false; });
                 desc.pos = new Vector3(0f, 1.18f - i * .75f, -.5f);
-                desc.buttonName = string.Format("{0}\n<size=70%>{1}", info.presetName, info.GetDescription());
+                if (isJapanese)
+                    desc.buttonName = string.Format("{0}<size=65%>{1}", info.presetName, info.GetDescription(3));
+                else
+                    desc.buttonName = string.Format("{0}\n<size=70%>{1}", info.presetName, info.GetDescription());
                 presetInfo.Initialize(desc);
                 presetInfoObjList.Add(presetInfo._transform.gameObject);
 
@@ -600,7 +691,7 @@ namespace TheOtherRoles.Patches
                     subButtonDesc.pos = new Vector3(.6f, .1f, -5f);
                     subButtonDesc.selectColor = Color.yellow;
                     subButtonDesc.unselectColor = subButtonDesc.selectColor;
-                    var loadButtonInfo = new SelectionBehaviour("Load", () => {
+                    var loadButtonInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 14), () => {
                         info.OnLoad();
                         return false;
                     });
@@ -612,7 +703,7 @@ namespace TheOtherRoles.Patches
                     subButtonDesc.pos = new Vector3(1.3f, .1f, -5f);
                     subButtonDesc.selectColor = Color.cyan;
                     subButtonDesc.unselectColor = subButtonDesc.selectColor;
-                    var renameButtonInfo = new SelectionBehaviour("Rename", () => {
+                    var renameButtonInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 15), () => {
                         OnRenamePreset(info);
                         return false;
                     });
@@ -623,7 +714,7 @@ namespace TheOtherRoles.Patches
                 subButtonDesc.pos = new Vector3(2.0f, .1f, -5f);
                 subButtonDesc.selectColor = new Color32(235, 76, 70, 0xff);
                 subButtonDesc.unselectColor = subButtonDesc.selectColor;
-                var deleteButtonInfo = new SelectionBehaviour("Delete", () => {
+                var deleteButtonInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 16), () => {
                     info.OnRemove();
                     presetInfoList.Remove(info);
                     presetInfoPageMax = ((presetInfoList.Count - 1) / PresetInfoOnePageViewMax) + 1;
@@ -636,7 +727,7 @@ namespace TheOtherRoles.Patches
 
             prevPresetPageInfo._transform.gameObject.SetActive(presetInfoPageMax > 1);
             nextPresetPageInfo._transform.gameObject.SetActive(presetInfoPageMax > 1);
-            presetTitle.text = String.Format("Preset ({0}/{1})", presetInfoPageNow, presetInfoPageMax);
+            presetTitle.text = String.Format(ModTranslation.GetString("MainMenu", 27), presetInfoPageNow, presetInfoPageMax);
         }
 
         static IEnumerable<GameObject> GetAllChilds(this GameObject Go) {
