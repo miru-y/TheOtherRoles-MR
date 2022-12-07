@@ -796,8 +796,11 @@ namespace TheOtherRoles.Patches {
         {
 
             public static bool Prefix(PlanetSurveillanceMinigame __instance) {
+#if false
                 Func<PlayerTask, bool> p = (t) => { return t.TaskType == TaskTypes.FixComms; };
                 bool commsActive = CachedPlayer.LocalPlayer.PlayerControl.myTasks.Find(p) != null;
+#endif
+                bool commsActive = PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(CachedPlayer.LocalPlayer.PlayerControl);
                 if (commsActive) {
                     __instance.SabText.gameObject.SetActive(true);
                     __instance.ViewPort.sharedMaterial = __instance.StaticMaterial;
