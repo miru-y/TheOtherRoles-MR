@@ -676,5 +676,13 @@ namespace TheOtherRoles {
             for (int i = 0; i < t.GetChildCount(); ++i)
                 logTransform(name, t.GetChild(i), index + 1);
         }
+
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+        public static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
     }
 }

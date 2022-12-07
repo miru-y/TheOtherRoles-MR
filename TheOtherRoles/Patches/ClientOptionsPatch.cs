@@ -11,6 +11,8 @@ using Object = UnityEngine.Object;
 using System.Reflection;
 using TheOtherRoles.Players;
 using System.Text.RegularExpressions;
+using System.IO;
+using System.Text;
 
 namespace TheOtherRoles.Patches 
 {
@@ -32,19 +34,82 @@ namespace TheOtherRoles.Patches
         static TextMeshPro titleText;
         static ToggleButtonBehaviour buttonPrefab;
         static Vector3? _origin;
-
         static ToggleButtonBehaviour moreOptions;
         static TextMeshPro optionTitle;
+        const string PresetNameTitle = "PresetName,";
 
 
-        class PresetInfo
+        public class PresetInfo
         {
-            public string section { get; set; }
             public string presetName { get; set; }
             public long registTime { get; set; }
 
-            public PresetInfo(string presetName) {
-                SetPresetName(presetName);
+            public static void InheritData(string presetName) {
+                var property = typeof(BepInEx.Configuration.ConfigFile).GetProperty("OrphanedEntries", BindingFlags.NonPublic | BindingFlags.Instance);
+                var getter = property.GetGetMethod(true);
+                if (getter == null) return;
+
+                var orphanedEntries = getter.Invoke(TheOtherRolesPlugin.Instance.Config, new object[0]) as Dictionary<BepInEx.Configuration.ConfigDefinition, string>;
+                string path = GetFilePathRandom();
+                using (var sw = new StreamWriter(path, false, Encoding.UTF8))
+                {
+                    string section = GetSectionName(presetName);
+                    sw.WriteLine("# [CustomPreset]");
+                    sw.WriteLine(string.Format("{0},{1}", "PresetName", presetName));
+                    var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
+                    if (orphanedEntries.TryGetValue(configDefinition, out string value) && long.TryParse(value, out long time))
+                        sw.WriteLine(string.Format("{0},{1}", 0, time));
+                    BasicOptions.Inherit(section, orphanedEntries, sw);
+                    foreach (CustomOption option in CustomOption.options)
+                    {
+                        if (option.id == 0) continue;
+
+                        int v = option.defaultSelection;
+                        configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
+                        if (orphanedEntries.TryGetValue(configDefinition, out string value2))
+                            int.TryParse(value2, out v);
+                        sw.WriteLine(string.Format("{0},{1}", option.id, v));
+                    }
+
+                    // Remove
+                    BasicOptions.Remove(section, orphanedEntries);
+                    configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
+                    if (!TheOtherRolesPlugin.Instance.Config.Remove(configDefinition))
+                        orphanedEntries.Remove(configDefinition);
+                    foreach (var option in CustomOption.options)
+                    {
+                        configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
+                        if (!TheOtherRolesPlugin.Instance.Config.Remove(configDefinition))
+                            orphanedEntries.Remove(configDefinition);
+                    }
+                }
+            }
+
+            public PresetInfo(string presetName, string filePath = "") {
+               SetPresetName(presetName);
+               this.filePath = !string.IsNullOrEmpty(filePath) ? filePath : GetFilePathRandom();
+
+                if (File.Exists(filePath))
+                {
+                    using (var sr = new StreamReader(filePath, Encoding.UTF8))
+                    {
+                        int count = 0;
+                        while (!sr.EndOfStream)
+                        {
+                            string text = sr.ReadLine();
+                            if (count > 1)
+                            {
+                                var elements = text.Split(',');
+                                if (elements.Length >= 2 && int.TryParse(elements[0], out var key))
+                                    optionValueTable.Add(key, elements[1]);
+                            }
+                            ++count;
+                        }
+                    }
+
+                    if (optionValueTable.ContainsKey(0) && long.TryParse(optionValueTable[0], out long time))
+                        SetRegistTime(time);
+                }
             }
 
             public void SetRegistTime(long time) {
@@ -58,9 +123,8 @@ namespace TheOtherRoles.Patches
                 int roleCountMax = isJapanese ? 6 : 8;
                 foreach (var option in CustomOption.options) {
                     if (option.id == 0) continue;
-                    var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
                     int v = option.defaultSelection;
-                    if (orphanedEntries.TryGetValue(configDefinition, out string value))
+                    if (optionValueTable.TryGetValue(option.id, out string value))
                         int.TryParse(value, out v);
                     if (option.isRoleHeader() && v > 0) {
                         ++roleCount;
@@ -95,68 +159,69 @@ namespace TheOtherRoles.Patches
                 return description;
             }
 
-            public void Initialize() {
-                var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
-                if (orphanedEntries.TryGetValue(configDefinition, out string value) && long.TryParse(value, out long time))
-                    SetRegistTime(time);
+            public void Save() {
+                using (var sw = new StreamWriter(filePath, false, Encoding.UTF8))
+                {
+                    sw.WriteLine("# [CustomPreset]");
+                    sw.WriteLine(string.Format("{0},{1}", "PresetName", presetName));
+                    sw.WriteLine(string.Format("{0},{1}", 0, registTime));
+                    BasicOptions.Save(optionValueTable, sw);
+                    foreach (CustomOption option in CustomOption.options)
+                    {
+                        if (option.id == 0) continue;
+                        int value = option.selection;
+                        if (optionValueTable.TryGetValue(option.id, out string v))
+                            int.TryParse(v, out value);
+                        else
+							optionValueTable[option.id] = value.ToString();
+                        sw.WriteLine(string.Format("{0},{1}", option.id, value));
+                    }
+                }
             }
 
-            public void OnLoad() {
-                BasicOptions.Load(section, orphanedEntries);
+            public void Load() {
+                BasicOptions.Load(optionValueTable);
                 foreach (CustomOption option in CustomOption.options) {
                     if (option.id == 0) continue;
-
                     int v = option.defaultSelection;
-                    var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
-                    if (orphanedEntries.TryGetValue(configDefinition, out string value))
+                    if (optionValueTable.TryGetValue(option.id, out string value))
                         int.TryParse(value, out v);
                     option.updateSelection(v, false);
                 }
-                TheOtherRolesPlugin.Instance.Config.Save();
                 CustomOption.ShareOptionSelections();
                 CachedPlayer.LocalPlayer.PlayerControl.RpcSyncSettings(GameOptionsData.hostOptionsData);
             }
 
-            public void OnRename(string newPresetName) {
-                var optionTable = new Dictionary<int, string>();
-                foreach (var option in CustomOption.options) {
-                    if (option.id == 0) continue;
-                    var definition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
-                    if (orphanedEntries.TryGetValue(definition, out string value))
-                        optionTable.Add(option.id, value);
-                }
-                OnRemove(false);
-                if (string.IsNullOrEmpty(newPresetName))
-                    newPresetName = GetUniquePresetName();
+            public void Rename(string newPresetName) {
                 SetPresetName(newPresetName);
-                var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
-                orphanedEntries.Add(configDefinition, registTime.ToString());
-                foreach (var option in CustomOption.options) {
-                    if (option.id == 0) continue;
-                    var definition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
-                    orphanedEntries.Add(definition, optionTable[option.id]);
-                }
-                TheOtherRolesPlugin.Instance.Config.Save();
+                Save();
             }
 
-            public void OnRemove(bool isSave = true) {
-                BasicOptions.Remove(section, orphanedEntries);
-                var configDefinition = new BepInEx.Configuration.ConfigDefinition(section, "0");
-                if (!TheOtherRolesPlugin.Instance.Config.Remove(configDefinition))
-                    orphanedEntries.Remove(configDefinition);
-                foreach (var option in CustomOption.options) {
-                    configDefinition = new BepInEx.Configuration.ConfigDefinition(section, option.id.ToString());
-                    if (!TheOtherRolesPlugin.Instance.Config.Remove(configDefinition))
-                        orphanedEntries.Remove(configDefinition);
-                }
-                if (isSave)
-                    TheOtherRolesPlugin.Instance.Config.Save();
+            public void Delete(bool isSave = true) {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
             }
 
             void SetPresetName(string presetName) {
-                this.presetName = presetName;
-                section = $"CustomPreset_{presetName}";
+                this.presetName = !string.IsNullOrEmpty(presetName) ? presetName : "NewPreset";
             }
+
+            static string GetSectionName(string presetName) {
+                return $"CustomPreset_{presetName}";
+			}
+
+            static string GetFilePathRandom() {
+                string dir = Path.GetDirectoryName(Application.dataPath) + @"\CustomPreset\";
+                string path;
+                do
+                {
+                    path = dir + Helpers.RandomString(16) + ".csv";
+                } while (File.Exists(path));
+                return path;
+            }
+
+            string filePath;
+            Dictionary<int, string> optionValueTable = new();
         }
 
         const int PresetInfoOnePageViewMax = 4;
@@ -174,7 +239,9 @@ namespace TheOtherRoles.Patches
         static EditName createNewPresetEditName = null;
         static GameObject renamePresetPopUp = null;
         static EditName renamePresetEditName = null;
-        static Dictionary<BepInEx.Configuration.ConfigDefinition, string> orphanedEntries = null;
+
+        //static Dictionary<BepInEx.Configuration.ConfigDefinition, string> orphanedEntries = null;
+        
         static SelectionBehaviourObservable tabObservable = new SelectionBehaviourObservable();
         static SelectionBehaviour optionTabInfo = null;
         static SelectionBehaviour presetTabInfo = null;
@@ -380,30 +447,31 @@ namespace TheOtherRoles.Patches
             // Preset Contents
             // List
             presetInfoList.Clear();
-            string customPresetPrefix = "CustomPreset_";
-            var property = typeof(BepInEx.Configuration.ConfigFile).GetProperty("OrphanedEntries", BindingFlags.NonPublic | BindingFlags.Instance);
-            var getter = property.GetGetMethod(true);
-            if (getter != null) {
-                orphanedEntries = getter.Invoke(TheOtherRolesPlugin.Instance.Config, new object[0]) as Dictionary<BepInEx.Configuration.ConfigDefinition, string>;
-                for (int i = 0; i < orphanedEntries.Count; ++i) {
-                    string section = orphanedEntries.ElementAt(i).Key.Section;
-                    if (section.Contains(customPresetPrefix)) {
-                        string name = section.Substring(section.IndexOf(customPresetPrefix) + customPresetPrefix.Length);
-                        if (presetInfoList.Find((info) => info.presetName == name) == null)
-                            presetInfoList.Add(new PresetInfo(name));
+
+            // Create CustomPreset Folder
+            string dir = Path.GetDirectoryName(Application.dataPath) + @"\CustomPreset\";
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            string[] fileNames = Directory.GetFiles(dir, "*.csv");
+            foreach (string path in fileNames)
+            {
+                using (var sr = new StreamReader(path, Encoding.UTF8))
+				{
+                    TheOtherRolesPlugin.Logger.LogMessage(string.Format("[PRESET CHECK]: {0}", path));
+                    var text = sr.ReadLine();
+                    if (text == "# [CustomPreset]")
+					{
+                        string name = sr.ReadLine();
+                        if (name.Contains(PresetNameTitle))
+						{
+                            string presetName = name.Substring(name.IndexOf(PresetNameTitle) + PresetNameTitle.Length);
+                            presetInfoList.Add(new PresetInfo(presetName, path));
+                            TheOtherRolesPlugin.Logger.LogMessage(string.Format("[PRESET LOADED]: {0},{1}", presetName, path));
+                        }
                     }
                 }
             }
-            for (int i = 0; i < TheOtherRolesPlugin.Instance.Config.Count; ++i) {
-                string section = TheOtherRolesPlugin.Instance.Config.ElementAt(i).Key.Section;
-                if (section.Contains(customPresetPrefix)) {
-                    string name = section.Substring(section.IndexOf(customPresetPrefix) + customPresetPrefix.Length);
-                    if (presetInfoList.Find((info) => info.presetName == name) == null)
-                        presetInfoList.Add(new PresetInfo(name));
-                }
-            }
-            for (int i = 0; i < presetInfoList.Count; ++i)
-                presetInfoList[i].Initialize();
 
             presetInfoList.Sort((l, r) => {
                 long c = l.registTime - r.registTime;
@@ -517,8 +585,7 @@ namespace TheOtherRoles.Patches
                 submitButton.OnClick = new ButtonClickedEvent();
                 submitButton.OnClick.AddListener((Action)(() => {
                     if (!createNewPresetPopUp) return;
-                    if (presetInfoList.Find((info) => info.presetName == createNewPresetEditName.nameText.nameSource.text) == null)
-                        CreateNewPreset(createNewPresetEditName.nameText.nameSource.text);
+                    CreateNewPreset(createNewPresetEditName.nameText.nameSource.text);
                     createNewPresetEditName.Close();
                 }));
                 createNewPresetPopUp.transform.FindChild("RandomizeName").gameObject.SetActive(false);
@@ -538,11 +605,8 @@ namespace TheOtherRoles.Patches
                 button.OnClick = new ButtonClickedEvent();
                 button.OnClick.AddListener((Action)(() => {
                     if (!renamePresetPopUp) return;
-                    if (presetInfoList.Find((info) => info.presetName == renamePresetEditName.nameText.nameSource.text) == null)
-                    {
-                        info.OnRename(renamePresetEditName.nameText.nameSource.text);
-                        UpdatePresetInfo();
-                    }
+                    info.Rename(renamePresetEditName.nameText.nameSource.text);
+                    UpdatePresetInfo();
                     renamePresetEditName.Close();
                 }));
                 renamePresetPopUp.SetActive(true);
@@ -573,10 +637,8 @@ namespace TheOtherRoles.Patches
                 submitButton.OnClick = new ButtonClickedEvent();
                 submitButton.OnClick.AddListener((Action)(() => {
                     if (!renamePresetPopUp) return;
-                    if (presetInfoList.Find((info) => info.presetName == renamePresetEditName.nameText.nameSource.text) == null) {
-                        info.OnRename(renamePresetEditName.nameText.nameSource.text);
-                        UpdatePresetInfo();
-                    }
+                    info.Rename(renamePresetEditName.nameText.nameSource.text);
+                    UpdatePresetInfo();
                     renamePresetEditName.Close();
                 }));
                 renamePresetPopUp.transform.FindChild("RandomizeName").gameObject.SetActive(false);
@@ -604,40 +666,14 @@ namespace TheOtherRoles.Patches
             return false;
         }
 
-        static string GetUniquePresetName() {
-            int id = 1;
-            while (true) {
-                var definition = new BepInEx.Configuration.ConfigDefinition($"CustomPreset_NewPreset{id}", "0");
-                if (!orphanedEntries.TryGetValue(definition, out string value))
-                    return $"NewPreset{id}";
-                ++id;
-            }
-        }
-
         static void CreateNewPreset(string name) {
             long registTime = DateTime.Now.Ticks;
-            if (string.IsNullOrEmpty(name))
-                name = GetUniquePresetName();
             var presetInfo = new PresetInfo(name);
             presetInfoList.Add(presetInfo);
             presetInfoPageNow = presetInfoPageMax = ((presetInfoList.Count - 1) / PresetInfoOnePageViewMax) + 1;
-            var configDefinition = new BepInEx.Configuration.ConfigDefinition(presetInfo.section, "0");
-            if (!orphanedEntries.ContainsKey(configDefinition))
-                orphanedEntries.Add(configDefinition, registTime.ToString());
-            else
-                orphanedEntries[configDefinition] = registTime.ToString();
 
-            foreach (var option in CustomOption.options) {
-                if (option.id == 0) continue;
-                configDefinition = new BepInEx.Configuration.ConfigDefinition(presetInfo.section, option.id.ToString());
-                if (!orphanedEntries.ContainsKey(configDefinition))
-                    orphanedEntries.Add(configDefinition, option.selection.ToString());
-                else
-                    orphanedEntries[configDefinition] = option.selection.ToString();
-            }
             presetInfo.SetRegistTime(registTime);
-            BasicOptions.Save(presetInfo.section, orphanedEntries);
-            TheOtherRolesPlugin.Instance.Config.Save();
+            presetInfo.Save();
             UpdatePresetInfo();
         }
 
@@ -692,7 +728,7 @@ namespace TheOtherRoles.Patches
                     subButtonDesc.selectColor = Color.yellow;
                     subButtonDesc.unselectColor = subButtonDesc.selectColor;
                     var loadButtonInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 14), () => {
-                        info.OnLoad();
+                        info.Load();
                         return false;
                     });
                     loadButtonInfo.Initialize(subButtonDesc);
@@ -715,7 +751,7 @@ namespace TheOtherRoles.Patches
                 subButtonDesc.selectColor = new Color32(235, 76, 70, 0xff);
                 subButtonDesc.unselectColor = subButtonDesc.selectColor;
                 var deleteButtonInfo = new SelectionBehaviour(new TranslationInfo("MainMenu", 16), () => {
-                    info.OnRemove();
+                    info.Delete();
                     presetInfoList.Remove(info);
                     presetInfoPageMax = ((presetInfoList.Count - 1) / PresetInfoOnePageViewMax) + 1;
                     presetInfoPageNow = Mathf.Min(presetInfoPageNow, presetInfoPageMax);

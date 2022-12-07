@@ -22,6 +22,8 @@ using Reactor.Networking.Attributes;
 using AmongUs.Data;
 using TheOtherRoles.Patches;
 using static TheOtherRoles.Patches.OnGameEndPatch;
+using System.IO;
+using System.Reflection;
 
 namespace TheOtherRoles
 {
@@ -130,7 +132,57 @@ namespace TheOtherRoles
             
             SubmergedCompatibility.Initialize();
             AddComponent<ModUpdateBehaviour>();
+
+            BasicOptions.Init();
+            InheritCustomPreset();
         }
+
+        public static void InheritCustomPreset()
+		{
+            // Create CustomPreset Folder
+            string path = Path.GetDirectoryName(Application.dataPath) + @"\CustomPreset\";
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            // Inherit
+            bool isSave = false;
+            string customPresetPrefix = "CustomPreset_";
+            var property = typeof(ConfigFile).GetProperty("OrphanedEntries", BindingFlags.NonPublic | BindingFlags.Instance);
+            var getter = property.GetGetMethod(true);
+            if (getter != null)
+            {
+                var orphanedEntries = getter.Invoke(Instance.Config, new object[0]) as Dictionary<ConfigDefinition, string>;
+                for (int i = 0; i < orphanedEntries.Count; ++i)
+                {
+                    string section = orphanedEntries.ElementAt(i).Key.Section;
+                    if (section.Contains(customPresetPrefix))
+                    {
+                        var configDefinition = new ConfigDefinition(section, "0");
+                        if (orphanedEntries.TryGetValue(configDefinition, out string value) && long.TryParse(value, out long time))
+						{
+                            string name = section.Substring(section.IndexOf(customPresetPrefix) + customPresetPrefix.Length);
+                            ClientOptionsPatch.PresetInfo.InheritData(name);
+                            Logger.LogMessage(string.Format("[OLD PRESET INHERIT]: {0}", name));
+                            isSave = true;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < Instance.Config.Count; ++i)
+            {
+                string section = Instance.Config.ElementAt(i).Key.Section;
+                if (section.Contains(customPresetPrefix))
+                {
+                    string name = section.Substring(section.IndexOf(customPresetPrefix) + customPresetPrefix.Length);
+                    Logger.LogMessage(string.Format("[OLD PRESET INHERIT]: {0}", name));
+                    ClientOptionsPatch.PresetInfo.InheritData(name);
+                    isSave = true;
+                }
+            }
+            if (isSave)
+                Instance.Config.Save();
+        }
+
         public static Sprite GetModStamp() {
             if (ModStamp) return ModStamp;
             return ModStamp = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.ModStamp.png", 150f);
@@ -164,7 +216,6 @@ namespace TheOtherRoles
     public static class DebugManager
     {
         private static readonly string passwordHash = "7cd0fe883b2ef9e6079632d0bbcaa230194eeda5b8b8a57a15d59214e09fc358";
-        private static readonly System.Random random = new System.Random((int)DateTime.Now.Ticks);
         public static List<PlayerControl> bots = new List<PlayerControl>();
 
         public static bool EnableDebugMode()
@@ -211,8 +262,8 @@ namespace TheOtherRoles
                     playerControl.notRealPlayer = true;
                     playerControl.NetTransform.enabled = true;
 #endif
-                    playerControl.SetName(RandomString(10));
-                    playerControl.SetColor((byte)random.Next(Palette.PlayerColors.Length));
+                    playerControl.SetName(Helpers.RandomString(10));
+                    playerControl.SetColor((byte)Helpers.random.Next(Palette.PlayerColors.Length));
                     GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
                 }
 
@@ -295,12 +346,5 @@ namespace TheOtherRoles
 #if false
         static TMPro.TMP_Text debugText;
 #endif
-
-        public static string RandomString(int length)
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
     }
 }
