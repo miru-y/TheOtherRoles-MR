@@ -875,12 +875,13 @@ namespace TheOtherRoles.Patches {
             static IEnumerator CoStartMeeting2(PlayerControl reporter, GameData.PlayerInfo target)
             {
                 // Modで追加する遅延処理
+                SpriteRenderer blackscreen = null;
                 {
                     // ボタンと同時に通報が入った場合のバグ対応、他のクライアントからキルイベントが飛んでくるのを待つ
                     // 見えては行けないものが見えるので暗転させる
                     MeetingHud.Instance.state = MeetingHud.VoteStates.Animating; //ゲッサーのキル用meetingupdateが呼ばれないようにするおまじない（呼ばれるとバグる）
                     HudManager hudManager = DestroyableSingleton<HudManager>.Instance;
-                    var blackscreen = UnityEngine.Object.Instantiate(hudManager.FullScreen, hudManager.transform);
+                    blackscreen = UnityEngine.Object.Instantiate(hudManager.FullScreen, hudManager.transform);
                     var greyscreen = UnityEngine.Object.Instantiate(hudManager.FullScreen, hudManager.transform);
                     blackscreen.color = Palette.Black;
                     blackscreen.transform.position = Vector3.zero;
@@ -964,7 +965,15 @@ namespace TheOtherRoles.Patches {
                     }
                     MeetingHud.Instance.StartCoroutine(MeetingHud.Instance.CoIntro(reporter.Data, target, deadBodies));
                 }
-                yield break;
+
+                if (blackscreen != null)
+                {
+                    yield return Effects.Lerp(30.0f, new Action<float>((p) =>
+                    {
+                        if (blackscreen != null)
+                            blackscreen.color = new Color(0.0f, 0.0f, 0.0f, 1.0f - p);
+                    }));
+                }
             }
 
             static float delay { get { return CustomOptionHolder.delayBeforeMeeting.getFloat(); } }
