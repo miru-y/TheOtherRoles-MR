@@ -87,6 +87,7 @@ namespace TheOtherRoles.Patches
             public int ExTasksTotal { get; set; }
             public string ExtraInfo { get; set; }
             public bool IsGuesser { get; set; }
+            public bool IsImpostor { get; set; }
             public int? Kills { get; set; }
         }
 
@@ -172,6 +173,7 @@ namespace TheOtherRoles.Patches
                         ExTasksCompleted = isTaskMasterExTasks ? TaskMaster.clearExTasks : 0,
                         ExtraInfo = extraInfo,
                         IsGuesser = isGuesser,
+                        IsImpostor = playerControl.Data.Role.IsImpostor,
                         Kills = killCount,
                     });
                 }
@@ -694,9 +696,9 @@ namespace TheOtherRoles.Patches
                             var roles = string.Join(" ", data.Roles.Select(x => Helpers.cs(x.color, x.name)));
                             if (data.IsGuesser) roles += ModTranslation.GetString("EndGame", 21);
                             var taskInfo = data.TasksTotal > 0 ? $"<color=#FAD934FF>({data.TasksCompleted}/{data.TasksTotal})</color>" : "";
-                            if (data.Kills != null) taskInfo += string.Format(ModTranslation.GetString("EndGame", 22), data.Kills);
+                            var killInfo = data.Kills != null ? string.Format(ModTranslation.GetString("EndGame", 22), data.Kills) : "";
                             var taskInfo2 = data.ExTasksTotal > 0 ? $"Ex <color=#E1564BFF>({data.ExTasksCompleted}/{data.ExTasksTotal})</color>" : "";
-                            roleSummaryText.AppendLine($"{data.ExtraInfo}<pos=2%>{data.PlayerName}<pos=22%>{taskInfo}<pos=30%>{"- " + roles + " " + taskInfo2}");
+                            roleSummaryText.AppendLine($"{data.ExtraInfo}<pos=2%>{data.PlayerName}<pos=22%>{(!string.IsNullOrEmpty(taskInfo) ? taskInfo : data.IsImpostor ? killInfo : "")}<pos=30%>{"- " + roles + " " + (!data.IsImpostor && !string.IsNullOrEmpty(killInfo) ? killInfo : "") + " " + taskInfo2}");
                         }
                     }
 
