@@ -133,7 +133,7 @@ namespace TheOtherRoles
 
         public static string GetString(string category, int id, string def = null)
         {
-            TheOtherRolesPlugin.Instance.Log.LogMessage($"category:{category}, id:{id}, def:{def}");
+            //TheOtherRolesPlugin.Instance.Log.LogMessage($"category:{category}, id:{id}, def:{def}");
             if (!stringTable.TryGetValue(category, out var t))
                 return def;
             if (!t.TryGetValue(id, out var t2))
