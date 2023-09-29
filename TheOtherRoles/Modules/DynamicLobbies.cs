@@ -1,8 +1,10 @@
 using System;
+using AmongUs.Data;
 using HarmonyLib;
-using UnityEngine;
 using Hazel;
 using InnerNet;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles.Modules {
     [HarmonyPatch]
@@ -18,16 +20,16 @@ namespace TheOtherRoles.Modules {
                             if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.CanBan()) { // checking both just cause
                                 handled = true;
                                 if (!Int32.TryParse(text.Substring(6), out LobbyLimit)) {
-                                    __instance.AddChat(PlayerControl.LocalPlayer, "Invalid Size\nUsage: /size {amount}");
+                                    __instance.AddChat(CachedPlayer.LocalPlayer.PlayerControl, "Invalid Size\nUsage: /size {amount}");
                                 } else {
                                     LobbyLimit = Math.Clamp(LobbyLimit, 4, 15);
                                     if (LobbyLimit != PlayerControl.GameOptions.MaxPlayers) {
                                         PlayerControl.GameOptions.MaxPlayers = LobbyLimit;
-                                        DestroyableSingleton<GameStartManager>.Instance.LastPlayerCount = LobbyLimit;
-                                        PlayerControl.LocalPlayer.RpcSyncSettings(PlayerControl.GameOptions);
-                                        __instance.AddChat(PlayerControl.LocalPlayer, $"Lobby Size changed to {LobbyLimit} players");
+                                        FastDestroyableSingleton<GameStartManager>.Instance.LastPlayerCount = LobbyLimit;
+                                        CachedPlayer.LocalPlayer.PlayerControl.RpcSyncSettings(PlayerControl.GameOptions);
+                                        __instance.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"Lobby Size changed to {LobbyLimit} players");
                                     } else {
-                                        __instance.AddChat(PlayerControl.LocalPlayer, $"Lobby Size is already {LobbyLimit}");
+                                        __instance.AddChat(CachedPlayer.LocalPlayer.PlayerControl, $"Lobby Size is already {LobbyLimit}");
                                     }
                                 }
                             }
@@ -45,7 +47,7 @@ namespace TheOtherRoles.Modules {
             public static void Prefix(InnerNet.InnerNetClient __instance, [HarmonyArgument(0)] GameOptionsData settings) {
                 DynamicLobbies.LobbyLimit = settings.MaxPlayers;
                 settings.MaxPlayers = 15; // Force 15 Player Lobby on Server
-                SaveManager.ChatModeType = InnerNet.QuickChatModes.FreeChatOrQuickChat;
+                DataManager.Settings.Multiplayer.ChatMode = InnerNet.QuickChatModes.FreeChatOrQuickChat;
             }
             public static void Postfix(InnerNet.InnerNetClient __instance, [HarmonyArgument(0)] GameOptionsData settings) {
                 settings.MaxPlayers = DynamicLobbies.LobbyLimit;
@@ -54,7 +56,7 @@ namespace TheOtherRoles.Modules {
         [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.JoinGame))]
         public static class InnerNetClientJoinPatch {
             public static void Prefix(InnerNet.InnerNetClient __instance) {
-                SaveManager.ChatModeType = InnerNet.QuickChatModes.FreeChatOrQuickChat;
+                DataManager.Settings.Multiplayer.ChatMode = InnerNet.QuickChatModes.FreeChatOrQuickChat;
             }
         }
         [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]

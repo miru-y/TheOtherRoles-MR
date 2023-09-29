@@ -1,38 +1,65 @@
-using HarmonyLib;
+﻿using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using TheOtherRoles.Objects;
+using TheOtherRoles.Players;
+using TheOtherRoles.Utilities;
 using UnityEngine;
 
 
 namespace TheOtherRoles.Patches {
-	
+
 	[HarmonyPatch(typeof(MapBehaviour))]
 	class MapBehaviourPatch {
+		private static Dictionary<PlayerControl, SpriteRenderer> herePoints = new Dictionary<PlayerControl, SpriteRenderer>();
 
 		[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.FixedUpdate))]
-		static bool Prefix(MapBehaviour __instance) {
-			if (!MeetingHud.Instance) return true;  // Only run in meetings, and then set the Position of the HerePoint to the Position before the Meeting!
-			if (!ShipStatus.Instance) {
+		static void Postfix(MapBehaviour __instance) {
+			if (Trapper.trapper != null && CachedPlayer.LocalPlayer.PlayerId == Trapper.trapper.PlayerId) {
+				foreach (PlayerControl player in Trapper.playersOnMap) {
+					if (herePoints.ContainsKey(player)) continue;
+					Vector3 v = Trap.trapPlayerIdMap[player.PlayerId].trap.transform.position;
+					v /= MapUtilities.CachedShipStatus.MapScale;
+					v.x *= Mathf.Sign(MapUtilities.CachedShipStatus.transform.localScale.x);
+					v.z = -1f;
+					var herePoint = UnityEngine.Object.Instantiate(__instance.HerePoint, __instance.HerePoint.transform.parent, true);
+					herePoint.transform.localPosition = v;
+					herePoint.enabled = true;
+					int colorId = player.CurrentOutfit.ColorId;
+					if (Trapper.anonymousMap) player.CurrentOutfit.ColorId = 6;
+					player.SetPlayerMaterialColors(herePoint);
+					player.CurrentOutfit.ColorId = colorId;
+					herePoints.Add(player, herePoint);
+				}
+				foreach (var s in herePoints.Where(x => !Trapper.playersOnMap.Contains(x.Key)).ToList()) {
+					UnityEngine.Object.Destroy(s.Value);
+					herePoints.Remove(s.Key);
+				}
+			}
+		}
+	}
+
+	[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.Close))]
+	class MapBehaviourClosePatch
+	{
+		static void Postfix(MapBehaviour __instance)
+		{
+			if (EvilHacker.evilHacker != null && EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl)
+				EvilHacker.isMobile = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(MapBehaviour), "get_IsOpenStopped")]
+	class MapBehaviorGetIsOpenStoppedPatch
+	{
+		static bool Prefix(MapBehaviour __instance, ref bool __result)
+		{
+			if (EvilHacker.evilHacker == CachedPlayer.LocalPlayer.PlayerControl && CustomOptionHolder.evilHackerCanMoveEvenIfUsesAdmin.getBool())
+			{
+				__result = false;
 				return false;
 			}
-			Vector3 vector = AntiTeleport.position != null? AntiTeleport.position : PlayerControl.LocalPlayer.transform.position;
-			vector /= ShipStatus.Instance.MapScale;
-			vector.x *= Mathf.Sign(ShipStatus.Instance.transform.localScale.x);
-			vector.z = -1f;
-			__instance.HerePoint.transform.localPosition = vector;
-			PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
-			return false;
-		}
-
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowNormalMap))]
-		static bool Prefix3(MapBehaviour __instance) {
-			if (!MeetingHud.Instance || __instance.IsOpen) return true;  // Only run in meetings and when the map is closed
-
-			PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
-			__instance.GenericShow();
-			__instance.taskOverlay.Show();
-			__instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
-			DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
-			return false;
+			return true;
 		}
 	}
 }
